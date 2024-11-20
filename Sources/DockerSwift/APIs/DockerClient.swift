@@ -54,8 +54,8 @@ public class DockerClient {
 
         // Docker uses ISO8601 internet variant for returning dates
         let formatter = ISO8601DateFormatter()
-		formatter.formatOptions = .withInternetDateTime
-		formatter.formatOptions.insert(.withFractionalSeconds)
+        formatter.formatOptions = .withInternetDateTime
+        formatter.formatOptions.insert(.withFractionalSeconds)
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom({ [formatter] decoder in
