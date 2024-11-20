@@ -57,8 +57,8 @@ public class DockerClient {
         formatter.formatOptions = .withInternetDateTime
         formatter.formatOptions.insert(.withFractionalSeconds)
 
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom({ [formatter] decoder in
+        // create explicit closure to silence annoying warning
+        let strat: (any Swift.Decoder) throws -> Date = { decoder in
             let dateStr = try decoder.singleValueContainer().decode(String.self)
 
             let date = formatter.date(from: dateStr)
@@ -66,7 +66,9 @@ public class DockerClient {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Malformatted date string"))
             }
             return date
-        })
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom(strat)
         self.decoder = decoder
     }
 
