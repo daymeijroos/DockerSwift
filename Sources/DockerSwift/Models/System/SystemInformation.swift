@@ -1,4 +1,5 @@
 import Foundation
+import BetterCodable
 
 // MARK: - SystemInformationResponse
 public struct SystemInformation: Codable {
@@ -196,8 +197,9 @@ public struct SystemInformation: Codable {
     
     /// Hostname of the host where the Docker daemon is running.
     public let name: String
-    
-    public let labels: [String]
+
+	@DefaultEmptyArray
+    public var labels: [String]
     
     /// Indicates if experimental features are enabled on the daemon.
     public let experimentalBuild: Bool
