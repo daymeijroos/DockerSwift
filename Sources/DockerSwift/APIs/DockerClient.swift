@@ -132,6 +132,7 @@ public class DockerClient {
             finalHeaders.add(contentsOf: additionalHeaders)
         }
         if logger.logLevel <= .debug {
+            // printing to avoid the logging prefix, making for an easier copy/pasta
             try print("\n\(genCurlCommand(endpoint))\n")
         }
 
