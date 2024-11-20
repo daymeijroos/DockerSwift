@@ -83,7 +83,43 @@ public class DockerClient {
     public func shutdown() async throws {
         try await client.shutdown()
     }
-    
+
+    func genCurlCommand<E: Endpoint>(_ endpoint: E) throws -> String {
+        var finalHeaders: HTTPHeaders = self.headers
+        if let additionalHeaders = endpoint.headers {
+            finalHeaders.add(contentsOf: additionalHeaders)
+        }
+
+        let curlHeaders: String? = {
+            let headers = finalHeaders
+                .map { "-H \"\($0.name): \($0.value)\"" }
+                .joined(separator: " ")
+            guard headers.isEmpty == false else {
+                return nil
+            }
+            return headers
+        }()
+        let curlBody: String? = try {
+            if let body = endpoint.body {
+                String(decoding: try body.encode(), as: UTF8.self)
+            } else {
+                nil
+            }
+        }()
+        let curlUnixSocket = "${DOCKER_HOST}"
+        let curlCommand = """
+            curl \
+            --unix-socket "\(curlUnixSocket)" \
+            "http://localhost/\(apiVersion)/\(endpoint.path)" \
+            -X \(endpoint.method.rawValue)
+            """
+
+        let final = [curlCommand, curlHeaders, curlBody]
+            .compactMap(\.self)
+            .joined(separator: " ")
+        return final
+    }
+
     /// Executes a request to a specific endpoint. The `Endpoint` struct provides all necessary data and parameters for the request.
     /// - Parameter endpoint: `Endpoint` instance with all necessary data and parameters.
     /// - Throws: It can throw an error when encoding the body of the `Endpoint` request to JSON.
