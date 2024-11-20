@@ -4,6 +4,7 @@ public enum Architecture: String, Codable {
     case ppc64
     case ppc64le
     case x86 = "386"
+    case x86_64 = "x86_64"
     case amd64
     case arm
     case arm64
