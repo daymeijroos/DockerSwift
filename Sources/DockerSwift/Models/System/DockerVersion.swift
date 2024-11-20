@@ -102,8 +102,8 @@ public struct DockerVersionComponentDetails: Codable {
     public let gitCommit: String?
     public let goVersion, kernelVersion, minAPIVersion: String?
     
-    public let os: OsType
-    
+    public let os: OsType?
+
     enum CodingKeys: String, CodingKey {
         case apiVersion = "ApiVersion"
         case arch = "Arch"
