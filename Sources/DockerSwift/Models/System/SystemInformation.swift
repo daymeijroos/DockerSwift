@@ -200,7 +200,7 @@ public struct SystemInformation: Codable {
 
 	@DefaultEmptyArray
     public var labels: [String]
-    
+
     /// Indicates if experimental features are enabled on the daemon.
     public let experimentalBuild: Bool
     
@@ -241,10 +241,11 @@ public struct SystemInformation: Codable {
     
     /// List of warnings / informational messages about missing features, or issues related to the daemon configuration.
     public let warnings: [String]?
-    
-    public let cdiSpecDirs: [String]
-    
-    public let containerd: ContainerdInfo
+
+    @DefaultEmptyArray
+    public var cdiSpecDirs: [String]
+
+    public let containerd: ContainerdInfo?
     
     enum CodingKeys: String, CodingKey {
         case id = "ID"
@@ -343,6 +344,27 @@ public struct SystemInformation: Codable {
     
     public enum Isolation: String, Codable {
         case `default`, hyperv, process
+
+        public init?(rawValue: String) {
+            switch rawValue.lowercased() {
+            case "default", "": self = .default
+            case "hyperv": self = .hyperv
+            case "process": self = .process
+            default: return nil
+            }
+        }
+
+        public init(from decoder: any Swift.Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            let str = try container.decode(String.self)
+
+            guard
+                let new = Isolation(rawValue: str)
+            else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid isolation value: \(str)"))
+            }
+            self = new
+        }
     }
     
     public enum CgroupDriver: String, Codable {
