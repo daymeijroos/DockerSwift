@@ -37,32 +37,39 @@ public class DockerClient {
         timeout: HTTPClient.Configuration.Timeout = .init(),
         proxy: HTTPClient.Configuration.Proxy? = nil
     ) {
-            
-            self.daemonURL = daemonURL
-            self.tlsConfig = tlsConfig
-            let clientConfig = HTTPClient.Configuration(
-                tlsConfiguration: tlsConfig,
-                timeout: timeout,
-                proxy: proxy,
-                ignoreUncleanSSLShutdown: true
-            )
-            let httpClient = HTTPClient(
-                eventLoopGroupProvider: .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads)),
-                configuration: clientConfig
-            )
-            self.client = httpClient
-            self.logger = logger
-            
-            // Docker uses a slightly custom format for returning dates
-            let format = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'"
-            let formatter = DateFormatter()
-            formatter.dateFormat = format
+        self.daemonURL = daemonURL
+        self.tlsConfig = tlsConfig
+        let clientConfig = HTTPClient.Configuration(
+            tlsConfiguration: tlsConfig,
+            timeout: timeout,
+            proxy: proxy,
+            ignoreUncleanSSLShutdown: true
+        )
+        let httpClient = HTTPClient(
+            eventLoopGroupProvider: .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads)),
+            configuration: clientConfig
+        )
+        self.client = httpClient
+        self.logger = logger
 
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(formatter)
-            self.decoder = decoder
-        }
-    
+        // Docker uses ISO8601 internet variant for returning dates
+        let formatter = ISO8601DateFormatter()
+		formatter.formatOptions = .withInternetDateTime
+		formatter.formatOptions.insert(.withFractionalSeconds)
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom({ [formatter] decoder in
+            let dateStr = try decoder.singleValueContainer().decode(String.self)
+
+            let date = formatter.date(from: dateStr)
+            guard let date else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Malformatted date string"))
+            }
+            return date
+        })
+        self.decoder = decoder
+    }
+
     /// The client needs to be shutdown otherwise it can crash on exit.
     /// - Throws: Throws an error if the `DockerClient` can not be shutdown.
     public func syncShutdown() throws {
