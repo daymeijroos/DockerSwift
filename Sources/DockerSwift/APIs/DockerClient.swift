@@ -30,7 +30,7 @@ public class DockerClient {
     ///   - timeout: Pass custom connect and read timeouts via a `HTTPClient.Configuration.Timeout` instance
     ///   - proxy: Proxy settings, defaults to `nil`.
     public init(
-        daemonURL: URL = URL(httpURLWithSocketPath: "/var/run/docker.sock")!,
+        daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
         tlsConfig: TLSConfiguration? = nil,
         logger: Logger = .init(label: "docker-client"),
         clientThreads: Int = 2,
