@@ -48,7 +48,7 @@ public struct DockerVersion: Codable {
     public let kernelVersion: String?
     
     /// The date and time that the daemon was compiled.
-    @DateValue<ISO8601WithFractionalSecondsStrategy>
+	@DateValue<WeirdDockerStrategy>
     private(set) public var buildTime: Date
     
     /// Indicates if the daemon is started with experimental features enabled.

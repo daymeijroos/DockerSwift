@@ -1,32 +1,28 @@
 import Foundation
 import BetterCodable
 
-/// The inconsistent date format used by Docker for containers, images and Version Buildtime
-/// when set, format is "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'"
-/// when not set, docker returns "0001-01-01T00:00:00Z"
-/// Note: this comes from Golang's defaults.
+/// Docker sometimes provides timestamps with fractional seconds and sometimes without.
+/// Both are valid ISO8601 standards, but require different configurations.
 public struct WeirdDockerStrategy: DateValueCodableStrategy {
-    
-    private static let formatter: DateFormatter = {
-        let format = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'"
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        return formatter
+    private static let isoFractionsFormatter: ISO8601DateFormatter = {
+        let new = ISO8601DateFormatter()
+        new.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return new
     }()
-    
+
+    private static let isoBasicFormatter = ISO8601DateFormatter()
+
     public static func decode(_ value: String) throws -> Date {
-        if let date = formatter.date(from: value) {
+        if let date = isoBasicFormatter.date(from: value) {
             return date
-        }
-        else if let date = ISO8601DateFormatter().date(from: value) {
+        } else if let date = isoFractionsFormatter.date(from: value) {
             return date
-        }
-        else {
+        } else {
             throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "Invalid Date Format!"))
         }
     }
     
     public static func encode(_ date: Date) -> String {
-        return formatter.string(from: date)
+        return isoFractionsFormatter.string(from: date)
     }
 }

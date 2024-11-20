@@ -52,23 +52,7 @@ public class DockerClient {
         self.client = httpClient
         self.logger = logger
 
-        // Docker uses ISO8601 internet variant for returning dates
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = .withInternetDateTime
-        formatter.formatOptions.insert(.withFractionalSeconds)
-
-        // create explicit closure to silence annoying warning
-        let strat: (any Swift.Decoder) throws -> Date = { decoder in
-            let dateStr = try decoder.singleValueContainer().decode(String.self)
-
-            let date = formatter.date(from: dateStr)
-            guard let date else {
-                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Malformatted date string"))
-            }
-            return date
-        }
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom(strat)
         self.decoder = decoder
     }
 

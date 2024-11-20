@@ -148,8 +148,9 @@ public struct SystemInformation: Codable {
     public let nGoroutines: UInt
     
     /// Current system-time in RFC 3339 format with nano-seconds.
-    public let systemTime: Date
-    
+    @DateValue<WeirdDockerStrategy>
+    public var systemTime: Date
+
     /// The logging driver to use as a default for new containers.
     public let loggingDriver: String
     
@@ -549,7 +550,10 @@ public struct SwarmInfo: Codable {
         
         public let id: String
         public let version: SwarmVersion
-        public let createdAt, updatedAt: Date
+        @DateValue<WeirdDockerStrategy>
+        public var createdAt: Date
+        @DateValue<WeirdDockerStrategy>
+        public var updatedAt: Date
         public let spec: SwarmSpec
         public let tlsInfo: SwarmTLSInfo
         public let rootRotationInProgress: Bool
