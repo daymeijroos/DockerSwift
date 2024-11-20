@@ -131,6 +131,10 @@ public class DockerClient {
         if let additionalHeaders = endpoint.headers {
             finalHeaders.add(contentsOf: additionalHeaders)
         }
+        if logger.logLevel <= .debug {
+            try print("\n\(genCurlCommand(endpoint))\n")
+        }
+
         return try await client.execute(
             endpoint.method,
             daemonURL: self.daemonURL,
