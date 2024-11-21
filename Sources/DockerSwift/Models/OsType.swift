@@ -1,6 +1,6 @@
 import Foundation
 
-public enum OsType: String, Codable {
+public enum OsType: String, Sendable, Codable {
     case aix
     case android
     case darwin

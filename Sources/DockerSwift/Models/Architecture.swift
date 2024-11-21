@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Architecture: String, Codable {
+public enum Architecture: String, Sendable, Codable {
     case ppc64
     case ppc64le
     case x86 = "386"

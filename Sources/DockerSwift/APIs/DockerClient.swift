@@ -19,8 +19,9 @@ public class DockerClient {
     internal let tlsConfig: TLSConfiguration?
     internal let client: HTTPClient
     private let logger: Logger
-    
-    
+
+    public private(set) var state: State = .uninitialized
+
     /// Initialize the `DockerClient`.
     /// - Parameters:
     ///   - daemonURL: The URL where the Docker API is listening on. Default is `http+unix:///var/run/docker.sock`.
@@ -56,15 +57,60 @@ public class DockerClient {
         self.decoder = decoder
     }
 
+    public func initialize() async throws {
+        _ = try await _initialize().value
+    }
+
+    @MainActor
+    private func _initialize() -> Task<HostInfo, Error> {
+        if let existing = State.stateRetrievalTask {
+            return existing
+        } else {
+            let newTask = Task {
+                let version = try await version()
+
+                let info: HostInfo? = {
+                    guard
+                        let component = version.components.first(where: { $0.details?.arch != nil }),
+                        let details = component.details
+                    else { return nil }
+                    let isExperimental = details.experimental == "true"
+                    let engine = HostInfo.HostEngine(rawValue: component.name)
+                    let arch = version.arch
+                    let os = version.os
+                    let engineVersion = version.version
+
+                    return HostInfo(
+                        architecture: arch,
+                        version: engineVersion,
+                        isExperimentalBuild: isExperimental,
+                        os: os,
+                        engine: engine)
+                }()
+                guard
+                    let info
+                else { throw DockerError.message("Failed to retrieve Docker host information.") }
+
+                self.state = .initialized(info)
+
+                return info
+            }
+            State.stateRetrievalTask = newTask
+            return newTask
+        }
+    }
+
     /// The client needs to be shutdown otherwise it can crash on exit.
     /// - Throws: Throws an error if the `DockerClient` can not be shutdown.
     public func syncShutdown() throws {
+        defer { state = .uninitialized }
         try client.syncShutdown()
     }
     
     /// The client needs to be shutdown otherwise it can crash on exit.
     /// - Throws: Throws an error if the `DockerClient` can not be shutdown.
     public func shutdown() async throws {
+        defer { state = .uninitialized }
         try await client.shutdown()
     }
 
@@ -122,6 +168,9 @@ public class DockerClient {
     /// - Returns: Returns the expected result definied by the `Endpoint`.
     @discardableResult
     internal func run<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
+        if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
+            try await initialize()
+        }
         logger.debug("\(Self.self) execute Endpoint: \(endpoint.method) \(endpoint.path)")
         var finalHeaders: HTTPHeaders = self.headers
         if let additionalHeaders = endpoint.headers {
@@ -152,6 +201,9 @@ public class DockerClient {
     /// - Returns: Returns the expected result definied and transformed by the `PipelineEndpoint`.
     @discardableResult
     internal func run<T: PipelineEndpoint>(_ endpoint: T) async throws -> T.Response {
+        if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
+            try await initialize()
+        }
         logger.debug("\(Self.self) execute PipelineEndpoint: \(endpoint.method) \(endpoint.path)")
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
@@ -173,6 +225,9 @@ public class DockerClient {
     
     @discardableResult
     internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool, separators: [UInt8]) async throws -> T.Response {
+        if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
+            try await initialize()
+        }
         logger.debug("\(Self.self) execute StreamingEndpoint: \(endpoint.method) \(endpoint.path)")
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
@@ -197,6 +252,9 @@ public class DockerClient {
     
     @discardableResult
     internal func run<T: UploadEndpoint>(_ endpoint: T, timeout: TimeAmount, separators: [UInt8]) async throws -> T.Response {
+        if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
+            try await initialize()
+        }
         logger.debug("\(Self.self) execute \(T.self): \(endpoint.path)")
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
