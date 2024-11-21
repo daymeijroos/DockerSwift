@@ -88,12 +88,13 @@ final class ImageTests: XCTestCase {
     
     func testPruneImages() async throws {
         let image = try await client.images.get("nginx:latest")
+        let cleanID = String(image.id.trimmingPrefix("sha256:"))
         let pruned = try await client.images.prune(all: true)
+        XCTAssertTrue(pruned.imageIds.contains(cleanID))
+        XCTAssertGreaterThan(pruned.reclaimedSpace, 0)
+
         let images = try await client.images.list()
-        
-        XCTAssert(!images.map(\.id).contains(image.id))
-        XCTAssert(pruned.reclaimedSpace > 0)
-        XCTAssert(pruned.imageIds.contains(image.id))
+        XCTAssertFalse(images.map(\.id).contains(image.id))
     }
     
     func testBuild() async throws {
