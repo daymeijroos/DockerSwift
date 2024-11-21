@@ -143,9 +143,11 @@ public class DockerClient {
         }()
         let curlBody: String? = try {
             if let body = body {
-                String(decoding: try body.encode(), as: UTF8.self)
+                let data = String(decoding: try body.encode(), as: UTF8.self)
+                    .trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+                return "-d \"\(data)\""
             } else {
-                nil
+                return nil
             }
         }()
         let curlUnixSocket = "${DOCKER_HOST}"
