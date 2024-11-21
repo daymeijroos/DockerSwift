@@ -945,3 +945,8 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 
 ## Contribute
 You can contribute to this project by submitting a detailed issue or by forking this project and sending a pull request. Contributions of any kind are very welcome :)
+
+To run tests, make sure you have docker or podman installed and, if the default path for the socket 
+(`/var/run/docker.sock`) is not correct, to set the env var `DOCKER_HOST` while running tests. On Linux, you may need 
+to activate the docker service. On Ubuntu, for example, run `systemctl start docker` and `systemctl enable docker`, 
+which should then populate the default socket location. 
