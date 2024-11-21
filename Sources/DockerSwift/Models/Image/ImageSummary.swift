@@ -26,8 +26,8 @@ public struct ImageSummary: Codable {
     
     /// Equivalent of the `size` field.
     /// This field is kept for backward compatibility, but may be removed in a future version of the API.
-    public let virtualSize: UInt64
-    
+    public let virtualSize: UInt64?
+
     
     public let sharedSize: Int
     
