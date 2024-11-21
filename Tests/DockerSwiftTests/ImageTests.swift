@@ -88,7 +88,13 @@ final class ImageTests: XCTestCase {
     
     func testPruneImages() async throws {
         let image = try await client.images.get("nginx:latest")
-        let cleanID = String(image.id.trimmingPrefix("sha256:"))
+        let cleanID = {
+            if client.state.hostInfo?.engine == .podman {
+                String(image.id.trimmingPrefix("sha256:"))
+            } else {
+                image.id
+            }
+        }()
         let pruned = try await client.images.prune(all: true)
         XCTAssertTrue(pruned.imageIds.contains(cleanID))
         XCTAssertGreaterThan(pruned.reclaimedSpace, 0)
