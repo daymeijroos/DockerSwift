@@ -44,64 +44,17 @@ extension HTTPClient {
         request.method = method
         request.body = body
         
-        let lengthHeaderSize: UInt32 = 8
         let response = try await self.execute(request, timeout: timeout, logger: logger)
         let body = response.body
-        return AsyncThrowingStream<ByteBuffer, Error> { continuation in
-            _Concurrency.Task {
-                var messageBuffer = ByteBuffer()
-                var availablebytes = 0
-                var neededBytes = 0
-                for try await var buffer in body {
-                    if !hasLengthHeader {
-                        messageBuffer.writeBuffer(&buffer)
-                        while messageBuffer.readableBytes > 0 {
-                            guard let lineEndPos = messageBuffer.readableBytesView.firstRange(of: separators)?.lowerBound, lineEndPos > 0 else {
-                                break
-                            }
-                            guard let data = messageBuffer.readData(length: lineEndPos - messageBuffer.readerIndex + separators.count) else {
-                                continuation.finish(throwing: DockerError.corruptedData("Unable to get Data() from ByteBuffer"))
-                                return
-                            }
-                            let returnBuffer = ByteBuffer(data: data)
-                                _ = messageBuffer.readBytes(length: 1)
-                            
-                            continuation.yield(returnBuffer)
-                        }
-                        continue
-                    }
-                    
-                    availablebytes += buffer.readableBytes
-                    messageBuffer.writeBuffer(&buffer)
-                    //print("\n•••• executeStream: availablebytes=\(availablebytes), neededBytes=\(neededBytes), buffer.readableBytes=\(buffer.readableBytes)")
-                    while availablebytes >= neededBytes && availablebytes > 0 {
-                        guard let msgSize = messageBuffer.getInteger(at: messageBuffer.readerIndex + 4, endianness: .big, as: UInt32.self), msgSize > 0 else {
-                            continuation.finish(
-                                throwing: DockerError.corruptedData("Error reading message size in data stream having length header")
-                            )
-                            return
-                        }
-                        
-                        neededBytes = Int(msgSize + lengthHeaderSize)
-                        if availablebytes >= neededBytes {
-                            guard let data = messageBuffer.readData(length: neededBytes) else {
-                                continuation.finish(
-                                    throwing: DockerError.corruptedData("Error reading data when having enough in buffer")
-                                )
-                                return
-                            }
-                            let returnBuffer = ByteBuffer(data: data)
-                            availablebytes = messageBuffer.readableBytes
-                            neededBytes = 0
-                            continuation.yield(returnBuffer)
-                        }
-                        else {
-                            break
-                        }
-                    }
-                }
-                continuation.finish()
+        let (stream, continuation) = AsyncThrowingStream<ByteBuffer, Error>.makeStream()
+
+        _Concurrency.Task {
+            for try await buffer in body {
+                continuation.yield(buffer)
             }
+            continuation.finish()
         }
+
+        return stream
     }
 }

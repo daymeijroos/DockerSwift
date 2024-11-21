@@ -26,8 +26,19 @@ public struct Image : Codable {
     public let containerId: String?
     
     /// Configuration for a container that is portable between hosts.
+    ///
+    /// What's different between this and `config`? Who knows.
+    /// Podman docs list both with identical info, and docker docs only list `config`.
+    /// In practice, Podman populates each one differently.
     public let containerConfig: ContainerConfig
-    
+
+    /// Configuration for a container that is portable between hosts.
+    ///
+    /// What's different between this and `containerConfig`? Who knows.
+    /// Podman docs list both with identical info, and docker docs only list `config`.
+    /// In practice, Podman populates each one differently.
+    public let config: ContainerConfig
+
     /// Configuration for a container that is portable between hosts.
     //public let config: ContainerConfig
 
@@ -85,7 +96,7 @@ public struct Image : Codable {
         case comment = "Comment"
         case containerId = "Container"
         case containerConfig = "ContainerConfig"
-        //case config = "Config"
+        case config = "Config"
         case dockerVersion = "DockerVersion"
         case author = "Author"
         case architecture = "Architecture"

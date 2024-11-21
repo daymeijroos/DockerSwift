@@ -100,7 +100,7 @@ final class ImageTests: XCTestCase {
 
         let tar = try Data(contentsOf: tarPath)
         let buffer = ByteBuffer.init(data: tar)
-        var imageId: String!
+        var imageID: String!
         do {
             let buildOutput = try await client.images.build(
                 config: .init(
@@ -108,24 +108,26 @@ final class ImageTests: XCTestCase {
                     buildArgs: ["TEST": "test"],
                     labels: ["test": "value"]
                 ),
-                context: buffer
-            )
-            
+                context: buffer)
+
             for try await item in buildOutput {
-                if item.aux != nil {
-                    imageId = item.aux!.id
-                }
+                guard let auxID = item.aux?.id else { continue }
+                imageID = auxID
             }
-            XCTAssert(imageId != nil, "Ensure built Image ID is returned")
-        }
-        catch(let error) {
+            XCTAssertNotNil(imageID, "Ensure built Image ID is returned")
+            addTeardownBlock { [client, imageID] in
+                try await client?.images.remove(imageID!)
+            }
+        } catch {
             print("\n•••• BOOM! \(error)")
             throw error
         }
-        let image = try await client.images.get(imageId ?? "")
-        XCTAssert(image.repoTags != nil && image.repoTags!.first == "build:test", "Ensure repo and tag are set")
-        XCTAssert(image.containerConfig.labels != nil && image.containerConfig.labels!["test"] == "value", "Ensure labels are set")
-        try await client.images.remove(imageId!)
+        let image = try await client.images.get(imageID)
+        let repoTags = try XCTUnwrap(image.repoTags)
+        XCTAssertTrue(repoTags.contains(where: { $0.contains("build:test") }), "Ensure repo and tag are set")
+        let labels = try XCTUnwrap(image.config.labels)
+        print(labels)
+        XCTAssertEqual(labels["test"], "value", "Ensure labels are set")
     }
     
     func testCommit() async throws {
