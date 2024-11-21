@@ -96,11 +96,9 @@ final class ImageTests: XCTestCase {
     }
     
     func testBuild() async throws {
-        let fm = FileManager.default
-        let tarContextPath = "./Tests/docker-context.tar"
-        guard let tar = fm.contents(atPath: tarContextPath) else {
-            fatalError("Unable to find build context tar")
-        }
+        let tarPath = Bundle.module.url(forResource: "docker-context", withExtension: "tar", subdirectory: "Assets")!
+
+        let tar = try Data(contentsOf: tarPath)
         let buffer = ByteBuffer.init(data: tar)
         var imageId: String!
         do {

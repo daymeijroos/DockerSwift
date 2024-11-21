@@ -31,6 +31,9 @@ let package = Package(
             dependencies: [
                 "DockerSwift",
                 //"Tarscape"
+            ],
+            resources: [
+                .copy("Assets")
             ]
         ),
     ]
