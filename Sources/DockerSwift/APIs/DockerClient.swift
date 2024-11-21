@@ -17,7 +17,7 @@ public class DockerClient {
     
     internal let daemonURL: URL
     internal let tlsConfig: TLSConfiguration?
-    internal let client: HTTPClient
+    internal let client: SocketClient
     private let logger: Logger
 
     public private(set) var state: State = .uninitialized
@@ -30,7 +30,7 @@ public class DockerClient {
     ///   - clientThreads: Number of threads to use for the HTTP client EventLoopGroup. Defaults to 2.
     ///   - timeout: Pass custom connect and read timeouts via a `HTTPClient.Configuration.Timeout` instance
     ///   - proxy: Proxy settings, defaults to `nil`.
-    public init(
+    public convenience init(
         daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
         tlsConfig: TLSConfiguration? = nil,
         logger: Logger = .init(label: "docker-client"),
@@ -38,19 +38,47 @@ public class DockerClient {
         timeout: HTTPClient.Configuration.Timeout = .init(),
         proxy: HTTPClient.Configuration.Proxy? = nil
     ) {
-        self.daemonURL = daemonURL
-        self.tlsConfig = tlsConfig
-        let clientConfig = HTTPClient.Configuration(
-            tlsConfiguration: tlsConfig,
+        self.init(
+            daemonURL: daemonURL,
+            tlsConfig: tlsConfig,
+            logger: logger,
+            clientThreads: clientThreads,
             timeout: timeout,
             proxy: proxy,
-            ignoreUncleanSSLShutdown: true
-        )
-        let httpClient = HTTPClient(
-            eventLoopGroupProvider: .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads)),
-            configuration: clientConfig
-        )
-        self.client = httpClient
+            forTesting: false)
+    }
+
+    private init(
+        daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
+        tlsConfig: TLSConfiguration? = nil,
+        logger: Logger = .init(label: "docker-client"),
+        clientThreads: Int = 2,
+        timeout: HTTPClient.Configuration.Timeout = .init(),
+        proxy: HTTPClient.Configuration.Proxy? = nil,
+        forTesting: Bool
+    ) {
+        self.daemonURL = daemonURL
+        self.tlsConfig = tlsConfig
+
+        let loopGroupProvider = HTTPClient
+            .EventLoopGroupProvider
+            .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads))
+        if forTesting {
+            let mockClient = MockingClient(eventLoopGroupProvider: loopGroupProvider)
+            self.client = mockClient
+        } else {
+            let clientConfig = HTTPClient.Configuration(
+                tlsConfiguration: tlsConfig,
+                timeout: timeout,
+                proxy: proxy,
+                ignoreUncleanSSLShutdown: true
+            )
+            let httpClient = HTTPClient(
+                eventLoopGroupProvider: .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads)),
+                configuration: clientConfig
+            )
+            self.client = httpClient
+        }
         self.logger = logger
 
         let decoder = JSONDecoder()
@@ -187,7 +215,8 @@ public class DockerClient {
             endpoint.method,
             daemonURL: self.daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
-            body: endpoint.body.map {HTTPClient.Body.data( try! $0.encode())},
+            body: endpoint.body.map { HTTPClient.Body.data( try! $0.encode()) },
+            deadline: nil,
             logger: logger,
             headers: finalHeaders
         )
@@ -216,7 +245,8 @@ public class DockerClient {
             endpoint.method,
             daemonURL: self.daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
-            body: endpoint.body.map {HTTPClient.Body.data( try! $0.encode())},
+            body: endpoint.body.map { HTTPClient.Body.data( try! $0.encode()) },
+            deadline: nil,
             logger: logger,
             headers: self.headers
         )
@@ -271,6 +301,7 @@ public class DockerClient {
             timeout: timeout,
             logger: logger,
             headers: self.headers,
+            hasLengthHeader: false,
             separators: separators
         )
         return stream as! T.Response
