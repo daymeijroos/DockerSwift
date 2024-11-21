@@ -141,6 +141,11 @@ public class DockerClient {
     @discardableResult
     internal func run<T: PipelineEndpoint>(_ endpoint: T) async throws -> T.Response {
         logger.debug("\(Self.self) execute PipelineEndpoint: \(endpoint.method) \(endpoint.path)")
+        if logger.logLevel <= .debug {
+            // printing to avoid the logging prefix, making for an easier copy/pasta
+            try print("\n\(genCurlCommand(endpoint))\n")
+        }
+
         return try await client.execute(
             endpoint.method,
             daemonURL: self.daemonURL,
