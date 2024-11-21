@@ -29,20 +29,24 @@ struct PullImageEndpoint: PipelineEndpoint {
     
     struct Status: Codable {
         let status: String
+        let id: String?
     }
     
     func map(data: String) throws -> PullImageResponse {
         if let message = try? MessageResponse.decode(from: data) {
             throw DockerError.message(message.message)
         }
-        let parts = data.components(separatedBy: "\r\n")
+        let parts = data.components(separatedBy: .newlines)
             .filter({ $0.count > 0 })
             .compactMap({ try? Status.decode(from: $0) })
-        if let digest = parts.last(where: { $0.status.hasPrefix("Digest:")})
-            .map({ (status) -> String in
-                status.status.replacingOccurrences(of: "Digest: ", with: "")
-            }) {
+
+        if let digestPart = parts.last(where: { $0.status.hasPrefix("Digest:")}) {
+            // docker flavor
+            let digest = digestPart.status.replacingOccurrences(of: "Digest: ", with: "")
             return .init(digest: digest)
+        } else if let idPart = parts.last(where: { $0.id != nil }), let id = idPart.id {
+            // podman flavor
+            return .init(digest: id)
         } else {
             throw DockerError.unknownResponse(data)
         }

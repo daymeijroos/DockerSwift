@@ -25,7 +25,7 @@ final class ImageTests: XCTestCase {
     func testPullImage() async throws {
         let image = try await client.images.pull(byName: "nginx", tag: "latest")
         
-        XCTAssertTrue(image.repoTags!.first == "nginx:latest")
+        XCTAssertTrue(image.repoTags!.contains(where: { $0.contains("nginx:latest") }))
     }
     
     func testPushImage() async throws {

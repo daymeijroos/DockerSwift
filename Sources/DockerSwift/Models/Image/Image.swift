@@ -33,6 +33,7 @@ public struct Image : Codable {
 
     /// Date when the image was created.
     /// This is **not** the date when the image was pulled.
+    @DateValue<WeirdDockerStrategy>
     public var created: Date
     
     /// The version of Docker that was used to build the image.
