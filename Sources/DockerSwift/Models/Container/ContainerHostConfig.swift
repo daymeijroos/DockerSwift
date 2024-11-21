@@ -131,7 +131,7 @@ public struct ContainerHostConfig: Codable {
     public var kernelMemory: UInt64 = 0
     
     /// Hard limit for kernel TCP buffer memory (in bytes).
-    public var kernelMemoryTcp: UInt64 = 0
+    public var kernelMemoryTcp: UInt64?
     
     /// A list of links for the container in the form `container_name:alias`.
     public var links: [String]? = nil

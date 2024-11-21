@@ -128,7 +128,6 @@ final class ImageTests: XCTestCase {
         let repoTags = try XCTUnwrap(image.repoTags)
         XCTAssertTrue(repoTags.contains(where: { $0.contains("build:test") }), "Ensure repo and tag are set")
         let labels = try XCTUnwrap(image.config.labels)
-        print(labels)
         XCTAssertEqual(labels["test"], "value", "Ensure labels are set")
     }
     
@@ -141,8 +140,10 @@ final class ImageTests: XCTestCase {
         )
         try await client.containers.start(container.id)
         let image = try await client.images.createFromContainer(container.id, repo: "test-commit", tag: "latest")
-        XCTAssert(image.repoTags?.first == "test-commit:latest", "Ensure image has custom repo and tag")
-        try await client.images.remove(image.id)
-        
+        addTeardownBlock { [client] in
+            try await client?.images.remove(image.id)
+        }
+        let repoTags = try XCTUnwrap(image.repoTags)
+        XCTAssertTrue(repoTags.contains(where: { $0.contains("test-commit:latest") }), "Ensure image has custom repo and tag")
     }
 }

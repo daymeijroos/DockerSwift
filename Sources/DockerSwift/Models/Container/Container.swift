@@ -15,9 +15,10 @@ public struct Container: Codable {
     
     /// Container configuration that depends on the host we are running on
     public let hostConfig: ContainerHostConfig
-    
+
+    @DateValue<WeirdDockerStrategy>
     /// The time the container was created
-    public let createdAt: Date
+    public var createdAt: Date
     
     /// The storage driver used to store the container's and image's filesystem.
     public let storageDriver: String
