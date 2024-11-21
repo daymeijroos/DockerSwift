@@ -23,7 +23,7 @@ public struct Image : Codable {
     
     /// The ID of the container that was used to create the image.
     /// Depending on how the image was created, this field may be empty.
-    public let containerId: String
+    public let containerId: String?
     
     /// Configuration for a container that is portable between hosts.
     public let containerConfig: ContainerConfig
