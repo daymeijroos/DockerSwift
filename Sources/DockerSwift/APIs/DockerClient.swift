@@ -69,8 +69,20 @@ public class DockerClient {
     }
 
     func genCurlCommand<E: Endpoint>(_ endpoint: E) throws -> String {
+        try genCurlCommand(method: endpoint.method, path: endpoint.path, headers: endpoint.headers, body: endpoint.body)
+    }
+
+    func genCurlCommand<E: StreamingEndpoint>(_ endpoint: E) throws -> String {
+        try genCurlCommand(method: endpoint.method, path: endpoint.path, headers: nil, body: endpoint.body)
+    }
+
+    func genCurlCommand<E: UploadEndpoint>(_ endpoint: E) throws -> String {
+        try genCurlCommand(method: endpoint.method, path: endpoint.path, headers: nil, body: endpoint.body)
+    }
+
+    private func genCurlCommand<Body: Codable>(method: HTTPMethod, path: String, headers: HTTPHeaders?, body: Body?) throws -> String {
         var finalHeaders: HTTPHeaders = self.headers
-        if let additionalHeaders = endpoint.headers {
+        if let additionalHeaders = headers {
             finalHeaders.add(contentsOf: additionalHeaders)
         }
 
@@ -84,7 +96,7 @@ public class DockerClient {
             return headers
         }()
         let curlBody: String? = try {
-            if let body = endpoint.body {
+            if let body = body {
                 String(decoding: try body.encode(), as: UTF8.self)
             } else {
                 nil
@@ -94,8 +106,8 @@ public class DockerClient {
         let curlCommand = """
             curl \
             --unix-socket "\(curlUnixSocket)" \
-            "http://localhost/\(apiVersion)/\(endpoint.path)" \
-            -X \(endpoint.method.rawValue)
+            "http://localhost/\(apiVersion)/\(path)" \
+            -X \(method.rawValue)
             """
 
         let final = [curlCommand, curlHeaders, curlBody]
@@ -162,6 +174,11 @@ public class DockerClient {
     @discardableResult
     internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool, separators: [UInt8]) async throws -> T.Response {
         logger.debug("\(Self.self) execute StreamingEndpoint: \(endpoint.method) \(endpoint.path)")
+        if logger.logLevel <= .debug {
+            // printing to avoid the logging prefix, making for an easier copy/pasta
+            try print("\n\(genCurlCommand(endpoint))\n")
+        }
+
         let stream = try await client.executeStream(
             endpoint.method,
             daemonURL: self.daemonURL,
@@ -181,6 +198,11 @@ public class DockerClient {
     @discardableResult
     internal func run<T: UploadEndpoint>(_ endpoint: T, timeout: TimeAmount, separators: [UInt8]) async throws -> T.Response {
         logger.debug("\(Self.self) execute \(T.self): \(endpoint.path)")
+        if logger.logLevel <= .debug {
+            // printing to avoid the logging prefix, making for an easier copy/pasta
+            try print("\n\(genCurlCommand(endpoint))\n")
+        }
+
         let stream = try await client.executeStream(
             endpoint.method,
             daemonURL: self.daemonURL,
