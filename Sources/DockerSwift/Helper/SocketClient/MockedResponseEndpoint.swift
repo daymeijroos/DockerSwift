@@ -6,12 +6,12 @@ import AsyncHTTPClient
 protocol MockedResponseEndpoint: SimpleEndpoint {
 	var responseData: [MockedResponseData] { get }
 
-	func mockedResponse(_ request: HTTPClient.Request) async throws -> ByteBuffer
+	func mockedResponse(_ request: HTTPClientRequest) async throws -> ByteBuffer
 	func mockedStreamingResponse(_ request: HTTPClientRequest) async throws -> AsyncThrowingStream<ByteBuffer, Error>
 }
 
 extension MockedResponseEndpoint {
-	func mockedResponse(_ request: HTTPClient.Request) async throws -> ByteBuffer {
+	func mockedResponse(_ request: HTTPClientRequest) async throws -> ByteBuffer {
 		guard
 			let first = responseData.first
 		else { throw DockerError.message("Error retrieving mock data") }

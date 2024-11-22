@@ -34,14 +34,16 @@ final class SystemTests: XCTestCase {
             name: name,
             spec: .init(config: .init(image: "hello-world:latest"))
         )
-        
+        addTeardownBlock { [client] in
+            try await client?.containers.remove(name, force: true, removeAnonymousVolumes: true)
+        }
+
         for try await event in try await events {
             if event.action == .create && event.type == .container {
                 XCTAssert(event.actor.attributes?["name"] == name, "Ensure create event for this container is emitted")
                 break
             }
         }
-        try await client.containers.remove(name, force: true, removeAnonymousVolumes: true)
     }
     
     func testSystemInfo() async throws {

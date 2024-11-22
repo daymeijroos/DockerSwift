@@ -225,11 +225,11 @@ public class DockerClient {
             try print("💻\n\(genCurlCommand(endpoint))\n")
         }
 
-        let request = try HTTPClient.Request(
+        let request = try HTTPClientRequest(
             daemonURL: daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
             method: endpoint.method,
-            body: endpoint.body.map { HTTPClient.Body.data( try $0.encode()) },
+            body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
             headers: finalHeaders)
 
         if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
@@ -237,13 +237,27 @@ public class DockerClient {
             return try decoder.decode(T.Response.self, from: buffer)
         }
 
-        return try await client.execute(
-            request: request,
-            deadline: nil,
-            logger: logger)
-        .logResponseBody(logger)
-        .decode(as: T.Response.self, decoder: self.decoder)
-        .get()
+        let response = try await client.execute(request, timeout: .minutes(2))
+        let responseBody = response.body
+        try response.checkStatusCode()
+
+        var buffer = ByteBuffer()
+
+        for try await var response in responseBody {
+            buffer.writeBuffer(&response)
+        }
+
+        if logger.logLevel <= .debug {
+            var debugResponseCopy = buffer
+            logger.debug("Response: \(debugResponseCopy.readString(length: debugResponseCopy.readableBytes) ?? "No Response Data")")
+        }
+        if T.Response.self == NoBody.self || T.Response.self == NoBody?.self {
+            return NoBody() as! T.Response
+        }
+        guard T.Response.self != String.self else {
+            return String(buffer: buffer) as! T.Response
+        }
+        return try decoder.decode(T.Response.self, from: buffer)
     }
     
     /// Executes a request to a specific endpoint. The `PipelineEndpoint` struct provides all necessary data and parameters for the request.
@@ -262,11 +276,11 @@ public class DockerClient {
             try print("\n\(genCurlCommand(endpoint))\n")
         }
 
-        let request = try HTTPClient.Request(
+        let request = try HTTPClientRequest(
             daemonURL: daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
             method: endpoint.method,
-            body: endpoint.body.map { HTTPClient.Body.data( try $0.encode()) },
+            body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
             headers: headers)
 
         if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
@@ -274,13 +288,20 @@ public class DockerClient {
             return try decoder.decode(T.Response.self, from: buffer)
         }
 
-        return try await client.execute(
-            request: request,
-            deadline: nil,
-            logger: logger)
-        .logResponseBody(logger)
-        .mapString(map: endpoint.map(data: ))
-        .get()
+        let response = try await client.execute(request, timeout: .minutes(2))
+        let responseBody = response.body
+
+        var buffer = ByteBuffer()
+
+        for try await var response in responseBody {
+            buffer.writeBuffer(&response)
+        }
+
+        guard
+            let bufferString = buffer.readString(length: buffer.readableBytes)
+        else { throw DockerError.corruptedData("Expected a string") }
+
+        return try endpoint.map(data: bufferString)
     }
     
     @discardableResult
