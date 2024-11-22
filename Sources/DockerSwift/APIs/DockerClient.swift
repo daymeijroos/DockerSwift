@@ -225,19 +225,22 @@ public class DockerClient {
             try print("\n\(genCurlCommand(endpoint))\n")
         }
 
+        let request = try HTTPClient.Request(
+            daemonURL: daemonURL,
+            urlPath: "/\(apiVersion)/\(endpoint.path)",
+            method: endpoint.method,
+            body: endpoint.body.map { HTTPClient.Body.data( try $0.encode()) },
+            headers: finalHeaders)
+
         if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-            let buffer = try await mockEndpoint.mockedResponse()
+            let buffer = try await mockEndpoint.mockedResponse(request)
             return try decoder.decode(T.Response.self, from: buffer)
         }
 
         return try await client.execute(
-            endpoint.method,
-            daemonURL: self.daemonURL,
-            urlPath: "/\(apiVersion)/\(endpoint.path)",
-            body: endpoint.body.map { HTTPClient.Body.data( try! $0.encode()) },
-            logger: logger,
-            headers: finalHeaders
-        )
+            request: request,
+            deadline: nil,
+            logger: logger)
         .logResponseBody(logger)
         .decode(as: T.Response.self, decoder: self.decoder)
         .get()
@@ -259,14 +262,22 @@ public class DockerClient {
             try print("\n\(genCurlCommand(endpoint))\n")
         }
 
-        return try await client.execute(
-            endpoint.method,
-            daemonURL: self.daemonURL,
+        let request = try HTTPClient.Request(
+            daemonURL: daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
-            body: endpoint.body.map { HTTPClient.Body.data( try! $0.encode()) },
-            logger: logger,
-            headers: self.headers
-        )
+            method: endpoint.method,
+            body: endpoint.body.map { HTTPClient.Body.data( try $0.encode()) },
+            headers: headers)
+
+        if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+            let buffer = try await mockEndpoint.mockedResponse(request)
+            return try decoder.decode(T.Response.self, from: buffer)
+        }
+
+        return try await client.execute(
+            request: request,
+            deadline: nil,
+            logger: logger)
         .logResponseBody(logger)
         .mapString(map: endpoint.map(data: ))
         .get()
@@ -283,20 +294,20 @@ public class DockerClient {
             try print("\n\(genCurlCommand(endpoint))\n")
         }
 
-        let stream = try await client.executeStream(
-            endpoint.method,
-            daemonURL: self.daemonURL,
+        let request = try HTTPClientRequest(
+            daemonURL: daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
-            body: endpoint.body.map {
-                HTTPClientRequest.Body.bytes( try! $0.encode())
-            },
-            timeout: timeout,
-            logger: logger,
-            headers: self.headers,
-            hasLengthHeader: hasLengthHeader,
-            separators: separators
-        )
-        return stream as! T.Response
+            method: endpoint.method,
+            body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
+            headers: headers)
+
+        if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+            let stream = try await mockEndpoint.mockedStreamingResponse(request)
+            return stream
+        }
+
+        let stream = try await client.executeStream(request: request, timeout: timeout, logger: logger)
+        return stream
     }
     
     @discardableResult
@@ -310,16 +321,18 @@ public class DockerClient {
             try print("\n\(genCurlCommand(endpoint))\n")
         }
 
-        let stream = try await client.executeStream(
-            endpoint.method,
-            daemonURL: self.daemonURL,
+        let request = try HTTPClientRequest(
+            daemonURL: daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
-            body: endpoint.body == nil ? nil : .bytes(endpoint.body!),
-            timeout: timeout,
-            logger: logger,
-            headers: self.headers,
-            separators: separators
-        )
-        return stream as! T.Response
+            method: endpoint.method,
+            body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
+            headers: headers)
+
+        if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+            let stream = try await mockEndpoint.mockedStreamingResponse(request)
+            return stream
+        }
+
+        return try await client.executeStream(request: request, timeout: timeout, logger: logger)
     }
 }
