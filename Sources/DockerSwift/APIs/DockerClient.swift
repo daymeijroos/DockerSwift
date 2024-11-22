@@ -73,7 +73,7 @@ public class DockerClient {
     private init(
         daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
         tlsConfig: TLSConfiguration? = nil,
-        logger: Logger = .init(label: "docker-client"),
+        logger: Logger = .init(label: "🪵docker-client"),
         clientThreads: Int = 2,
         timeout: HTTPClient.Configuration.Timeout = .init(),
         proxy: HTTPClient.Configuration.Proxy? = nil,
