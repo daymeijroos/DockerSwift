@@ -4,8 +4,6 @@ import NIOHTTP1
 
 protocol MockedResponseEndpoint: Endpoint {
 	var responseData: [MockedResponseData] { get }
-	var responseHeader: HTTPHeaders { get }
-	var responseSuccessStatus: HTTPResponseStatus { get }
 }
 
 extension MockedResponseEndpoint {

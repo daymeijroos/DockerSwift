@@ -17,10 +17,10 @@ public class DockerClient {
     
     internal let daemonURL: URL
     internal let tlsConfig: TLSConfiguration?
-    internal let client: SocketClient
+    internal let client: HTTPClient
     private let logger: Logger
 
-    private let isTesting: Bool
+    package let isTesting: Bool
 
     public private(set) var state: State = .uninitialized
 
@@ -50,7 +50,7 @@ public class DockerClient {
             forTesting: false)
     }
 
-    static func forTesting(
+    package static func forTesting(
         daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
         tlsConfig: TLSConfiguration? = nil,
         clientThreads: Int = 2,
@@ -81,26 +81,17 @@ public class DockerClient {
     ) {
         self.daemonURL = daemonURL
         self.tlsConfig = tlsConfig
-
-        let loopGroupProvider = HTTPClient
-            .EventLoopGroupProvider
-            .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads))
-        if forTesting {
-            let mockClient = MockingClient(eventLoopGroupProvider: loopGroupProvider)
-            self.client = mockClient
-        } else {
-            let clientConfig = HTTPClient.Configuration(
-                tlsConfiguration: tlsConfig,
-                timeout: timeout,
-                proxy: proxy,
-                ignoreUncleanSSLShutdown: true
-            )
-            let httpClient = HTTPClient(
-                eventLoopGroupProvider: .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads)),
-                configuration: clientConfig
-            )
-            self.client = httpClient
-        }
+        let clientConfig = HTTPClient.Configuration(
+            tlsConfiguration: tlsConfig,
+            timeout: timeout,
+            proxy: proxy,
+            ignoreUncleanSSLShutdown: true
+        )
+        let httpClient = HTTPClient(
+            eventLoopGroupProvider: .shared(MultiThreadedEventLoopGroup(numberOfThreads: clientThreads)),
+            configuration: clientConfig
+        )
+        self.client = httpClient
         self.logger = logger
         self.isTesting = forTesting
 
@@ -244,7 +235,6 @@ public class DockerClient {
             daemonURL: self.daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
             body: endpoint.body.map { HTTPClient.Body.data( try! $0.encode()) },
-            deadline: nil,
             logger: logger,
             headers: finalHeaders
         )
@@ -274,7 +264,6 @@ public class DockerClient {
             daemonURL: self.daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
             body: endpoint.body.map { HTTPClient.Body.data( try! $0.encode()) },
-            deadline: nil,
             logger: logger,
             headers: self.headers
         )
@@ -329,7 +318,6 @@ public class DockerClient {
             timeout: timeout,
             logger: logger,
             headers: self.headers,
-            hasLengthHeader: false,
             separators: separators
         )
         return stream as! T.Response
