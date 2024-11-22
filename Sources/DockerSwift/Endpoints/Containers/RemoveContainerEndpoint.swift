@@ -21,11 +21,3 @@ struct RemoveContainerEndpoint: SimpleEndpoint {
 		"containers/\(containerId)?force=\(force)&v=\(removeAnonymousVolumes)"
 	}
 }
-
-extension RemoveContainerEndpoint: MockedResponseEndpoint {
-	var responseData: [MockedResponseData] {
-		[
-			.rawData(ByteBuffer())
-		]
-	}
-}

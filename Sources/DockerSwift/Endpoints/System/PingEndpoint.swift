@@ -7,9 +7,3 @@ struct PingEndpoint: SimpleEndpoint {
 	var method: HTTPMethod = .GET
 	let path: String = "_ping"
 }
-
-extension PingEndpoint: MockedResponseEndpoint {
-	var responseData: [MockedResponseData] {
-		[.string("OK")]
-	}
-}
