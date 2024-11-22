@@ -232,9 +232,19 @@ public class DockerClient {
             body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
             headers: finalHeaders)
 
+        func decodeOut(_ buffer: ByteBuffer) throws -> T.Response {
+            if T.Response.self == NoBody.self || T.Response.self == NoBody?.self {
+                return NoBody() as! T.Response
+            }
+            guard T.Response.self != String.self else {
+                return String(buffer: buffer) as! T.Response
+            }
+            return try decoder.decode(T.Response.self, from: buffer)
+        }
+
         if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
             let buffer = try await mockEndpoint.mockedResponse(request)
-            return try decoder.decode(T.Response.self, from: buffer)
+            return try decodeOut(buffer)
         }
 
         let response = try await client.execute(request, timeout: .minutes(2))
@@ -247,13 +257,7 @@ public class DockerClient {
             var debugResponseCopy = buffer
             logger.debug("Response: \(debugResponseCopy.readString(length: debugResponseCopy.readableBytes) ?? "No Response Data")")
         }
-        if T.Response.self == NoBody.self || T.Response.self == NoBody?.self {
-            return NoBody() as! T.Response
-        }
-        guard T.Response.self != String.self else {
-            return String(buffer: buffer) as! T.Response
-        }
-        return try decoder.decode(T.Response.self, from: buffer)
+        return try decodeOut(buffer)
     }
     
     /// Executes a request to a specific endpoint. The `PipelineEndpoint` struct provides all necessary data and parameters for the request.
