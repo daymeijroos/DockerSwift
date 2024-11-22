@@ -241,11 +241,7 @@ public class DockerClient {
         let responseBody = response.body
         try response.checkStatusCode()
 
-        var buffer = ByteBuffer()
-
-        for try await var response in responseBody {
-            buffer.writeBuffer(&response)
-        }
+        let buffer = try await responseBody.collect(upTo: .max)
 
         if logger.logLevel <= .debug {
             var debugResponseCopy = buffer
@@ -291,11 +287,7 @@ public class DockerClient {
         let response = try await client.execute(request, timeout: .minutes(2))
         let responseBody = response.body
 
-        var buffer = ByteBuffer()
-
-        for try await var response in responseBody {
-            buffer.writeBuffer(&response)
-        }
+        var buffer = try await responseBody.collect(upTo: .max)
 
         guard
             let bufferString = buffer.readString(length: buffer.readableBytes)
