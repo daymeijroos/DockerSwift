@@ -20,6 +20,8 @@ public class DockerClient {
     internal let client: SocketClient
     private let logger: Logger
 
+    private let isTesting: Bool
+
     public private(set) var state: State = .uninitialized
 
     /// Initialize the `DockerClient`.
@@ -46,6 +48,26 @@ public class DockerClient {
             timeout: timeout,
             proxy: proxy,
             forTesting: false)
+    }
+
+    static func forTesting(
+        daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
+        tlsConfig: TLSConfiguration? = nil,
+        clientThreads: Int = 2,
+        timeout: HTTPClient.Configuration.Timeout = .init(),
+        proxy: HTTPClient.Configuration.Proxy? = nil
+    ) -> DockerClient {
+        var logger = Logger(label: "docker-client-tests")
+        logger.logLevel = .debug
+
+        return DockerClient(
+            daemonURL: daemonURL,
+            tlsConfig: tlsConfig,
+            logger: logger,
+            clientThreads: clientThreads,
+            timeout: timeout,
+            proxy: proxy,
+            forTesting: true)
     }
 
     private init(
@@ -80,6 +102,7 @@ public class DockerClient {
             self.client = httpClient
         }
         self.logger = logger
+        self.isTesting = forTesting
 
         let decoder = JSONDecoder()
         self.decoder = decoder
@@ -209,6 +232,11 @@ public class DockerClient {
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
             try print("\n\(genCurlCommand(endpoint))\n")
+        }
+
+        if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+            let buffer = try await mockEndpoint.mockedResponse()
+            return try decoder.decode(T.Response.self, from: buffer)
         }
 
         return try await client.execute(
