@@ -6,7 +6,7 @@ final class SystemTests: XCTestCase {
     var client: DockerClient!
     
     override func setUp() {
-        client = DockerClient.testable()
+        client = DockerClient.forTesting()
     }
     
     override func tearDownWithError() throws {
