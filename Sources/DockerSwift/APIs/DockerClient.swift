@@ -35,7 +35,7 @@ public class DockerClient {
     public convenience init(
         daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
         tlsConfig: TLSConfiguration? = nil,
-        logger: Logger = .init(label: "docker-client"),
+        logger: Logger = .init(label: "🪵docker-client"),
         clientThreads: Int = 2,
         timeout: HTTPClient.Configuration.Timeout = .init(),
         proxy: HTTPClient.Configuration.Proxy? = nil
@@ -57,7 +57,7 @@ public class DockerClient {
         timeout: HTTPClient.Configuration.Timeout = .init(),
         proxy: HTTPClient.Configuration.Proxy? = nil
     ) -> DockerClient {
-        var logger = Logger(label: "docker-client-tests")
+        var logger = Logger(label: "🪵docker-client-tests")
         logger.logLevel = .debug
 
         return DockerClient(
@@ -222,7 +222,7 @@ public class DockerClient {
         }
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
-            try print("\n\(genCurlCommand(endpoint))\n")
+            try print("💻\n\(genCurlCommand(endpoint))\n")
         }
 
         let request = try HTTPClient.Request(
