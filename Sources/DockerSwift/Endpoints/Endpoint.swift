@@ -4,7 +4,7 @@ import NIOFoundationCompat
 import Foundation
 
 protocol Endpoint {
-    associatedtype Response: Codable
+    associatedtype Response
     associatedtype Body: Codable
     var path: String { get }
     var method: HTTPMethod { get }
@@ -12,7 +12,7 @@ protocol Endpoint {
     var body: Body? { get }
 }
 
-extension Endpoint {
+extension SimpleEndpoint {
     public var body: Body? {
         return nil
     }
@@ -22,19 +22,17 @@ extension Endpoint {
     }
 }
 
-protocol PipelineEndpoint: Endpoint {
+protocol SimpleEndpoint: Endpoint where Response: Codable {}
+
+protocol PipelineEndpoint: SimpleEndpoint {
     func map(data: String) throws -> Self.Response
 }
 
-protocol StreamingEndpoint {
-    associatedtype Response: AsyncSequence
-    associatedtype Body: Codable
-    var path: String { get }
-    var method: HTTPMethod { get }
-    var body: Body? { get }
-}
+protocol StreamingEndpoint: Endpoint where Response: AsyncSequence {}
 
 extension StreamingEndpoint {
+    var headers: HTTPHeaders? { nil }
+
     public var body: Body? {
         return nil
     }

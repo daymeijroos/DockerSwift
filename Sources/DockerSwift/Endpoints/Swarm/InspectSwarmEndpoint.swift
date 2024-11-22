@@ -1,7 +1,7 @@
 import NIOHTTP1
 import Foundation
 
-public struct InspectSwarmEndpoint: Endpoint {
+public struct InspectSwarmEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = SwarmResponse
     var method: HTTPMethod = .GET

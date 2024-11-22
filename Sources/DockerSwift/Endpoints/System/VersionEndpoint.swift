@@ -2,7 +2,7 @@ import NIOHTTP1
 
 struct NoBody: Codable {}
 
-struct VersionEndpoint: Endpoint {
+struct VersionEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = DockerVersion
     

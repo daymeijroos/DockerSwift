@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct CreateVolumeEndpoint: Endpoint {
+struct CreateVolumeEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = Volume

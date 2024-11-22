@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct InspectTaskEndpoint: Endpoint {
+struct InspectTaskEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = SwarmTask
     var method: HTTPMethod = .GET

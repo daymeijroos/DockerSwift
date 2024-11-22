@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct PruneContainersEndpoint: Endpoint {
+struct PruneContainersEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = PruneContainersResponse

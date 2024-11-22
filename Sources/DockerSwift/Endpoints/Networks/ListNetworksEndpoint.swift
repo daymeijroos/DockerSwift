@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct ListNetworksEndpoint: Endpoint {
+struct ListNetworksEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = [Network]
     var method: HTTPMethod = .GET

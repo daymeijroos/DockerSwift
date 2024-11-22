@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct InspectImagesEndpoint: Endpoint {
+struct InspectImagesEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = Image
     var method: HTTPMethod = .GET

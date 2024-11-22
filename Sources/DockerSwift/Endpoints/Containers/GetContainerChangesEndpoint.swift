@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct GetContainerChangesEndpoint: Endpoint {
+struct GetContainerChangesEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = [ContainerFsChange]
     var method: HTTPMethod = .GET

@@ -2,7 +2,7 @@ import NIO
 import Foundation
 import NIOHTTP1
 
-protocol MockedResponseEndpoint: Endpoint {
+protocol MockedResponseEndpoint: SimpleEndpoint {
 	var responseData: [MockedResponseData] { get }
 }
 

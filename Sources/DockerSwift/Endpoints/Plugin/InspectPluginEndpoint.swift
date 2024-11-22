@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct InspectPluginEndpoint: Endpoint {
+struct InspectPluginEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = Plugin
     var method: HTTPMethod = .GET

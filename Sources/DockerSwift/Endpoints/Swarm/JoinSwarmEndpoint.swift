@@ -1,7 +1,7 @@
 import NIOHTTP1
 import Foundation
 
-public struct JoinSwarmEndpoint: Endpoint {
+public struct JoinSwarmEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Body = SwarmJoin

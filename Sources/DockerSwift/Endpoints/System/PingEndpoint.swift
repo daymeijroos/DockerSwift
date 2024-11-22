@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct PingEndpoint: Endpoint {
+struct PingEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = String
     

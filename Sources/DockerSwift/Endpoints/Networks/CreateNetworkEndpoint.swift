@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct CreateNetworkEndpoint: Endpoint {
+struct CreateNetworkEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = CreateNetworkResponse

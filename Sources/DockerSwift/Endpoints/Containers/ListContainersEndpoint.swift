@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct ListContainersEndpoint: Endpoint {
+struct ListContainersEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = [ContainerSummary]
     var method: HTTPMethod = .GET

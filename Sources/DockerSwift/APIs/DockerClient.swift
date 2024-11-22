@@ -156,7 +156,7 @@ public class DockerClient {
         try await client.shutdown()
     }
 
-    func genCurlCommand<E: Endpoint>(_ endpoint: E) throws -> String {
+    func genCurlCommand<E: SimpleEndpoint>(_ endpoint: E) throws -> String {
         try genCurlCommand(method: endpoint.method, path: endpoint.path, headers: endpoint.headers, body: endpoint.body)
     }
 
@@ -211,7 +211,7 @@ public class DockerClient {
     /// - Throws: It can throw an error when encoding the body of the `Endpoint` request to JSON.
     /// - Returns: Returns the expected result definied by the `Endpoint`.
     @discardableResult
-    internal func run<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
+    internal func run<T: SimpleEndpoint>(_ endpoint: T) async throws -> T.Response {
         if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
             try await initialize()
         }

@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct WaitContainerEndpoint: Endpoint {
+struct WaitContainerEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = ContainerWaitResponse
     var method: HTTPMethod = .POST

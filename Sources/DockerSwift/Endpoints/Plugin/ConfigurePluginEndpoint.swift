@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct ConfigurePluginEndpoint: Endpoint {
+struct ConfigurePluginEndpoint: SimpleEndpoint {
     typealias Response = NoBody
     typealias Body = [String]
     var method: HTTPMethod = .POST

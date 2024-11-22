@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct CreateSecretEndpoint: Endpoint {
+struct CreateSecretEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = CreateSecretResponse

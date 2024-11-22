@@ -1,7 +1,7 @@
 import NIOHTTP1
 import Foundation
 
-struct TagImageEndpoint: Endpoint {
+struct TagImageEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = NoBody
     var method: HTTPMethod = .POST

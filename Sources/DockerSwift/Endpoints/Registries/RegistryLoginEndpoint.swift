@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct RegistryLoginEndpoint: Endpoint {
+struct RegistryLoginEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = RegistryLoginResponse

@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct UpdateNodeEndpoint: Endpoint {
+struct UpdateNodeEndpoint: SimpleEndpoint {
     typealias Body = SwarmNodeSpec
     typealias Response = NoBody
     var method: HTTPMethod = .POST

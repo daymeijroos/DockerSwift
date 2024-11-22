@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct StopContainerEndpoint: Endpoint {
+struct StopContainerEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     
     typealias Response = NoBody?

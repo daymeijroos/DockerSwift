@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct PauseUnpauseContainerEndpoint: Endpoint {
+struct PauseUnpauseContainerEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     
     typealias Response = NoBody?

@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-public struct DiskUsageInformationEndpoint: Endpoint {
+public struct DiskUsageInformationEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = DataUsageInformation
     

@@ -1,7 +1,7 @@
 import NIOHTTP1
 import Foundation
 
-struct PruneNetworksEndpoint: Endpoint {
+struct PruneNetworksEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = PrunedNetworks

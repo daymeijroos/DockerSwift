@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct CommitContainerEndpoint: Endpoint {
+struct CommitContainerEndpoint: SimpleEndpoint {
     typealias Response = CommitContainerResponse
     typealias Body = ContainerConfig?
     var method: HTTPMethod = .POST

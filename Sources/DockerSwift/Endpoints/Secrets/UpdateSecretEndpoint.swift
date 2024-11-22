@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct UpdateSecretEndpoint: Endpoint {
+struct UpdateSecretEndpoint: SimpleEndpoint {
     typealias Response = NoBody
     typealias Body = SecretSpec
     var method: HTTPMethod = .POST

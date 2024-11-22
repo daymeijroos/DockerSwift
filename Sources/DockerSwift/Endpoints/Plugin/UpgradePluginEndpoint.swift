@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct UpgradePluginEndpoint: Endpoint {
+struct UpgradePluginEndpoint: SimpleEndpoint {
     typealias Response = NoBody
     typealias Body = [PluginPrivilege]
     var method: HTTPMethod = .POST

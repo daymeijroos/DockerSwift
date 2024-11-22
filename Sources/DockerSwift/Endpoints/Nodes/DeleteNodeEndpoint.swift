@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct DeleteNodeEndpoint: Endpoint {
+struct DeleteNodeEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = NoBody
     var method: HTTPMethod = .DELETE

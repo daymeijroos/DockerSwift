@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct SystemInformationEndpoint: Endpoint {
+struct SystemInformationEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = SystemInformation
     

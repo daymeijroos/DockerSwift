@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct CreateConfigEndpoint: Endpoint {
+struct CreateConfigEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = CreateConfigResponse

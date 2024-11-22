@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct UpdateServiceEndpoint: Endpoint {
+struct UpdateServiceEndpoint: SimpleEndpoint {
     var body: Body?
     
     typealias Response = NoBody?

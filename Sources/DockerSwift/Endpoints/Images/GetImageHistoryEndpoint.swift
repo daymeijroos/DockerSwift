@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct GetImageHistoryEndpoint: Endpoint {
+struct GetImageHistoryEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     typealias Response = [ImageLayer]
     var method: HTTPMethod = .GET

@@ -1,7 +1,7 @@
 import NIOHTTP1
 import Foundation
 
-public struct LeaveSwarmEndpoint: Endpoint {
+public struct LeaveSwarmEndpoint: SimpleEndpoint {
     
     typealias Body = NoBody
     typealias Response = NoBody

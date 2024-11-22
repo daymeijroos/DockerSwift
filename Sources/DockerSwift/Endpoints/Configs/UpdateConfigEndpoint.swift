@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct UpdateConfigEndpoint: Endpoint {
+struct UpdateConfigEndpoint: SimpleEndpoint {
     typealias Response = NoBody
     typealias Body = ConfigSpec
     var method: HTTPMethod = .POST

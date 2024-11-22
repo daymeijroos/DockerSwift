@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct SimpleCreateContainerEndpoint: Endpoint {
+struct SimpleCreateContainerEndpoint: SimpleEndpoint {
     var body: CreateContainerBody?
     
     typealias Response = CreateContainerResponse
@@ -30,7 +30,7 @@ struct SimpleCreateContainerEndpoint: Endpoint {
     }
 }
 
-struct CreateContainerEndpoint: Endpoint {
+struct CreateContainerEndpoint: SimpleEndpoint {
     typealias Response = CreateContainerResponse
     typealias Body = ContainerSpec
     var method: HTTPMethod = .POST

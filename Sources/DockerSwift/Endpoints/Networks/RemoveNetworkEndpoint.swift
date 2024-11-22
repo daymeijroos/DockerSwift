@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-struct RemoveNetworkEndpoint: Endpoint {
+struct RemoveNetworkEndpoint: SimpleEndpoint {
     typealias Body = NoBody
     
     typealias Response = NoBody?
