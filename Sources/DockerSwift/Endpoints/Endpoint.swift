@@ -36,7 +36,7 @@ extension StreamingEndpoint {
 }
 
 /// A Docker API endpoint that receives a stream of bytes in the request body
-protocol UploadEndpoint: Endpoint where Response == AsyncThrowingStream<ByteBuffer, Error> {}
+protocol UploadEndpoint: Endpoint where Response == AsyncThrowingStream<ByteBuffer, Error>, Body == ByteBuffer {}
 
 extension UploadEndpoint {
     var headers: HTTPHeaders? { nil }

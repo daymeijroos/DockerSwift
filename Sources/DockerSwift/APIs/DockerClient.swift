@@ -346,7 +346,7 @@ public class DockerClient {
             daemonURL: daemonURL,
             urlPath: "/\(apiVersion)/\(endpoint.path)",
             method: endpoint.method,
-            body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
+            body: endpoint.body.map { HTTPClientRequest.Body.bytes($0) },
             headers: headers)
 
         if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
