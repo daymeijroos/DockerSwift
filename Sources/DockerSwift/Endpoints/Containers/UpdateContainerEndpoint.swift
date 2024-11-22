@@ -1,20 +1,20 @@
 import NIOHTTP1
 
 struct UpdateContainerEndpoint: SimpleEndpoint {
-    var body: ContainerUpdate?
-    
-    typealias Response = NoBody
-    typealias Body = ContainerUpdate
-    var method: HTTPMethod = .POST
-    
-    private let nameOrId: String
-    
-    init(nameOrId: String, spec: ContainerUpdate) {
-        self.nameOrId = nameOrId
-        self.body = spec
-    }
-    
-    var path: String {
-        "containers/\(nameOrId)/update"
-    }
+	var body: ContainerUpdate?
+	
+	typealias Response = NoBody
+	typealias Body = ContainerUpdate
+	var method: HTTPMethod = .POST
+	
+	private let nameOrId: String
+	
+	init(nameOrId: String, spec: ContainerUpdate) {
+		self.nameOrId = nameOrId
+		self.body = spec
+	}
+	
+	var path: String {
+		"containers/\(nameOrId)/update"
+	}
 }

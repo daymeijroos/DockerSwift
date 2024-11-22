@@ -2,17 +2,17 @@ import Foundation
 import NIOHTTP1
 
 struct InspectConfigEndpoint: SimpleEndpoint {
-    typealias Body = NoBody
-    typealias Response = Config
-    var method: HTTPMethod = .GET
-    
-    private let nameOrId: String
-    
-    init(nameOrId: String) {
-        self.nameOrId = nameOrId
-    }
-    
-    var path: String {
-        "configs/\(nameOrId)"
-    }
+	typealias Body = NoBody
+	typealias Response = Config
+	var method: HTTPMethod = .GET
+	
+	private let nameOrId: String
+	
+	init(nameOrId: String) {
+		self.nameOrId = nameOrId
+	}
+	
+	var path: String {
+		"configs/\(nameOrId)"
+	}
 }

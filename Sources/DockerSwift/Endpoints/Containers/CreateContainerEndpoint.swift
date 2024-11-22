@@ -1,62 +1,62 @@
 import NIOHTTP1
 
 struct SimpleCreateContainerEndpoint: SimpleEndpoint {
-    var body: CreateContainerBody?
-    
-    typealias Response = CreateContainerResponse
-    typealias Body = CreateContainerBody
-    var method: HTTPMethod = .POST
-    
-    private let imageName: String
-    private let commands: [String]?
-    
-    init(imageName: String, commands: [String]? = nil) {
-        self.imageName = imageName
-        self.commands = commands
-        self.body = .init(Image: imageName, Cmd: commands)
-    }
-    
-    var path: String {
-        "containers/create"
-    }
+	var body: CreateContainerBody?
+	
+	typealias Response = CreateContainerResponse
+	typealias Body = CreateContainerBody
+	var method: HTTPMethod = .POST
+	
+	private let imageName: String
+	private let commands: [String]?
+	
+	init(imageName: String, commands: [String]? = nil) {
+		self.imageName = imageName
+		self.commands = commands
+		self.body = .init(Image: imageName, Cmd: commands)
+	}
+	
+	var path: String {
+		"containers/create"
+	}
 
-    struct CreateContainerBody: Codable {
-        let Image: String
-        let Cmd: [String]?
-    }
-    
-    struct CreateContainerResponse: Codable {
-        let Id: String
-    }
+	struct CreateContainerBody: Codable {
+		let Image: String
+		let Cmd: [String]?
+	}
+	
+	struct CreateContainerResponse: Codable {
+		let Id: String
+	}
 }
 
 struct CreateContainerEndpoint: SimpleEndpoint {
-    typealias Response = CreateContainerResponse
-    typealias Body = ContainerSpec
-    var method: HTTPMethod = .POST
-    
-    var body: ContainerSpec?
-    private let name: String?
-    
-    init(name: String? = nil, spec: ContainerSpec) {
-        self.name = name
-        self.body = spec
-    }
-    
-    var path: String {
-        "containers/create\(name != nil ? "?name=\(name!)" : "")"
-    }
+	typealias Response = CreateContainerResponse
+	typealias Body = ContainerSpec
+	var method: HTTPMethod = .POST
+	
+	var body: ContainerSpec?
+	private let name: String?
+	
+	init(name: String? = nil, spec: ContainerSpec) {
+		self.name = name
+		self.body = spec
+	}
+	
+	var path: String {
+		"containers/create\(name != nil ? "?name=\(name!)" : "")"
+	}
 
-    struct CreateContainerResponse: Codable {
-        let Id: String
-        let Warnings: [String]
-    }
+	struct CreateContainerResponse: Codable {
+		let Id: String
+		let Warnings: [String]
+	}
 }
 
 extension CreateContainerEndpoint: MockedResponseEndpoint {
-    var responseData: [MockedResponseData] {
-        [
-            .string(#"{"Id":"ce25040926ba103e72dd4070db9a07c4510291a3a3475b0cb175dd06dddfbc93","Warnings":[]}"#)
-        ]
-    }
+	var responseData: [MockedResponseData] {
+		[
+			.string(#"{"Id":"ce25040926ba103e72dd4070db9a07c4510291a3a3475b0cb175dd06dddfbc93","Warnings":[]}"#)
+		]
+	}
 }
