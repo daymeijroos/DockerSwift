@@ -1,5 +1,6 @@
 import NIOHTTP1
 import Foundation
+import Logging
 
 struct PullImageEndpoint: PipelineEndpoint {
     typealias Body = NoBody
@@ -8,19 +9,22 @@ struct PullImageEndpoint: PipelineEndpoint {
     
     let imageName: String
     let credentials: RegistryAuth?
-    
+
+    let logger: Logger
+
     var path: String {
         "images/create?fromImage=\(imageName)"
     }
     
     var headers: HTTPHeaders? = nil
     
-    init(imageName: String, credentials: RegistryAuth?) {
+    init(imageName: String, credentials: RegistryAuth?, logger: Logger) {
         self.imageName = imageName
         self.credentials = credentials
         if let credentials = credentials, let token = credentials.token {
             self.headers = .init([("X-Registry-Auth", token)])
         }
+        self.logger = logger
     }
     
     struct PullImageResponse: Codable {
@@ -51,4 +55,23 @@ struct PullImageEndpoint: PipelineEndpoint {
             throw DockerError.unknownResponse(data)
         }
     }
+}
+
+extension PullImageEndpoint: MockedResponseEndpoint {
+    var responseData: [MockedResponseData] {
+        switch imageName {
+        case "hello-world:latest":
+            return [
+                .string(#"{"status":"Already exists","progressDetail":{},"id":"478afc919002"}"#),
+                .string(#"{"status":"Pulling fs layer","progressDetail":{},"id":"ee301c921b8a"}"#),
+                .string(#"{"status":"Download complete","progressDetail":{},"id":"ee301c921b8a"}"#),
+                .string(#"{"status":"Download complete","progressDetail":{},"id":"ee301c921b8a"}"#),
+            ]
+        default:
+            logger.error("Requested image not found: \(imageName).")
+            return []
+        }
+    }
+    
+
 }

@@ -38,7 +38,7 @@ extension DockerClient {
         /// - Throws: Errors that can occur when executing the request.
         /// - Returns: Fetches the latest image information and returns the `Image` that has been fetched.
         public func pull(byIdentifier identifier: String, credentials: RegistryAuth? = nil) async throws -> Image {
-            try await client.run(PullImageEndpoint(imageName: identifier, credentials: credentials))
+            try await client.run(PullImageEndpoint(imageName: identifier, credentials: credentials, logger: client.logger))
             return try await self.get(identifier)
         }
         

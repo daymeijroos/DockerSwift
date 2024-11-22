@@ -18,7 +18,7 @@ public class DockerClient {
     internal let daemonURL: URL
     internal let tlsConfig: TLSConfiguration?
     internal let client: HTTPClient
-    private let logger: Logger
+    internal let logger: Logger
 
     package let isTesting: Bool
 
@@ -280,8 +280,12 @@ public class DockerClient {
             headers: headers)
 
         if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-            let buffer = try await mockEndpoint.mockedResponse(request)
-            return try decoder.decode(T.Response.self, from: buffer)
+            var buffer = try await mockEndpoint.mockedResponse(request)
+            guard
+                let bufferString = buffer.readString(length: buffer.readableBytes)
+            else { throw DockerError.corruptedData("Expected a string") }
+
+            return try endpoint.map(data: bufferString)
         }
 
         let response = try await client.execute(request, timeout: .minutes(2))
