@@ -27,7 +27,7 @@ final class SystemTests: XCTestCase {
     
     func testEvents() async throws {
         let _ = try await client.images.pull(byName: "hello-world", tag: "latest")
-        let name = UUID().uuidString
+        let name = "81A5DB11-78E9-4B21-9943-23FB75818224"
         async let events = try client.events(since: Date())
         try await Task.sleep(nanoseconds: 2_000_000_000)
         let _ = try await client.containers.create(

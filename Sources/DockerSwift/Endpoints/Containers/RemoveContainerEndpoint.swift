@@ -1,3 +1,4 @@
+import NIO
 import NIOHTTP1
 
 struct RemoveContainerEndpoint: SimpleEndpoint {
@@ -18,5 +19,13 @@ struct RemoveContainerEndpoint: SimpleEndpoint {
     
     var path: String {
         "containers/\(containerId)?force=\(force)&v=\(removeAnonymousVolumes)"
+    }
+}
+
+extension RemoveContainerEndpoint: MockedResponseEndpoint {
+    var responseData: [MockedResponseData] {
+        [
+            .rawData(ByteBuffer())
+        ]
     }
 }

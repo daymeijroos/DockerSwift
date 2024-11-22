@@ -74,6 +74,10 @@ extension HTTPClient {
         _Concurrency.Task {
             do {
                 for try await buffer in body {
+                    if logger.logLevel <= .debug {
+                        var debugResponseCopy = buffer
+                        logger.debug("Response: \(debugResponseCopy.readString(length: debugResponseCopy.readableBytes) ?? "No Response Data")")
+                    }
                     continuation.yield(buffer)
                 }
             } catch {

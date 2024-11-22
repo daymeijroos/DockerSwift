@@ -3,7 +3,7 @@ import Foundation
 import NIOHTTP1
 import AsyncHTTPClient
 
-protocol MockedResponseEndpoint: SimpleEndpoint {
+protocol MockedResponseEndpoint: Endpoint {
 	var responseData: [MockedResponseData] { get }
 
 	func mockedResponse(_ request: HTTPClientRequest) async throws -> ByteBuffer
