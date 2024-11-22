@@ -269,7 +269,7 @@ public class DockerClient {
         logger.debug("\(Self.self) execute PipelineEndpoint: \(endpoint.method) \(endpoint.path)")
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
-            try print("\n\(genCurlCommand(endpoint))\n")
+            try print("💻\n\(genCurlCommand(endpoint))\n")
         }
 
         let request = try HTTPClientRequest(
@@ -289,6 +289,11 @@ public class DockerClient {
 
         var buffer = try await responseBody.collect(upTo: .max)
 
+        if logger.logLevel <= .debug {
+            var debugResponseCopy = buffer
+            logger.debug("Response: \(debugResponseCopy.readString(length: debugResponseCopy.readableBytes) ?? "No Response Data")")
+        }
+
         guard
             let bufferString = buffer.readString(length: buffer.readableBytes)
         else { throw DockerError.corruptedData("Expected a string") }
@@ -304,7 +309,7 @@ public class DockerClient {
         logger.debug("\(Self.self) execute StreamingEndpoint: \(endpoint.method) \(endpoint.path)")
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
-            try print("\n\(genCurlCommand(endpoint))\n")
+            try print("💻\n\(genCurlCommand(endpoint))\n")
         }
 
         let request = try HTTPClientRequest(
@@ -331,7 +336,7 @@ public class DockerClient {
         logger.debug("\(Self.self) execute \(T.self): \(endpoint.path)")
         if logger.logLevel <= .debug {
             // printing to avoid the logging prefix, making for an easier copy/pasta
-            try print("\n\(genCurlCommand(endpoint))\n")
+            try print("💻\n\(genCurlCommand(endpoint))\n")
         }
 
         let request = try HTTPClientRequest(
