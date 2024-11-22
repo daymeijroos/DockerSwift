@@ -74,7 +74,7 @@ extension DockerClient {
         /// - Throws: Errors that can occur when executing the request.
         /// - Returns: Returns the `Image` data.
         public func get(_ nameOrId: String) async throws -> Image {
-            return try await client.run(InspectImagesEndpoint(nameOrId: nameOrId))
+            return try await client.run(InspectImagesEndpoint(nameOrId: nameOrId, logger: client.logger))
         }
         
         /// Fetches the history (layers) information for an image.
