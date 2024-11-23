@@ -4,7 +4,6 @@ import Foundation
 struct RemoveImageEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
-	typealias Response = NoBody?
 	var method: HTTPMethod = .DELETE
 	var queryArugments: [URLQueryItem] {
 		[
@@ -22,4 +21,6 @@ struct RemoveImageEndpoint: SimpleEndpoint {
 		self.nameOrId = nameOrId
 		self.force = force
 	}
+
+	typealias Response = [RemoveImageResult]
 }

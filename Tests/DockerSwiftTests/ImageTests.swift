@@ -19,7 +19,17 @@ final class ImageTests: XCTestCase {
 	}
 
 	func testDeleteImage() async throws {
-		try await client.images.remove("nginx:latest", force: true)
+		let deleted = try await client.images.remove("nginx:latest", force: true)
+
+		let results = Set(deleted)
+		for result in results {
+			switch result {
+			case .deleted(let value):
+				XCTAssertEqual(value, "7a3f95c078122f959979fac556ae6f43746c9f32e5a66526bb503ed1d4adbd07")
+			case .untagged(let value):
+				XCTAssertTrue(value.contains("nginx:latest"))
+			}
+		}
 	}
 
 	func testPullImage() async throws {

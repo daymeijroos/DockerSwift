@@ -65,7 +65,8 @@ extension DockerClient {
 		///   - nameOrId: Name or ID of an `Image` that should be removed.
 		///   - force: Should the image be removed by force? If `false` the image will only be removed if it's unused. If `true` existing containers will break. Default is `false`.
 		/// - Throws: Errors that can occur when executing the request.
-		public func remove(_ nameOrId: String, force: Bool = false) async throws {
+		@discardableResult
+		public func remove(_ nameOrId: String, force: Bool = false) async throws -> [RemoveImageResult] {
 			try await client.run(RemoveImageEndpoint(nameOrId: nameOrId, force: force))
 		}
 		
