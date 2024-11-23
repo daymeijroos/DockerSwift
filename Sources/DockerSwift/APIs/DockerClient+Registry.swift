@@ -1,4 +1,5 @@
 import Foundation
+import Logging
 
 extension DockerClient {
 	
@@ -14,18 +15,13 @@ extension DockerClient {
 		/// - Parameters:
 		///   - credentials: configuration as a `RegistryAuth`.
 		/// - Throws: Errors that can occur when executing the request.
-		public func login(credentials: inout RegistryAuth) async throws {
+		public func login(credentials: inout RegistryAuth, logger: Logger) async throws -> RegistryAuth.Token {
 			let response = try await client.run(RegistryLoginEndpoint(credentials: credentials))
-			if response.IdentityToken != "" {
-				credentials.token = response.IdentityToken
-			}
-			else { // use the credentials themselves
-				let encoder = JSONEncoder()
-				let encoded = try encoder.encode(credentials) 
-				credentials.token = encoded.base64EncodedString()
-			}
-			//return credentials
+			logger.debug("\(response.status)")
+
+			let encodedToken = credentials.entoken()
+			credentials.token = encodedToken.rawValue
+			return encodedToken
 		}
-		
 	}
 }

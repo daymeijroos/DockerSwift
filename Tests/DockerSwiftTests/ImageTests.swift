@@ -38,17 +38,17 @@ final class ImageTests: XCTestCase {
 	}
 
 	func testPushImage() async throws {
-		guard let password = ProcessInfo.processInfo.environment["REGISTRY_PASSWORD"] else {
-			fatalError("REGISTRY_PASSWORD is not set")
-		}
-		var credentials = RegistryAuth(username: "mbarthelemy", password: password)
-		try await client.registries.login(credentials: &credentials)
+		let password = "P@sSw0rd"
+		var credentials = RegistryAuth(username: "johnsmith", password: password, serverAddress: URL(string: "https://registry.gitlab.com")!)
+		// just verifies that credentials are good, but you *can* skip over this step and just `entoken()` your credentials directly
+		let token = try await client.registries.login(credentials: &credentials, logger: client.logger)
 
-		let tag = UUID().uuidString
-		let image = try await client.images.get("nginx:latest")
-		try await client.images.tag(image.id, repoName: "mbarthelemy/tests", tag: tag)
+		let tag = "29455605-C9F2-4C13-9E79-E8E97A96695C"
+		let image = try await client.images.get("alpine:latest")
+		// if using a non `hub.docker.com` repo, the name needs to include the service as seen here
+		try await client.images.tag(image.id, repoName: "registry.gitlab.com/johnsmith/tests", tag: tag)
 
-		try await client.images.push("mbarthelemy/tests", tag: tag, credentials: credentials)
+		try await client.images.push("registry.gitlab.com/johnsmith/tests", tag: tag, token: token)
 	}
 
 	func testListImage() async throws {

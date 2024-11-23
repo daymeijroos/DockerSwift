@@ -18,7 +18,12 @@ struct RegistryLoginEndpoint: SimpleEndpoint {
 	}
 	
 	struct RegistryLoginResponse: Codable {
-		let Status: String
-		let IdentityToken: String?
+		let status: String
+		let identityToken: String?
+
+		enum CodingKeys: String, CodingKey {
+			case status = "Status"
+			case identityToken = "IdentityToken"
+		}
 	}
 }

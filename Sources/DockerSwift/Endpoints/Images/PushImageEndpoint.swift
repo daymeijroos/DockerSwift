@@ -14,20 +14,20 @@ struct PushImageEndpoint: SimpleEndpoint {
 
 	let nameOrId: String
 	let tag: String?
-	let credentials: RegistryAuth?
-	
+	let token: RegistryAuth.Token?
+
 	var path: String {
 		"images/\(nameOrId)/push"
 	}
 	
 	var headers: HTTPHeaders? = nil
 	
-	init(nameOrId: String, tag: String? = nil, credentials: RegistryAuth?) {
+	init(nameOrId: String, tag: String? = nil, token: RegistryAuth.Token?) {
 		self.nameOrId = nameOrId
 		self.tag = tag
-		self.credentials = credentials
-		if let credentials = credentials, let token = credentials.token {
-			self.headers = .init([("X-Registry-Auth", token)])
+		self.token = token
+		if let token {
+			self.headers = .init([("X-Registry-Auth", token.rawValue)])
 		}
 	}
 }
