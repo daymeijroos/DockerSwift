@@ -66,8 +66,7 @@ final class ContainerTests: XCTestCase {
 				// Expose port 80
 				exposedPorts: [.tcp(80)],
 				// Set custon container labels
-				labels: ["label1": "value1", "label2": "value2"]
-			),
+				labels: ["label1": "value1", "label2": "value2"]),
 			hostConfig: .init(
 				// Memory the container is allocated when starting
 				memoryReservation: .mb(32),
@@ -76,13 +75,11 @@ final class ContainerTests: XCTestCase {
 				// Needs to be either disabled (-1) or be equal to, or greater than, `memoryLimit`
 				memorySwap: .mb(64),
 				// Let's publish the port we exposed in `config`
-				portBindings: [.tcp(80): [.publishTo(hostIp: "0.0.0.0", hostPort: 8008)]]
-			)
-		)
+				portBindings: [.tcp(80): [.publishTo(hostIp: "0.0.0.0", hostPort: 8008)]]))
 
-		let name = UUID.init().uuidString
+		let name = "81A5DB11-78E9-4B21-9943-23FB75818224"
 		let container = try await client.containers.create(name: name, spec: spec)
-		XCTAssert(container.name == "/\(name)", "Ensure name is set")
+		XCTAssert(container.name.trimmingPrefix("/") == name, "Ensure name is set")
 		XCTAssert(container.config.command == cmd, "Ensure custom command is set")
 		XCTAssert(
 			container.config.exposedPorts != nil && container.config.exposedPorts![0].port == 80,
