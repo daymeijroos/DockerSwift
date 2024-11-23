@@ -7,7 +7,6 @@ final class ImageTests: XCTestCase {
 	var client: DockerClient!
 
 	override func setUp() async throws {
-		//        client = DockerClient.testable()
 		client = DockerClient.forTesting()
 		if (try? await client.images.get("nginx:latest")) == nil {
 			_ = try await client.images.pull(byName: "nginx", tag: "latest")
@@ -153,9 +152,6 @@ final class ImageTests: XCTestCase {
 		)
 		try await client.containers.start(container.id)
 		let image = try await client.images.createFromContainer(container.id, repo: "test-commit", tag: "latest")
-		addTeardownBlock { [client] in
-			try await client?.images.remove(image.id)
-		}
 		let repoTags = try XCTUnwrap(image.repoTags)
 		XCTAssertTrue(repoTags.contains(where: { $0.contains("test-commit:latest") }), "Ensure image has custom repo and tag")
 	}
