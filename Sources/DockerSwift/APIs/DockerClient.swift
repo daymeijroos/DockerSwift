@@ -20,7 +20,7 @@ public class DockerClient {
 	internal let client: HTTPClient
 	internal let logger: Logger
 
-	package let isTesting: Bool
+	package let testMode: TestMode
 
 	public private(set) var state: State = .uninitialized
 
@@ -47,7 +47,7 @@ public class DockerClient {
 			clientThreads: clientThreads,
 			timeout: timeout,
 			proxy: proxy,
-			forTesting: false)
+			testMode: .live)
 	}
 
 	package static func forTesting(
@@ -55,7 +55,8 @@ public class DockerClient {
 		tlsConfig: TLSConfiguration? = nil,
 		clientThreads: Int = 2,
 		timeout: HTTPClient.Configuration.Timeout = .init(),
-		proxy: HTTPClient.Configuration.Proxy? = nil
+		proxy: HTTPClient.Configuration.Proxy? = nil,
+		useLiveSocket: Bool = false
 	) -> DockerClient {
 		var logger = Logger(label: "🪵docker-client-tests")
 		logger.logLevel = .debug
@@ -67,7 +68,7 @@ public class DockerClient {
 			clientThreads: clientThreads,
 			timeout: timeout,
 			proxy: proxy,
-			forTesting: true)
+			testMode: .testing(useMocks: !useLiveSocket))
 	}
 
 	private init(
@@ -77,7 +78,7 @@ public class DockerClient {
 		clientThreads: Int = 2,
 		timeout: HTTPClient.Configuration.Timeout = .init(),
 		proxy: HTTPClient.Configuration.Proxy? = nil,
-		forTesting: Bool
+		testMode: TestMode
 	) {
 		self.daemonURL = daemonURL
 		self.tlsConfig = tlsConfig
@@ -93,7 +94,7 @@ public class DockerClient {
 		)
 		self.client = httpClient
 		self.logger = logger
-		self.isTesting = forTesting
+		self.testMode = testMode
 
 		let decoder = JSONDecoder()
 		self.decoder = decoder
@@ -246,14 +247,15 @@ public class DockerClient {
 		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
 			try await initialize()
 		}
-		logger.debug("\(Self.self) execute Endpoint: \(endpoint.method) \(endpoint.path)")
 		var finalHeaders: HTTPHeaders = self.headers
 		if let additionalHeaders = endpoint.headers {
 			finalHeaders.add(contentsOf: additionalHeaders)
 		}
-		if logger.logLevel <= .debug {
-			// printing to avoid the logging prefix, making for an easier copy/pasta
-			try print("💻\n\(genCurlCommand(endpoint))\n")
+		defer {
+			if logger.logLevel <= .debug {
+				// printing to avoid the logging prefix, making for an easier copy/pasta
+				try? print("💻⭐️\n\(genCurlCommand(endpoint))\n")
+			}
 		}
 
 		let request = try HTTPClientRequest(
@@ -274,9 +276,18 @@ public class DockerClient {
 			return try decoder.decode(T.Response.self, from: buffer)
 		}
 
-		if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-			let buffer = try await mockEndpoint.mockedResponse(request)
-			return try decodeOut(buffer)
+		if case .testing(useMocks: let useMocks) = testMode{
+			if useMocks {
+				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+					let buffer = try await mockEndpoint.mockedResponse(request)
+					return try decodeOut(buffer)
+				} else {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+				}
+			} else {
+				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
+			}
 		}
 
 		let response = try await client.execute(request, timeout: .minutes(2))
@@ -302,10 +313,11 @@ public class DockerClient {
 		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
 			try await initialize()
 		}
-		logger.debug("\(Self.self) execute PipelineEndpoint: \(endpoint.method) \(endpoint.path)")
-		if logger.logLevel <= .debug {
-			// printing to avoid the logging prefix, making for an easier copy/pasta
-			try print("💻\n\(genCurlCommand(endpoint))\n")
+		defer {
+			if logger.logLevel <= .debug {
+				// printing to avoid the logging prefix, making for an easier copy/pasta
+				try? print("💻⭐️\n\(genCurlCommand(endpoint))\n")
+			}
 		}
 
 		let request = try HTTPClientRequest(
@@ -325,9 +337,18 @@ public class DockerClient {
 			return try endpoint.map(data: bufferString)
 		}
 
-		if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-			let buffer = try await mockEndpoint.mockedResponse(request)
-			return try decodeOut(buffer)
+		if case .testing(useMocks: let useMocks) = testMode{
+			if useMocks {
+				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+					let buffer = try await mockEndpoint.mockedResponse(request)
+					return try decodeOut(buffer)
+				} else {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+				}
+			} else {
+				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
+			}
 		}
 
 		let response = try await client.execute(request, timeout: .minutes(2))
@@ -348,10 +369,11 @@ public class DockerClient {
 		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
 			try await initialize()
 		}
-		logger.debug("\(Self.self) execute StreamingEndpoint: \(endpoint.method) \(endpoint.path)")
-		if logger.logLevel <= .debug {
-			// printing to avoid the logging prefix, making for an easier copy/pasta
-			try print("💻\n\(genCurlCommand(endpoint))\n")
+		defer {
+			if logger.logLevel <= .debug {
+				// printing to avoid the logging prefix, making for an easier copy/pasta
+				try? print("💻⭐️\n\(genCurlCommand(endpoint))\n")
+			}
 		}
 
 		let request = try HTTPClientRequest(
@@ -362,9 +384,17 @@ public class DockerClient {
 			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
 			headers: headers)
 
-		if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-			let stream = try await mockEndpoint.mockedStreamingResponse(request)
-			return stream
+		if case .testing(useMocks: let useMocks) = testMode{
+			if useMocks {
+				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+					return try await mockEndpoint.mockedStreamingResponse(request)
+				} else {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+				}
+			} else {
+				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
+			}
 		}
 
 		let stream = try await client.executeStream(request: request, timeout: timeout, logger: logger)
@@ -376,10 +406,11 @@ public class DockerClient {
 		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
 			try await initialize()
 		}
-		logger.debug("\(Self.self) execute \(T.self): \(endpoint.path)")
-		if logger.logLevel <= .debug {
-			// printing to avoid the logging prefix, making for an easier copy/pasta
-			try print("💻\n\(genCurlCommand(endpoint))\n")
+		defer {
+			if logger.logLevel <= .debug {
+				// printing to avoid the logging prefix, making for an easier copy/pasta
+				try? print("💻⭐️\n\(genCurlCommand(endpoint))\n")
+			}
 		}
 
 		let request = HTTPClientRequest(
@@ -390,11 +421,25 @@ public class DockerClient {
 			body: endpoint.body.map { HTTPClientRequest.Body.bytes($0) },
 			headers: headers)
 
-		if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-			let stream = try await mockEndpoint.mockedStreamingResponse(request)
-			return stream
+
+		if case .testing(useMocks: let useMocks) = testMode{
+			if useMocks {
+				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+					return try await mockEndpoint.mockedStreamingResponse(request)
+				} else {
+					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+				}
+			} else {
+				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
+			}
 		}
 
 		return try await client.executeStream(request: request, timeout: timeout, logger: logger)
+	}
+
+	package enum TestMode {
+		case live
+		case testing(useMocks: Bool)
 	}
 }
