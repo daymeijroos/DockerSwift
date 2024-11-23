@@ -1,0 +1,39 @@
+{
+  "configurations" : [
+    {
+      "id" : "0CA31F77-F3BF-4B91-BB40-0BACA67A06F9",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "DockerSwift",
+          "name" : "DockerSwift"
+        }
+      ]
+    },
+    "environmentVariableEntries" : [
+      {
+        "enabled" : false,
+        "key" : "DOCKER_HOST",
+        "value" : "\/var\/run\/docker.sock"
+      }
+    ]
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "DockerSwiftTests",
+        "name" : "DockerSwiftTests"
+      }
+    }
+  ],
+  "version" : 1
+}
