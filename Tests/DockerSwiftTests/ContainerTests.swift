@@ -117,15 +117,9 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testListContainers() async throws {
-		let container = try await client.containers.create(
-			spec: .init(config: .init(image: "hello-world:latest"))
-		)
-
 		let containers = try await client.containers.list(all: true)
 		XCTAssert(containers.count >= 1)
 		XCTAssert(containers.first!.createdAt > Date.distantPast)
-
-		try await client.containers.remove(container.id)
 	}
 
 	func testInspectContainer() async throws {
