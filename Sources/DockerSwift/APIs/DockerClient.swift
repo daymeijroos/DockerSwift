@@ -157,87 +157,6 @@ public class DockerClient {
 		try await client.shutdown()
 	}
 
-	func genCurlCommand<E: SimpleEndpoint>(_ endpoint: E) throws -> String {
-		try genCurlCommand(
-			method: endpoint.method,
-			path: endpoint.path,
-			queryItems: endpoint.queryArugments,
-			headers: endpoint.headers,
-			body: endpoint.body)
-	}
-
-	func genCurlCommand<E: StreamingEndpoint>(_ endpoint: E) throws -> String {
-		try genCurlCommand(
-			method: endpoint.method,
-			path: endpoint.path,
-			queryItems: endpoint.queryArugments,
-			headers: nil,
-			body: endpoint.body)
-	}
-
-	func genCurlCommand<E: UploadEndpoint>(_ endpoint: E) throws -> String {
-		try genCurlCommand(
-			method: endpoint.method,
-			path: endpoint.path,
-			queryItems: endpoint.queryArugments,
-			headers: nil,
-			body: endpoint.body)
-	}
-
-	private func genCurlCommand<Body: Codable>(
-		method: HTTPMethod,
-		path: String,
-		queryItems: [URLQueryItem],
-		headers: HTTPHeaders?,
-		body: Body?
-	) throws -> String {
-		var finalHeaders: HTTPHeaders = self.headers
-		if let additionalHeaders = headers {
-			finalHeaders.add(contentsOf: additionalHeaders)
-		}
-
-		let curlHeaders: String? = {
-			let headers = finalHeaders
-				.map { "-H \"\($0.name): \($0.value)\"" }
-				.joined(separator: " ")
-			guard headers.isEmpty == false else {
-				return nil
-			}
-			return headers
-		}()
-		let curlBody: String? = try {
-			if let body = body {
-				let data = String(decoding: try body.encode(), as: UTF8.self)
-					.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-				return "-d \"\(data)\""
-			} else {
-				return nil
-			}
-		}()
-		let url = {
-			var new = URL(string: "http://localhost/")!
-				.appending(component: "\(apiVersion)")
-				.appending(path: path)
-			if queryItems.isEmpty == false {
-				new
-				.append(queryItems: queryItems)
-			}
-			return new
-		}()
-		let curlUnixSocket = "${DOCKER_HOST}"
-		let curlCommand = """
-			curl \
-			--unix-socket "\(curlUnixSocket)" \
-			"\(url.absoluteString)" \
-			-X \(method.rawValue)
-			"""
-
-		let final = [curlCommand, curlHeaders, curlBody]
-			.compactMap(\.self)
-			.joined(separator: " ")
-		return final
-	}
-
 	/// Executes a request to a specific endpoint. The `Endpoint` struct provides all necessary data and parameters for the request.
 	/// - Parameter endpoint: `Endpoint` instance with all necessary data and parameters.
 	/// - Throws: It can throw an error when encoding the body of the `Endpoint` request to JSON.
@@ -441,5 +360,89 @@ public class DockerClient {
 	package enum TestMode {
 		case live
 		case testing(useMocks: Bool)
+	}
+}
+
+// MARK: - Curl Command
+extension DockerClient {
+	func genCurlCommand<E: SimpleEndpoint>(_ endpoint: E) throws -> String {
+		try genCurlCommand(
+			method: endpoint.method,
+			path: endpoint.path,
+			queryItems: endpoint.queryArugments,
+			headers: endpoint.headers,
+			body: endpoint.body)
+	}
+
+	func genCurlCommand<E: StreamingEndpoint>(_ endpoint: E) throws -> String {
+		try genCurlCommand(
+			method: endpoint.method,
+			path: endpoint.path,
+			queryItems: endpoint.queryArugments,
+			headers: nil,
+			body: endpoint.body)
+	}
+
+	func genCurlCommand<E: UploadEndpoint>(_ endpoint: E) throws -> String {
+		try genCurlCommand(
+			method: endpoint.method,
+			path: endpoint.path,
+			queryItems: endpoint.queryArugments,
+			headers: nil,
+			body: endpoint.body)
+	}
+
+	private func genCurlCommand<Body: Codable>(
+		method: HTTPMethod,
+		path: String,
+		queryItems: [URLQueryItem],
+		headers: HTTPHeaders?,
+		body: Body?
+	) throws -> String {
+		var finalHeaders: HTTPHeaders = self.headers
+		if let additionalHeaders = headers {
+			finalHeaders.add(contentsOf: additionalHeaders)
+		}
+
+		let curlHeaders: String? = {
+			let headers = finalHeaders
+				.map { "-H \"\($0.name): \($0.value)\"" }
+				.joined(separator: " ")
+			guard headers.isEmpty == false else {
+				return nil
+			}
+			return headers
+		}()
+		let curlBody: String? = try {
+			if let body = body {
+				let data = String(decoding: try body.encode(), as: UTF8.self)
+					.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+				return "-d \"\(data)\""
+			} else {
+				return nil
+			}
+		}()
+		let url = {
+			var new = URL(string: "http://localhost/")!
+				.appending(component: "\(apiVersion)")
+				.appending(path: path)
+			if queryItems.isEmpty == false {
+				new
+				.append(queryItems: queryItems)
+			}
+			return new
+		}()
+		let curlUnixSocket = "${DOCKER_HOST}"
+		let curlCommand = """
+			curl \
+			--unix-socket "\(curlUnixSocket)" \
+			"\(url.absoluteString)" \
+			-X \(method.rawValue)
+			"""
+
+		let final = [curlCommand, curlHeaders, curlBody]
+			.compactMap(\.self)
+			.joined(separator: " ")
+		return final
 	}
 }
