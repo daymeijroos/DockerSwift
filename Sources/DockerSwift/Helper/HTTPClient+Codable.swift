@@ -53,7 +53,7 @@ extension EventLoopFuture where Value == HTTPClient.Response {
 	///     - decoder: The decoder used to decode the reponse body.  Defaults to JSONDecoder.
 	/// - returns: A future decoded type.
 	/// - throws: BodyError.noBodyData when no body is found in reponse.
-	public func decode<T : Decodable>(as type: T.Type, decoder: Decoder = JSONDecoder()) -> EventLoopFuture<T> {
+	public func decode<T: Decodable>(as type: T.Type, decoder: AnyDecoder = JSONDecoder()) -> EventLoopFuture<T> {
 		flatMapThrowing { response -> T in
 			try response.checkStatusCode()
 			if T.self == NoBody.self || T.self == NoBody?.self {
@@ -89,7 +89,7 @@ extension EventLoopFuture where Value == HTTPClient.Response {
 	///     - type: The type to decode.  Must conform to Decoable.
 	///     - decoder: The decoder used to decode the reponse body.  Defaults to JSONDecoder.
 	/// - returns: A future optional decoded type.  The future value will be nil when no body is present in the response.
-	public func decode<T : Decodable>(as type: T.Type, decoder: Decoder = JSONDecoder()) -> EventLoopFuture<T?> {
+	public func decode<T: Decodable>(as type: T.Type, decoder: AnyDecoder = JSONDecoder()) -> EventLoopFuture<T?> {
 		flatMapThrowing { response -> T? in
 			try response.checkStatusCode()
 			guard let bodyData = response.bodyData else {
@@ -136,8 +136,8 @@ extension HTTPClient.Response {
 	
 }
 
-public protocol Decoder {
+public protocol AnyDecoder {
 	func decode<T>(_ type: T.Type, from: Data) throws -> T where T : Decodable
 }
 
-extension JSONDecoder : Decoder {}
+extension JSONDecoder: AnyDecoder {}
