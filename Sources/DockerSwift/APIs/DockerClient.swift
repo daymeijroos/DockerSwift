@@ -23,6 +23,8 @@ public class DockerClient {
 	package let testMode: TestMode
 
 	public private(set) var state: State = .uninitialized
+	@MainActor
+	private var stateRetrievalTask: Task<HostInfo, Error>?
 
 	/// Initialize the `DockerClient`.
 	/// - Parameters:
@@ -106,7 +108,7 @@ public class DockerClient {
 
 	@MainActor
 	private func _initialize() -> Task<HostInfo, Error> {
-		if let existing = State.stateRetrievalTask {
+		if let existing = stateRetrievalTask {
 			return existing
 		} else {
 			let newTask = Task {
@@ -138,7 +140,7 @@ public class DockerClient {
 
 				return info
 			}
-			State.stateRetrievalTask = newTask
+			stateRetrievalTask = newTask
 			return newTask
 		}
 	}

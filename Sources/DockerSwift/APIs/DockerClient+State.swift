@@ -1,7 +1,5 @@
 public extension DockerClient {
 	enum State {
-		@MainActor
-		internal static var stateRetrievalTask: Task<HostInfo, Error>?
 		case uninitialized
 		case initialized(HostInfo)
 
