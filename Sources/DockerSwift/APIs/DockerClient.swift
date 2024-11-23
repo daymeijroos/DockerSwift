@@ -419,7 +419,8 @@ extension DockerClient {
 			if let body = body {
 				let data = String(decoding: try body.encode(), as: UTF8.self)
 					.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-				return "-d \"\(data)\""
+					.replacingOccurrences(of: "'", with: "\'")
+				return "-d '\(data)'"
 			} else {
 				return nil
 			}
