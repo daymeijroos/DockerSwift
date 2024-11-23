@@ -5,16 +5,19 @@ struct CommitContainerEndpoint: SimpleEndpoint {
 	typealias Response = CommitContainerResponse
 	typealias Body = ContainerConfig?
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "container", value: nameOrId),
+			repo.map { URLQueryItem(name: "repo", value: $0.description) },
+			tag.map { URLQueryItem(name: "tag", value: $0) },
+			comment.map { URLQueryItem(name: "comment", value: $0) },
+			URLQueryItem(name: "pause", value: pause.description),
+		]
+			.compactMap(\.self)
+	}
+
 	var path: String {
-		"""
-		commit\
-		?container=\(nameOrId)\
-		\(repo != nil    ? "&repo=\(repo!)" : "")\
-		\(tag != nil     ? "&tag=\(tag!)" : "")\
-		\(comment != nil ? "&comment=\(comment!)" : "")\
-		&pause=\(pause)
-		"""
+		"commit"
 	}
 	var body: ContainerConfig?
 	

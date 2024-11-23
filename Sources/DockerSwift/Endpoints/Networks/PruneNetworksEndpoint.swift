@@ -3,18 +3,16 @@ import Foundation
 
 struct PruneNetworksEndpoint: SimpleEndpoint {
 	var body: Body?
-	
+
 	typealias Response = PrunedNetworks
 	typealias Body = NoBody
 	var method: HTTPMethod = .POST
-	
-	init() {}
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	var path: String {
 		"networks/prune"
 	}
-	
-	
+
 	struct PrunedNetworks: Codable {
 		let NetworksDeleted: [String]
 	}

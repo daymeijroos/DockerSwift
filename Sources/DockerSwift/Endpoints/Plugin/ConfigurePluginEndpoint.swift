@@ -1,10 +1,12 @@
 import NIOHTTP1
+import Foundation
 
 struct ConfigurePluginEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = [String]
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	var path: String {
 		"plugins/\(name)/set"
 	}

@@ -16,7 +16,9 @@ struct BuildEndpoint: UploadEndpoint {
 	// Decode build output message
 	private let decoder = JSONDecoder()
 
-	var path: String {
+	var path: String { "build" }
+
+	var queryArugments: [URLQueryItem] {
 		let cacheFrom = try? encoder.encode(buildConfig.cacheFrom)
 		let buildArgs = {
 			let args = try? encoder.encode(buildConfig.buildArgs)
@@ -26,8 +28,6 @@ struct BuildEndpoint: UploadEndpoint {
 			let value = try? encoder.encode(buildConfig.labels)
 			return value.map { String(decoding: $0, as: UTF8.self) }
 		}()
-
-		var queryBuilder = URL(filePath: "build")
 
 		let queryItems: [URLQueryItem?] = [
 			URLQueryItem(name: "dockerfile", value: "\(buildConfig.dockerfile)"),
@@ -55,12 +55,7 @@ struct BuildEndpoint: UploadEndpoint {
 			labels.map { URLQueryItem(name: "labels", value: $0) },
 		]
 
-		queryBuilder.append(queryItems: queryItems.compactMap(\.self))
-		queryBuilder.append(queryItems: buildConfig.repoTags?.map { URLQueryItem(name: "t", value: $0) } ?? [])
-
-		return ["build", queryBuilder.query(percentEncoded: true)]
-			.compactMap(\.self)
-			.joined(separator: "?")
+		return queryItems.compactMap(\.self) + (buildConfig.repoTags?.map { URLQueryItem(name: "t", value: $0) } ?? [])
 	}
 
 	init(buildConfig: BuildConfig, context: ByteBuffer) {

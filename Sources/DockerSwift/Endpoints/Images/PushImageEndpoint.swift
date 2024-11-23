@@ -5,13 +5,19 @@ struct PushImageEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = NoBody
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			tag.map { URLQueryItem(name: "tag", value: $0) }
+		]
+			.compactMap(\.self)
+	}
+
 	let nameOrId: String
 	let tag: String?
 	let credentials: RegistryAuth?
 	
 	var path: String {
-		"images/\(nameOrId)/push\(tag != nil ? "?tag=\(tag!)" : "")"
+		"images/\(nameOrId)/push"
 	}
 	
 	var headers: HTTPHeaders? = nil

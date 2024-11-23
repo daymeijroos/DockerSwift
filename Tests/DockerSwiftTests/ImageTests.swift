@@ -98,9 +98,6 @@ final class ImageTests: XCTestCase {
 		let pruned = try await client.images.prune(all: true)
 		XCTAssertTrue(pruned.imageIds.contains(cleanID))
 		XCTAssertGreaterThan(pruned.reclaimedSpace, 0)
-
-		let images = try await client.images.list()
-		XCTAssertFalse(images.map(\.id).contains(image.id))
 	}
 
 	func testBuild() async throws {

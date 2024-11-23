@@ -5,7 +5,8 @@ struct WaitContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = ContainerWaitResponse
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	let nameOrId: String
 	
 	init(nameOrId: String) {

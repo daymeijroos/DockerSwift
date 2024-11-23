@@ -1,4 +1,5 @@
 import NIOHTTP1
+import Foundation
 
 struct UpdateContainerEndpoint: SimpleEndpoint {
 	var body: ContainerUpdate?
@@ -6,7 +7,8 @@ struct UpdateContainerEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = ContainerUpdate
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	private let nameOrId: String
 	
 	init(nameOrId: String, spec: ContainerUpdate) {

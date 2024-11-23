@@ -1,4 +1,5 @@
 import NIOHTTP1
+import Foundation
 
 struct CreateConfigEndpoint: SimpleEndpoint {
 	var body: Body?
@@ -6,7 +7,9 @@ struct CreateConfigEndpoint: SimpleEndpoint {
 	typealias Response = CreateConfigResponse
 	typealias Body = ConfigSpec
 	var method: HTTPMethod = .POST
-	
+
+	var queryArugments: [URLQueryItem] { [] }
+
 	init(spec: ConfigSpec) {
 		self.body = spec
 	}

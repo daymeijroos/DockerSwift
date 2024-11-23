@@ -1,11 +1,13 @@
 import NIOHTTP1
+import Foundation
 
 struct DisconnectContainerEndpoint: SimpleEndpoint {
 	typealias Body = DisconnectContainerRequest
 	
 	typealias Response = NoBody?
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	private let nameOrId: String
 	
 	var body: Body?

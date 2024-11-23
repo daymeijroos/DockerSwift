@@ -5,7 +5,8 @@ struct InspectTaskEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = SwarmTask
 	var method: HTTPMethod = .GET
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	private let id: String
 	
 	init(id: String) {

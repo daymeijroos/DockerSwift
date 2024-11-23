@@ -1,4 +1,5 @@
 import NIO
+import Foundation
 import NIOHTTP1
 
 struct RemoveContainerEndpoint: SimpleEndpoint {
@@ -6,7 +7,13 @@ struct RemoveContainerEndpoint: SimpleEndpoint {
 	
 	typealias Response = NoBody?
 	var method: HTTPMethod = .DELETE
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "force", value: force.description),
+			URLQueryItem(name: "v", value: removeAnonymousVolumes.description)
+		]
+	}
+
 	private let containerId: String
 	private let force: Bool
 	private let removeAnonymousVolumes: Bool
@@ -18,6 +25,6 @@ struct RemoveContainerEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"containers/\(containerId)?force=\(force)&v=\(removeAnonymousVolumes)"
+		"containers/\(containerId)"
 	}
 }

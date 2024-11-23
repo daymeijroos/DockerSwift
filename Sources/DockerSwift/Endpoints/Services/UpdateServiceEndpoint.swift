@@ -1,4 +1,5 @@
 import NIOHTTP1
+import Foundation
 
 struct UpdateServiceEndpoint: SimpleEndpoint {
 	var body: Body?
@@ -6,13 +7,17 @@ struct UpdateServiceEndpoint: SimpleEndpoint {
 	typealias Response = NoBody?
 	typealias Body = ServiceSpec?
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "version", value: version.description),
+			URLQueryItem(name: "rollback", value: rollback ? "previous" : nil),
+		]
+	}
+
 	private let nameOrId: String
 	private let version: UInt64
 	private let rollback: Bool
 
-	
-	
 	init(nameOrId: String, version: UInt64, spec: ServiceSpec?, rollback: Bool) {
 		self.nameOrId = nameOrId
 		self.body = spec

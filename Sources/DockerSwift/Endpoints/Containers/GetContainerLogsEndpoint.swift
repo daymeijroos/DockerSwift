@@ -5,9 +5,20 @@ import Foundation
 class GetContainerLogsEndpoint: StreamingEndpoint {
 	typealias Body = NoBody
 	typealias Response = AsyncThrowingStream<ByteBuffer, Error>
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "stdout", value: stdout.description),
+			URLQueryItem(name: "stderr", value: stderr.description),
+			URLQueryItem(name: "follow", value: follow.description),
+			URLQueryItem(name: "tail", value: tail),
+			URLQueryItem(name: "timestamps", value: timestamps.description),
+			URLQueryItem(name: "since", value: since.description),
+			URLQueryItem(name: "until", value: until.description),
+		]
+	}
+
 	var method: HTTPMethod = .GET
-	
+
 	private let containerId: String
 	let follow: Bool
 	let tail: String
@@ -18,16 +29,7 @@ class GetContainerLogsEndpoint: StreamingEndpoint {
 	let until: Int64
 	
 	var path: String {
-		"""
-		containers/\(containerId)/logs\
-		?stdout=\(stdout)\
-		&stderr=\(stderr)\
-		&follow=\(follow)\
-		&tail=\(tail)\
-		&timestamps=\(timestamps)\
-		&since=\(since)\
-		&until=\(until)
-		"""
+		"containers/\(containerId)/logs"
 	}
 	
 	static var formatter: DateFormatter {

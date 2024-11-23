@@ -1,10 +1,16 @@
 import NIOHTTP1
+import Foundation
 
 struct UpdateConfigEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = ConfigSpec
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "version", value: version.description)
+		]
+	}
+
 	var body: Body?
 	
 	private let nameOrId: String
@@ -17,6 +23,6 @@ struct UpdateConfigEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"configs/\(nameOrId)/update?version=\(version)"
+		"configs/\(nameOrId)"
 	}    
 }

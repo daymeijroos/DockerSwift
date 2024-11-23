@@ -1,12 +1,20 @@
 import NIOHTTP1
+import Foundation
 
 struct InstallPluginEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = [PluginPrivilege]
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "remote", value: remote),
+			alias.map { URLQueryItem.init(name: "name", value: $0) },
+		]
+			.compactMap(\.self)
+	}
+
 	var path: String {
-		"plugins/pull?remote=\(remote)\(self.alias != nil ? "&name=\(self.alias!)" : "")"
+		"plugins/pull"
 	}
 	var headers: HTTPHeaders? = nil
 	var body: Body?

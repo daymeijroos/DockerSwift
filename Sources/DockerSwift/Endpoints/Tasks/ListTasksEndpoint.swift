@@ -5,9 +5,7 @@ struct ListTasksEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = [SwarmTask]
 	var method: HTTPMethod = .GET
-	
-	init() {
-	}
+	var queryArugments: [URLQueryItem] { [] }
 	
 	var path: String {
 		"tasks"

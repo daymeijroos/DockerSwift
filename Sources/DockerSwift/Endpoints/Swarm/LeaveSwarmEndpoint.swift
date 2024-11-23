@@ -6,9 +6,12 @@ public struct LeaveSwarmEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = NoBody
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "force", value: force.description)]
+	}
+
 	var path: String {
-		"swarm/leave?force=\(force)"
+		"swarm/leave"
 	}
 	
 	private let force: Bool

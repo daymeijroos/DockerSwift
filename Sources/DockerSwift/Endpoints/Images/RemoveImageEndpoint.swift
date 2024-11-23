@@ -1,12 +1,18 @@
 import NIOHTTP1
+import Foundation
 
 struct RemoveImageEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
 	var method: HTTPMethod = .DELETE
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "force", value: force.description)
+		]
+	}
 	var path: String {
-		"images/\(nameOrId)?force=\(force ? "true" : "false")"
+		"images/\(nameOrId)"
 	}
 	
 	private let nameOrId: String

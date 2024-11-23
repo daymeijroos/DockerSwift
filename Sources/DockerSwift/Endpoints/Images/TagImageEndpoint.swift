@@ -9,9 +9,15 @@ struct TagImageEndpoint: SimpleEndpoint {
 	private let nameOrId: String
 	private let repoName: String
 	private let tag: String
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			URLQueryItem(name: "repo", value: repoName),
+			URLQueryItem(name: "tag", value: tag)
+		]
+	}
+
 	var path: String {
-		"images/\(nameOrId)/tag?repo=\(repoName)&tag=\(tag)"
+		"images/\(nameOrId)/tag"
 	}
 	
 	init(nameOrId: String, repoName: String, tag: String) {

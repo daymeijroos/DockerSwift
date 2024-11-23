@@ -8,6 +8,7 @@ protocol Endpoint {
 	associatedtype Body: Codable
 	var path: String { get }
 	var method: HTTPMethod { get }
+	var queryArugments: [URLQueryItem] { get }
 	var headers: HTTPHeaders? {get}
 	var body: Body? { get }
 }
@@ -50,7 +51,8 @@ class JSONStreamingEndpoint<T>: StreamingEndpoint where T: Codable {
 	}
 	
 	private(set) internal var path: String
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	private(set) internal var method: HTTPMethod = .GET
 	
 	typealias Response = AsyncThrowingStream<ByteBuffer, Error>

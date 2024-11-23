@@ -1,11 +1,15 @@
 import NIOHTTP1
+import Foundation
 
 struct KillContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "signal", value: signal.rawValue)]
+	}
+
 	private let containerId: String
 	private let signal: UnixSignal
 	
@@ -15,6 +19,6 @@ struct KillContainerEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"containers/\(containerId)/kill?signal=\(signal.rawValue)"
+		"containers/\(containerId)/kill"
 	}
 }

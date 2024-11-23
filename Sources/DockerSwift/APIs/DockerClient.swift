@@ -157,18 +157,39 @@ public class DockerClient {
 	}
 
 	func genCurlCommand<E: SimpleEndpoint>(_ endpoint: E) throws -> String {
-		try genCurlCommand(method: endpoint.method, path: endpoint.path, headers: endpoint.headers, body: endpoint.body)
+		try genCurlCommand(
+			method: endpoint.method,
+			path: endpoint.path,
+			queryItems: endpoint.queryArugments,
+			headers: endpoint.headers,
+			body: endpoint.body)
 	}
 
 	func genCurlCommand<E: StreamingEndpoint>(_ endpoint: E) throws -> String {
-		try genCurlCommand(method: endpoint.method, path: endpoint.path, headers: nil, body: endpoint.body)
+		try genCurlCommand(
+			method: endpoint.method,
+			path: endpoint.path,
+			queryItems: endpoint.queryArugments,
+			headers: nil,
+			body: endpoint.body)
 	}
 
 	func genCurlCommand<E: UploadEndpoint>(_ endpoint: E) throws -> String {
-		try genCurlCommand(method: endpoint.method, path: endpoint.path, headers: nil, body: endpoint.body)
+		try genCurlCommand(
+			method: endpoint.method,
+			path: endpoint.path,
+			queryItems: endpoint.queryArugments,
+			headers: nil,
+			body: endpoint.body)
 	}
 
-	private func genCurlCommand<Body: Codable>(method: HTTPMethod, path: String, headers: HTTPHeaders?, body: Body?) throws -> String {
+	private func genCurlCommand<Body: Codable>(
+		method: HTTPMethod,
+		path: String,
+		queryItems: [URLQueryItem],
+		headers: HTTPHeaders?,
+		body: Body?
+	) throws -> String {
 		var finalHeaders: HTTPHeaders = self.headers
 		if let additionalHeaders = headers {
 			finalHeaders.add(contentsOf: additionalHeaders)
@@ -192,11 +213,21 @@ public class DockerClient {
 				return nil
 			}
 		}()
+		let url = {
+			var new = URL(string: "http://localhost/")!
+				.appending(component: "\(apiVersion)")
+				.appending(path: path)
+			if queryItems.isEmpty == false {
+				new
+				.append(queryItems: queryItems)
+			}
+			return new
+		}()
 		let curlUnixSocket = "${DOCKER_HOST}"
 		let curlCommand = """
 			curl \
 			--unix-socket "\(curlUnixSocket)" \
-			"http://localhost/\(apiVersion)/\(path)" \
+			"\(url.absoluteString)" \
 			-X \(method.rawValue)
 			"""
 
@@ -228,6 +259,7 @@ public class DockerClient {
 		let request = try HTTPClientRequest(
 			daemonURL: daemonURL,
 			urlPath: "/\(apiVersion)/\(endpoint.path)",
+			queryItems: endpoint.queryArugments,
 			method: endpoint.method,
 			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
 			headers: finalHeaders)
@@ -279,12 +311,13 @@ public class DockerClient {
 		let request = try HTTPClientRequest(
 			daemonURL: daemonURL,
 			urlPath: "/\(apiVersion)/\(endpoint.path)",
+			queryItems: endpoint.queryArugments,
 			method: endpoint.method,
 			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
 			headers: headers)
 
-		if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-			var buffer = try await mockEndpoint.mockedResponse(request)
+		func decodeOut(_ buffer: ByteBuffer) throws -> T.Response {
+			var buffer = buffer
 			guard
 				let bufferString = buffer.readString(length: buffer.readableBytes)
 			else { throw DockerError.corruptedData("Expected a string") }
@@ -292,21 +325,22 @@ public class DockerClient {
 			return try endpoint.map(data: bufferString)
 		}
 
+		if isTesting, let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+			let buffer = try await mockEndpoint.mockedResponse(request)
+			return try decodeOut(buffer)
+		}
+
 		let response = try await client.execute(request, timeout: .minutes(2))
 		let responseBody = response.body
 
-		var buffer = try await responseBody.collect(upTo: .max)
+		let buffer = try await responseBody.collect(upTo: .max)
 
 		if logger.logLevel <= .debug {
 			var debugResponseCopy = buffer
 			logger.debug("Response: \(debugResponseCopy.readString(length: debugResponseCopy.readableBytes) ?? "No Response Data")")
 		}
 
-		guard
-			let bufferString = buffer.readString(length: buffer.readableBytes)
-		else { throw DockerError.corruptedData("Expected a string") }
-
-		return try endpoint.map(data: bufferString)
+		return try decodeOut(buffer)
 	}
 	
 	@discardableResult
@@ -323,6 +357,7 @@ public class DockerClient {
 		let request = try HTTPClientRequest(
 			daemonURL: daemonURL,
 			urlPath: "/\(apiVersion)/\(endpoint.path)",
+			queryItems: endpoint.queryArugments,
 			method: endpoint.method,
 			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
 			headers: headers)
@@ -347,9 +382,10 @@ public class DockerClient {
 			try print("💻\n\(genCurlCommand(endpoint))\n")
 		}
 
-		let request = try HTTPClientRequest(
+		let request = HTTPClientRequest(
 			daemonURL: daemonURL,
 			urlPath: "/\(apiVersion)/\(endpoint.path)",
+			queryItems: endpoint.queryArugments,
 			method: endpoint.method,
 			body: endpoint.body.map { HTTPClientRequest.Body.bytes($0) },
 			headers: headers)

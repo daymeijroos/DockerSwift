@@ -5,7 +5,8 @@ struct ListVolumesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = ListVolumesResponse
 	var method: HTTPMethod = .GET
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	init(filters: ListVolumesFilter? = nil) {}
 	
 	var path: String {

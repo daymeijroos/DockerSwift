@@ -1,11 +1,13 @@
 import NIOHTTP1
+import Foundation
 
 struct StartContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	private let containerId: String
 	
 	init(containerId: String) {

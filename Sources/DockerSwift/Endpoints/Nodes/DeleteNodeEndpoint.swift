@@ -5,7 +5,10 @@ struct DeleteNodeEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = NoBody
 	var method: HTTPMethod = .DELETE
-	
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "force", value: force.description)]
+	}
+
 	let id: String
 	let force: Bool
 	
@@ -15,6 +18,6 @@ struct DeleteNodeEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"nodes/\(id)?force=\(force)"
+		"nodes/\(id)"
 	}
 }

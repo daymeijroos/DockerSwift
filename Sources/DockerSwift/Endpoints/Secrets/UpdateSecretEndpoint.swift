@@ -1,10 +1,14 @@
 import NIOHTTP1
+import Foundation
 
 struct UpdateSecretEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = SecretSpec
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "version", value: version.description)]
+	}
+
 	var body: Body?
 	
 	private let nameOrId: String
@@ -17,6 +21,6 @@ struct UpdateSecretEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"secrets/\(nameOrId)/update?version=\(version)"
+		"secrets/\(nameOrId)/update"
 	}
 }

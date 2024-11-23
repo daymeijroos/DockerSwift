@@ -1,4 +1,5 @@
 import NIOHTTP1
+import Foundation
 
 struct CreateNetworkEndpoint: SimpleEndpoint {
 	var body: Body?
@@ -6,7 +7,8 @@ struct CreateNetworkEndpoint: SimpleEndpoint {
 	typealias Response = CreateNetworkResponse
 	typealias Body = NetworkSpec
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	init(spec: NetworkSpec) {
 		self.body = spec
 	}

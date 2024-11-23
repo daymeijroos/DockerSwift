@@ -7,7 +7,8 @@ public struct JoinSwarmEndpoint: SimpleEndpoint {
 	typealias Body = SwarmJoin
 	typealias Response = NoBody
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	var path: String {
 		"swarm/join"
 	}

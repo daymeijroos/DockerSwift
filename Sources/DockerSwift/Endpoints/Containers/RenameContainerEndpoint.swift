@@ -1,11 +1,15 @@
 import NIOHTTP1
+import Foundation
 
 struct RenameContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "name", value: newName)]
+	}
+
 	private let containerId: String
 	private let newName: String
 	
@@ -15,6 +19,6 @@ struct RenameContainerEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"containers/\(containerId)/rename?name=\(newName)"
+		"containers/\(containerId)/rename"
 	}
 }

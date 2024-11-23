@@ -9,11 +9,14 @@ struct PullImageEndpoint: PipelineEndpoint {
 
 	let imageName: String
 	let credentials: RegistryAuth?
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "fromImage", value: imageName)]
+	}
 
 	let logger: Logger
 
 	var path: String {
-		"images/create?fromImage=\(imageName)"
+		"images/create"
 	}
 
 	var headers: HTTPHeaders? = nil

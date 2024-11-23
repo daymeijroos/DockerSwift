@@ -1,12 +1,16 @@
 import NIOHTTP1
+import Foundation
 
 struct UpgradePluginEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = [PluginPrivilege]
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "remote", value: remote)]
+	}
+
 	var path: String {
-		"plugins/\(name)/upgrade?remote=\(remote)"
+		"plugins/\(name)/upgrade"
 	}
 	var headers: HTTPHeaders? = nil
 	var body: Body?

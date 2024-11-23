@@ -6,13 +6,17 @@ extension HTTPClientRequest {
 	public init(
 		daemonURL: URL,
 		urlPath: String,
+		queryItems: [URLQueryItem],
 		method: HTTPMethod,
 		body: HTTPClientRequest.Body? = nil,
 		headers: HTTPHeaders
-	) throws {
-		guard
-			let newURL = URL(string: daemonURL.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + urlPath)
-		else { throw HTTPClientError.invalidURL }
+	) {
+		var newURL = daemonURL
+			.appending(path: urlPath.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
+		if queryItems.isEmpty == false {
+			newURL
+				.append(queryItems: queryItems)
+		}
 
 		self.init(url: newURL.absoluteString)
 		self.method = method

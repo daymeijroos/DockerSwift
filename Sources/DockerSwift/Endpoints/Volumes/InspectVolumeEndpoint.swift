@@ -5,7 +5,8 @@ struct InspectVolumeEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = Volume
 	var method: HTTPMethod = .GET
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	private let nameOrId: String
 	
 	init(nameOrId: String) {

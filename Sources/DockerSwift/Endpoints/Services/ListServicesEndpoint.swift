@@ -5,11 +5,16 @@ struct ListServicesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = [Service]
 	var method: HTTPMethod = .GET
-	
-	init() {
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "insertDefaults", value: insertDefaults.description)]
+	}
+
+	var insertDefaults: Bool
+	init(insertDefaults: Bool = true) {
+		self.insertDefaults = insertDefaults
 	}
 	
 	var path: String {
-		"services?insertDefaults=true"
+		"services"
 	}
 }

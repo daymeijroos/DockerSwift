@@ -5,12 +5,15 @@ struct ContainerTopEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = ContainerTop
 	var method: HTTPMethod = .GET
-	
+	var queryArugments: [URLQueryItem] {
+		[URLQueryItem(name: "ps_args", value: psArgs)]
+	}
+
 	let nameOrId: String
 	let psArgs: String
 	
 	var path: String {
-		"containers/\(nameOrId)/top?ps_args=\(psArgs)"
+		"containers/\(nameOrId)/"
 	}
 	
 	init(nameOrId: String, psArgs: String) {

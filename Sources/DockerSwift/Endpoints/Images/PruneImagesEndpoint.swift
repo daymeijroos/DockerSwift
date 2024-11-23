@@ -7,6 +7,13 @@ struct PruneImagesEndpoint: SimpleEndpoint {
 	typealias Response = PruneImagesResponse
 	typealias Body = NoBody
 	var method: HTTPMethod = .POST
+	var queryArugments: [URLQueryItem] {
+		let value = ["dangling": ["\(dangling)"]]
+		let json = try! JSONEncoder().encode(value)
+		let jsonString = String(decoding: json, as: UTF8.self)
+
+		return [URLQueryItem(name: "filters", value: jsonString)]
+	}
 
 	private var dangling: Bool
 	
@@ -17,8 +24,7 @@ struct PruneImagesEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"images/prune?filters={\"dangling\": [\"false\"]}"
-			.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+		"images/prune"
 	}
 
 	struct PruneImagesResponse: Codable {

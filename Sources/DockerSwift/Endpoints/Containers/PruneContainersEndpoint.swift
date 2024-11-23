@@ -1,4 +1,5 @@
 import NIOHTTP1
+import Foundation
 
 struct PruneContainersEndpoint: SimpleEndpoint {
 	var body: Body?
@@ -6,6 +7,7 @@ struct PruneContainersEndpoint: SimpleEndpoint {
 	typealias Response = PruneContainersResponse
 	typealias Body = NoBody
 	var method: HTTPMethod = .POST
+	var queryArugments: [URLQueryItem] { [] }
 
 	init() {
 		

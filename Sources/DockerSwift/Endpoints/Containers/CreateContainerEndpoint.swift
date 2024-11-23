@@ -1,4 +1,5 @@
 import NIOHTTP1
+import Foundation
 
 struct SimpleCreateContainerEndpoint: SimpleEndpoint {
 	var body: CreateContainerBody?
@@ -6,7 +7,8 @@ struct SimpleCreateContainerEndpoint: SimpleEndpoint {
 	typealias Response = CreateContainerResponse
 	typealias Body = CreateContainerBody
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] { [] }
+
 	private let imageName: String
 	private let commands: [String]?
 	
@@ -34,7 +36,13 @@ struct CreateContainerEndpoint: SimpleEndpoint {
 	typealias Response = CreateContainerResponse
 	typealias Body = ContainerSpec
 	var method: HTTPMethod = .POST
-	
+	var queryArugments: [URLQueryItem] {
+		[
+			name.map { URLQueryItem(name: "name", value: $0) }
+		]
+			.compactMap(\.self)
+	}
+
 	var body: ContainerSpec?
 	private let name: String?
 	
@@ -44,7 +52,7 @@ struct CreateContainerEndpoint: SimpleEndpoint {
 	}
 	
 	var path: String {
-		"containers/create\(name != nil ? "?name=\(name!)" : "")"
+		"containers/create"
 	}
 
 	struct CreateContainerResponse: Codable {
