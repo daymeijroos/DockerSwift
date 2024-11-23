@@ -45,8 +45,7 @@ final class ContainerTests: XCTestCase {
 			try await Task.sleep(nanoseconds: 1_000_000_000)
 			try await attach.send("uname")
 			try await Task.sleep(nanoseconds: 1_000_000_000)
-		}
-		catch(let error) {
+		} catch(let error) {
 			print("\n••••• BOOM! \(error)")
 			throw error
 		}
