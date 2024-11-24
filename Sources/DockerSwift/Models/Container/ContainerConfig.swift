@@ -29,8 +29,8 @@ public struct ContainerConfig: Codable {
 	public var healthcheck: HealthCheckConfig? = nil
 	
 	/// The hostname to use for the container, as a valid RFC 1123 hostname.
-	public var hostname: String = ""
-	
+	public var hostname: String?
+
 	/// The name (or reference) of the image to use
 	public var image: String
 	
@@ -40,7 +40,9 @@ public struct ContainerConfig: Codable {
 	
 	/// Whether networking is disabled for the container.
 	public var networkDisabled: Bool?
-	
+
+	public var name: String?
+
 	/// `ONBUILD` metadata that were defined in the image's `Dockerfile`
 	public var onBuild: [String]? = nil
 	
@@ -54,11 +56,15 @@ public struct ContainerConfig: Codable {
 	
 	/// Unix signal to stop a container as a string or unsigned integer.
 	public var stopSignal: UnixSignal? = nil
-	
+
+	private var _stopTimeout: Int?
 	/// Timeout to stop a container, in seconds.
 	/// After that, the container will be forcibly killed.
-	public var stopTimeout: UInt? = 10
-	
+	public var stopTimeout: Int {
+		get { _stopTimeout ?? 10 }
+		set { _stopTimeout = newValue }
+	}
+
 	/// Attach standard streams to a TTY, including stdin if it is not closed.
 	public var tty: Bool = false
 	
@@ -70,8 +76,41 @@ public struct ContainerConfig: Codable {
 	
 	/// The working directory for commands to run in.
 	public var workingDir: String? = nil
-	
-	public init(image: String, attachStdin: Bool = false, attachStdout: Bool = true, attachStderr: Bool = true, command: [String]? = nil, domainname: String? = nil, entrypoint: [String]? = nil, environmentVars: [String]? = nil, exposedPorts: [ExposedPortSpec]? = [], healthcheck: ContainerConfig.HealthCheckConfig? = nil, hostname: String = "", labels: [String : String]? = [:], macAddress: String? = nil, networkDisabled: Bool? = nil, onBuild: [String]? = nil, openStdin: Bool = false, shell: [String]? = nil, stdinOnce: Bool = false, stopSignal: UnixSignal? = nil, stopTimeout: UInt? = 10, tty: Bool = false, user: String? = nil, volumes: [String : ContainerConfig.EmptyObject]? = [:], workingDir: String? = nil) {
+
+	public var hostConfig: ContainerHostConfig?
+
+	public init(image: String, command: [String]? = nil, name: String? = nil) {
+		self.init(command: command, image: image, name: name)
+	}
+
+	public init(
+		attachStdin: Bool = false,
+		attachStdout: Bool = true,
+		attachStderr: Bool = true,
+		command: [String]? = nil,
+		domainname: String? = nil,
+		entrypoint: [String]? = nil,
+		environmentVars: [String]? = nil,
+		exposedPorts: [ExposedPortSpec]? = nil,
+		healthcheck: HealthCheckConfig? = nil,
+		hostname: String? = nil,
+		image: String,
+		labels: [String : String]? = nil,
+		macAddress: String? = nil,
+		networkDisabled: Bool? = nil,
+		name: String? = nil,
+		onBuild: [String]? = nil,
+		openStdin: Bool = false,
+		shell: [String]? = nil,
+		stdinOnce: Bool = false,
+		stopSignal: UnixSignal? = nil,
+		stopTimeout: Int = 10,
+		tty: Bool = false,
+		user: String? = nil,
+		volumes: [String : EmptyObject]? = nil,
+		workingDir: String? = nil,
+		hostConfig: ContainerHostConfig? = nil
+	) {
 		self.attachStdin = attachStdin
 		self.attachStdout = attachStdout
 		self.attachStderr = attachStderr
@@ -86,18 +125,20 @@ public struct ContainerConfig: Codable {
 		self.labels = labels
 		self.macAddress = macAddress
 		self.networkDisabled = networkDisabled
+		self.name = name
 		self.onBuild = onBuild
 		self.openStdin = openStdin
 		self.shell = shell
 		self.stdinOnce = stdinOnce
 		self.stopSignal = stopSignal
-		self.stopTimeout = stopTimeout
+		self._stopTimeout = stopTimeout
 		self.tty = tty
 		self.user = user
 		self.volumes = volumes
 		self.workingDir = workingDir
+		self.hostConfig = hostConfig
 	}
-	
+
 	enum CodingKeys: String, CodingKey {
 		case attachStderr = "AttachStderr"
 		case attachStdout = "AttachStdout"
@@ -109,16 +150,18 @@ public struct ContainerConfig: Codable {
 		case exposedPorts = "ExposedPorts"
 		case healthcheck = "Healthcheck"
 		case hostname = "Hostname"
+		case hostConfig = "HostConfig"
 		case image = "Image"
 		case labels = "Labels"
 		case macAddress = "MacAddress"
+		case name = "Name"
 		case networkDisabled = "NetworkDisabled"
 		case onBuild = "OnBuild"
 		case openStdin = "OpenStdin"
 		case shell = "Shell"
 		case stdinOnce = "StdinOnce"
 		case stopSignal = "StopSignal"
-		case stopTimeout = "StopTimeout"
+		case _stopTimeout = "StopTimeout"
 		case tty = "Tty"
 		case user = "User"
 		case volumes = "Volumes"
