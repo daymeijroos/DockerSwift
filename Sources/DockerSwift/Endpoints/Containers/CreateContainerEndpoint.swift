@@ -12,7 +12,7 @@ struct CreateContainerEndpoint: SimpleEndpoint {
 	}
 	var path: String { "containers/create" }
 
-	var body: ContainerConfig?
+	var body: ContainerConfig
 	private let name: String?
 
 	init(name: String? = nil, spec: ContainerConfig) {
