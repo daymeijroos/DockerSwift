@@ -61,14 +61,13 @@ public enum UnixSignal: String, Encodable {
 
 /// This normally shouldn't be needed as Docker is expected to return a Unix signal as a string value, but I need to use Podman and podman returns integer values.
 extension UnixSignal: Decodable {
-	public init(from decoder: Swift.Decoder) throws {
+	public init(from decoder: Decoder) throws {
 		let container = try decoder.singleValueContainer()
 		let rawValue = try container.decode(String.self)
 
 		if let enumValue = UnixSignal.init(rawValue: rawValue) {
 			self = enumValue
-		}
-		else if let intValue = Int(rawValue) {
+		} else if let intValue = Int(rawValue) {
 			self = switch intValue {
 			case 1: .hup
 			case 2: .int

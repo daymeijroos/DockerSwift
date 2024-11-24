@@ -355,7 +355,7 @@ public struct SystemInformation: Codable {
 			}
 		}
 
-		public init(from decoder: any Swift.Decoder) throws {
+		public init(from decoder: any Decoder) throws {
 			let container = try decoder.singleValueContainer()
 			let str = try container.decode(String.self)
 

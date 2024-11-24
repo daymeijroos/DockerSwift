@@ -47,7 +47,7 @@ public struct SecretSpec: Encodable {
 
 extension SecretSpec: Decodable {
 	/// Custom decoding here since Secret Inspect doesn't return the `data field.`
-	public init(from decoder: Swift.Decoder) throws {
+	public init(from decoder: Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 		
 		self.name = try container.decode(String.self, forKey: .name)

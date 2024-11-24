@@ -650,19 +650,19 @@ public struct ContainerHostConfig: Codable {
 		}
 		
 		public func encode(to encoder: Encoder) throws {
-			var container = encoder.container(keyedBy: Self.CodingKeys)
+			var container = encoder.container(keyedBy: CodingKeys.self)
 			try container.encode("\(self.hostPort)", forKey: .hostPort)
 			try container.encode(self.hostIp, forKey: .hostIp)
 		}
 		
-		public init(from decoder: Swift.Decoder) throws {
-			let container = try decoder.container(keyedBy: Self.CodingKeys)
+		public init(from decoder: Decoder) throws {
+			let container = try decoder.container(keyedBy: CodingKeys.self)
 			self.hostIp = try container.decode(String.self, forKey: .hostIp)
 			let portString = try? container.decode(String.self, forKey: .hostPort)
 			guard let port = UInt16(portString ?? "") else {
 				throw DecodingError.typeMismatch(
 					UInt16.self,
-						.init(codingPath: [Self.CodingKeys.hostPort], debugDescription: "Must be parseable as a UInt16 value", underlyingError: nil))
+						.init(codingPath: [CodingKeys.hostPort], debugDescription: "Must be parseable as a UInt16 value", underlyingError: nil))
 				
 			}
 			self.hostPort = port

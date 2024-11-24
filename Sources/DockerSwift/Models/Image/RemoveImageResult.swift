@@ -2,7 +2,7 @@ public enum RemoveImageResult: Codable, Sendable, Hashable {
 	case deleted(String)
 	case untagged(String)
 
-	public init(from decoder: any Swift.Decoder) throws {
+	public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
 		guard
