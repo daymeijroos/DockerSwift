@@ -55,10 +55,7 @@ final class NetworkTests: XCTestCase {
 		let name = UUID().uuidString
 		let image = try await client.images.pull(byIdentifier: "nginx:latest")
 		let network = try await client.networks.create(spec: .init(name: name))
-		var container = try await client.containers.create(
-			name: name,
-			spec: .init(config: .init(image: image.id))
-		)
+		var container = try await client.containers.create(spec: ContainerConfig(image: image.id, name: name))
 		try await client.networks.connect(container: container.id, to: network.id)
 		container = try await client.containers.get(container.id)
 		XCTAssert(container.networkSettings.networks?[network.name] != nil, "Ensure Container is attached to Network")

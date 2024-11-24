@@ -23,14 +23,12 @@ final class ContainerTests: XCTestCase {
 
 	func testAttach() async throws {
 		let _ = try await client.images.pull(byName: "alpine", tag: "latest")
-		let spec = ContainerSpec(
-			config: .init(
-				image: "alpine:latest",
-				attachStdin: true,
-				attachStdout: true,
-				attachStderr: true,
-				openStdin: true
-			)
+		let spec = ContainerConfig(
+			attachStdin: true,
+			attachStdout: true,
+			attachStderr: true,
+			image: "alpine:latest",
+			openStdin: true
 		)
 		let container = try await client.containers.create(spec: spec)
 		let attach = try await client.containers.attach(container: container, stream: true, logs: true)
@@ -55,17 +53,16 @@ final class ContainerTests: XCTestCase {
 
 	func testCreateContainer() async throws {
 		let cmd = ["/custom/command", "--option"]
-		let spec = ContainerSpec(
-			config: .init(
-				image: "hello-world:latest",
-				// Override the default command of the Image
-				command: cmd,
-				// Add new environment variables
-				environmentVars: ["HELLO=hi"],
-				// Expose port 80
-				exposedPorts: [.tcp(80)],
-				// Set custon container labels
-				labels: ["label1": "value1", "label2": "value2"]),
+		let spec = ContainerConfig(
+			// Override the default command of the Image
+			command: cmd,
+			// Add new environment variables
+			environmentVars: ["HELLO=hi"],
+			// Expose port 80
+			exposedPorts: [.tcp(80)],
+			// Set custon container labels
+			image: "hello-world:latest",
+			labels: ["label1": "value1", "label2": "value2"],
 			hostConfig: .init(
 				// Memory the container is allocated when starting
 				memoryReservation: .mb(32),
@@ -96,10 +93,7 @@ final class ContainerTests: XCTestCase {
 
 	func testUpdateContainers() async throws {
 		let name = UUID.init().uuidString
-		let spec = ContainerSpec(
-			config: ContainerConfig(image: "hello-world:latest"),
-			hostConfig: ContainerHostConfig()
-		)
+		let spec = ContainerConfig(image: "hello-world:latest")
 		let container = try await client.containers.create(name: name, spec: spec)
 		try await client.containers.start(container.id)
 
@@ -119,9 +113,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testInspectContainer() async throws {
-		let container = try await client.containers.create(
-			spec: .init(config: .init(image: "hello-world:latest"))
-		)
+		let container = try await client.containers.create(imageID: "hello-world:latest")
 		let inspectedContainer = try await client.containers.get(container.id)
 
 		XCTAssertEqual(inspectedContainer.id, container.id)
@@ -129,12 +121,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testRetrievingLogsNoTty() async throws {
-		let container = try await client.containers.create(
-			name: nil,
-			spec: ContainerSpec(
-				config: ContainerConfig(image: "hello-world:latest", tty: false),
-				hostConfig: .init())
-		)
+		let container = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: false))
 		try await client.containers.start(container.id)
 		try await Task.sleep(nanoseconds: 3_000_000_000)
 
@@ -186,12 +173,7 @@ final class ContainerTests: XCTestCase {
 
 	// Log entries parsing is quite different depending on whether the container has a TTY
 	func testRetrievingLogsTty() async throws {
-		let container = try await client.containers.create(
-			name: nil,
-			spec: ContainerSpec(
-				config: ContainerConfig(image: "hello-world:latest", tty: true),
-				hostConfig: .init())
-		)
+		let container = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: true))
 		try await client.containers.start(container.id)
 
 		var output = ""
@@ -232,9 +214,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testPruneContainers() async throws {
-		let container = try await client.containers.create(
-			spec: .init(config: .init(image: "nginx:latest"))
-		)
+		let container = try await client.containers.create(imageID: "nginx:latest")
 
 		try await client.containers.start(container.id)
 		try await client.containers.stop(container.id)
@@ -248,7 +228,7 @@ final class ContainerTests: XCTestCase {
 
 	func testPauseUnpauseContainers() async throws {
 		let image = try await client.images.pull(byName: "nginx", tag: "latest")
-		let container = try await client.containers.create(image: image)
+		let container = try await client.containers.create(imageID: image.id)
 		try await client.containers.start(container.id)
 
 		try await client.containers.pause(container.id)
@@ -263,9 +243,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testRenameContainer() async throws {
-		let container = try await client.containers.create(
-			spec: .init(config: .init(image: "nginx:latest"))
-		)
+		let container = try await client.containers.create(imageID: "nginx:latest")
 		try await client.containers.start(container.id)
 		try await client.containers.rename(container.id, to: "renamed")
 		let renamed = try await client.containers.get(container.id)
@@ -275,9 +253,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testProcessesContainer() async throws {
-		let container = try await client.containers.create(
-			spec: .init(config: .init(image: "nginx:latest"))
-		)
+		let container = try await client.containers.create(imageID: "nginx:latest")
 		try await client.containers.start(container.id)
 
 		let psInfo = try await client.containers.processes(container.id)
@@ -287,9 +263,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testStatsContainer() async throws {
-		let container = try await client.containers.create(
-			spec: .init(config: .init(image: "nginx:latest"))
-		)
+		let container = try await client.containers.create(imageID: "nginx:latest")
 		try await client.containers.start(container.id)
 		try await Task.sleep(nanoseconds: 1_000_000_000)
 		do {
@@ -305,9 +279,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testWaitContainer() async throws {
-		let container = try await client.containers.create(
-			spec: .init(config: .init(image: "hello-world:latest"))
-		)
+		let container = try await client.containers.create(imageID: "hello-world:latest")
 
 		try await client.containers.start(container.id)
 		let statusCode = try await client.containers.wait(container.id)
