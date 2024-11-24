@@ -30,10 +30,9 @@ extension DockerClient {
 		/// - Parameters:
 		///   - spec: configuration as a `SecretSpec`.
 		/// - Throws: Errors that can occur when executing the request.
-		/// - Returns: Returns the newly created `Secret`.
-		public func create(spec: SecretSpec) async throws -> Secret {
-			let createResponse = try await client.run(CreateSecretEndpoint(spec: spec))
-			return try await client.secrets.get(createResponse.ID)
+		/// - Returns: Returns the newly created `Secret` info object.
+		public func create(spec: SecretSpec) async throws -> CreateSecretEndpoint.Response {
+			try await client.run(CreateSecretEndpoint(spec: spec))
 		}
 		
 		/// Updates a Secret. Currently, only the `labels` field can be updated (Docker limitation)

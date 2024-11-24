@@ -1,10 +1,9 @@
 import NIOHTTP1
 import Foundation
 
-struct CreateSecretEndpoint: SimpleEndpoint {
+public struct CreateSecretEndpoint: SimpleEndpoint {
 	var body: Body?
 	
-	typealias Response = CreateSecretResponse
 	typealias Body = SecretSpec
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
@@ -16,8 +15,12 @@ struct CreateSecretEndpoint: SimpleEndpoint {
 	init(spec: SecretSpec) {
 		self.body = spec
 	}
-	
-	struct CreateSecretResponse: Codable {
-		let ID: String
+
+	public struct Response: Codable {
+		let id: String
+
+		enum CodingKeys: String, CodingKey {
+			case id = "ID"
+		}
 	}
 }

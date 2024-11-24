@@ -63,7 +63,8 @@ final class ServiceTests: XCTestCase {
 	
 	func testCreateServiceWithNetRestartSecretVol() async throws {
 		let name = UUID().uuidString
-		let secret = try await client.secrets.create(spec: .init(name: name, value: "blublublu"))
+		let secretInfo = try await client.secrets.create(spec: .init(name: name, value: "blublublu"))
+		let secret = try await client.secrets.get(secretInfo.id)
 		let spec = ServiceSpec(
 			name: name,
 			taskTemplate: .init(

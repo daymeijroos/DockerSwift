@@ -41,12 +41,13 @@ final class ConfigAndSecretTests: XCTestCase {
 	func testCreateSecret() async throws {
 		let name = UUID().uuidString
 		let secretData = "test secret value".data(using: .utf8)!
-		let secret = try await client.secrets.create(
+		let secretInfo = try await client.secrets.create(
 			spec: .init(
 				name: name,
 				data: secretData
 			)
 		)
+		let secret = try await client.secrets.get(secretInfo.id)
 		XCTAssert(secret.id != "", "Ensure ID is parsed")
 		XCTAssert(secret.spec.name == name, "Ensure name is set")
 
