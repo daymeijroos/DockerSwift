@@ -11,6 +11,23 @@ protocol MockedResponseEndpoint: Endpoint {
 }
 
 extension MockedResponseEndpoint {
+	static var podmanHeaders: HTTPHeaders {
+		[
+			"Api-Version": "1.41",
+			"Server": "Libpod/5.2.3 (linux)",
+			"Libpod-Api-Version": "5.2.3",
+		]
+	}
+
+	static var dockerHeaders: HTTPHeaders {
+		[
+			"Api-Version": "1.47",
+			"Server": "Docker/27.3.1 (linux)",
+			"Docker-Experimental": "false",
+			"Ostype": "linux",
+		]
+	}
+
 	func mockedResponse(_ request: HTTPClientRequest) async throws -> ByteBuffer {
 		guard
 			let first = responseData.first

@@ -25,7 +25,10 @@ let package = Package(
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "WebSocketKit", package: "websocket-kit"),
                 "BetterCodable",
-            ]),
+			],
+			swiftSettings: [
+				.enableUpcomingFeature("BareSlashRegexLiterals"),
+			]),
         .testTarget(
             name: "DockerSwiftTests",
             dependencies: [

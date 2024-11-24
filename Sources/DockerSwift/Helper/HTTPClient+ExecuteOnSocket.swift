@@ -7,7 +7,7 @@ import AsyncHTTPClient
 import Logging
 
 extension HTTPClient {
-	func executeStream(request: HTTPClientRequest, timeout: TimeAmount, logger: Logger) async throws -> AsyncThrowingStream<ByteBuffer, Error> {
+	func executeStream(request: HTTPClientRequest, timeout: TimeAmount, logger: Logger) async throws -> (HTTPHeaders, AsyncThrowingStream<ByteBuffer, Error>) {
 		let response = try await self.execute(request, timeout: timeout, logger: logger)
 		guard
 			(200...299).contains(response.status.code)
@@ -34,6 +34,6 @@ extension HTTPClient {
 			continuation.finish()
 		}
 
-		return stream
+		return (response.headers, stream)
 	}
 }

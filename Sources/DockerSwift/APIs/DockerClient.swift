@@ -23,8 +23,6 @@ public class DockerClient {
 	package let testMode: TestMode
 
 	public private(set) var state: State = .uninitialized
-	@MainActor
-	private var stateRetrievalTask: Task<HostInfo, Error>?
 
 	/// Initialize the `DockerClient`.
 	/// - Parameters:
@@ -102,47 +100,12 @@ public class DockerClient {
 		self.decoder = decoder
 	}
 
-	public func initialize() async throws {
-		_ = try await _initialize().value
-	}
-
 	@MainActor
-	private func _initialize() -> Task<HostInfo, Error> {
-		if let existing = stateRetrievalTask {
-			return existing
-		} else {
-			let newTask = Task {
-				let version = try await version()
+	private func _initialize(with headers: HTTPHeaders) throws {
+		guard case .uninitialized = state else { return }
 
-				let info: HostInfo? = {
-					guard
-						let component = version.components.first(where: { $0.details?.arch != nil }),
-						let details = component.details
-					else { return nil }
-					let isExperimental = details.experimental == "true"
-					let engine = HostInfo.HostEngine(rawValue: component.name)
-					let arch = version.arch
-					let os = version.os
-					let engineVersion = version.version
-
-					return HostInfo(
-						architecture: arch,
-						version: engineVersion,
-						isExperimentalBuild: isExperimental,
-						os: os,
-						engine: engine)
-				}()
-				guard
-					let info
-				else { throw DockerError.message("Failed to retrieve Docker host information.") }
-
-				self.state = .initialized(info)
-
-				return info
-			}
-			stateRetrievalTask = newTask
-			return newTask
-		}
+		let hostInfo = try HostInfo(from: headers)
+		self.state = .initialized(hostInfo)
 	}
 
 	/// The client needs to be shutdown otherwise it can crash on exit.
@@ -165,9 +128,6 @@ public class DockerClient {
 	/// - Returns: Returns the expected result definied by the `Endpoint`.
 	@discardableResult
 	internal func run<T: SimpleEndpoint>(_ endpoint: T) async throws -> T.Response {
-		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
-			try await initialize()
-		}
 		var finalHeaders: HTTPHeaders = self.headers
 		if let additionalHeaders = endpoint.headers {
 			finalHeaders.add(contentsOf: additionalHeaders)
@@ -200,6 +160,7 @@ public class DockerClient {
 		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 					let buffer = try await mockEndpoint.mockedResponse(request)
 					return try decodeOut(buffer)
@@ -213,6 +174,7 @@ public class DockerClient {
 
 		let response = try await client.execute(request, timeout: .minutes(2))
 		let responseBody = response.body
+		try await _initialize(with: response.headers)
 		try response.checkStatusCode()
 
 		let buffer = try await responseBody.collect(upTo: .max)
@@ -231,9 +193,6 @@ public class DockerClient {
 	/// - Returns: Returns the expected result definied and transformed by the `PipelineEndpoint`.
 	@discardableResult
 	internal func run<T: PipelineEndpoint>(_ endpoint: T) async throws -> T.Response {
-		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
-			try await initialize()
-		}
 		defer {
 			if logger.logLevel <= .debug {
 				// printing to avoid the logging prefix, making for an easier copy/pasta
@@ -261,6 +220,7 @@ public class DockerClient {
 		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 					let stream = try await mockEndpoint.mockedStreamingResponse(request)
 					var buff = ByteBuffer()
@@ -278,6 +238,7 @@ public class DockerClient {
 		}
 
 		let response = try await client.execute(request, timeout: .minutes(2))
+		try await _initialize(with: response.headers)
 		let responseBody = response.body
 
 		let buffer = try await responseBody.collect(upTo: .max)
@@ -292,9 +253,6 @@ public class DockerClient {
 	
 	@discardableResult
 	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool, separators: [UInt8]) async throws -> T.Response {
-		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
-			try await initialize()
-		}
 		defer {
 			if logger.logLevel <= .debug {
 				// printing to avoid the logging prefix, making for an easier copy/pasta
@@ -313,6 +271,7 @@ public class DockerClient {
 		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 					return try await mockEndpoint.mockedStreamingResponse(request)
 				} else {
@@ -323,15 +282,13 @@ public class DockerClient {
 			}
 		}
 
-		let stream = try await client.executeStream(request: request, timeout: timeout, logger: logger)
+		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout, logger: logger)
+		try await _initialize(with: headers)
 		return stream
 	}
 	
 	@discardableResult
 	internal func run<T: UploadEndpoint>(_ endpoint: T, timeout: TimeAmount, separators: [UInt8]) async throws -> T.Response {
-		if case .uninitialized = state, type(of: endpoint) != VersionEndpoint.self {
-			try await initialize()
-		}
 		defer {
 			if logger.logLevel <= .debug {
 				// printing to avoid the logging prefix, making for an easier copy/pasta
@@ -351,6 +308,7 @@ public class DockerClient {
 		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 					return try await mockEndpoint.mockedStreamingResponse(request)
 				} else {
@@ -361,7 +319,9 @@ public class DockerClient {
 			}
 		}
 
-		return try await client.executeStream(request: request, timeout: timeout, logger: logger)
+		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout, logger: logger)
+		try await _initialize(with: headers)
+		return stream
 	}
 
 	package enum TestMode {
