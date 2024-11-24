@@ -1,9 +1,8 @@
 import Foundation
 import NIOHTTP1
 
-struct ContainerTopEndpoint: SimpleEndpoint {
+public struct ContainerTopEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
-	typealias Response = ContainerTop
 	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] {
 		[URLQueryItem(name: "ps_args", value: psArgs)]
@@ -20,4 +19,18 @@ struct ContainerTopEndpoint: SimpleEndpoint {
 		self.nameOrId = nameOrId
 		self.psArgs = psArgs
 	}
+
+	public struct Response: Codable {
+		/// The `ps` column titles
+		public let titles: [String]
+
+		/// Processes running in the container, where each item is an array of values corresponding to the titles.
+		public let processes: [[String]]
+
+		enum CodingKeys: String, CodingKey {
+			case titles = "Titles"
+			case processes = "Processes"
+		}
+	}
+
 }
