@@ -2,7 +2,7 @@ import NIOHTTP1
 import Foundation
 import Logging
 
-struct CreateContainerEndpoint: SimpleEndpoint {
+public struct CreateContainerEndpoint: SimpleEndpoint {
 	typealias Body = ContainerConfig
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
@@ -23,8 +23,13 @@ struct CreateContainerEndpoint: SimpleEndpoint {
 		self.logger = logger
 	}
 
-	struct Response: Codable {
-		let Id: String
-		let Warnings: [String]
+	public struct Response: Codable {
+		let id: String
+		let warnings: [String]
+
+		enum CodingKeys: String, CodingKey {
+			case id = "Id"
+			case warnings = "Warnings"
+		}
 	}
 }

@@ -3,7 +3,10 @@
 extension CreateContainerEndpoint: MockedResponseEndpoint {
 	public var responseData: [MockedResponseData] {
 		switch (body.image, body.command) {
-		case ("hello-world:latest", nil), ("nginx:latest", nil):
+		case
+			("hello-world:latest", nil),
+			("nginx:latest", nil),
+			("hello-world:latest", ["/custom/command", "--option"]):
 			return [
 				.string(#"{"Id":"ce25040926ba103e72dd4070db9a07c4510291a3a3475b0cb175dd06dddfbc93","Warnings":[]}"#)
 			]

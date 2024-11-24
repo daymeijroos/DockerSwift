@@ -30,7 +30,8 @@ final class ContainerTests: XCTestCase {
 			image: "alpine:latest",
 			openStdin: true
 		)
-		let container = try await client.containers.create(spec: spec)
+		let containerInfo = try await client.containers.create(spec: spec)
+		let container = try await client.containers.get(containerInfo.id)
 		let attach = try await client.containers.attach(container: container, stream: true, logs: true)
 		do {
 			Task {
@@ -74,7 +75,8 @@ final class ContainerTests: XCTestCase {
 				portBindings: [.tcp(80): [.publishTo(hostIp: "0.0.0.0", hostPort: 8008)]]))
 
 		let name = "81A5DB11-78E9-4B21-9943-23FB75818224"
-		let container = try await client.containers.create(name: name, spec: spec)
+		let containerInfo = try await client.containers.create(name: name, spec: spec)
+		let container = try await client.containers.get(containerInfo.id)
 		XCTAssert(container.name.trimmingPrefix("/") == name, "Ensure name is set")
 		XCTAssert(container.config.command == cmd, "Ensure custom command is set")
 		let exposedPorts = try XCTUnwrap(container.config.exposedPorts)
@@ -118,7 +120,8 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testRetrievingLogsNoTty() async throws {
-		let container = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: false))
+		let containerInfo = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: false))
+		let container = try await client.containers.get(containerInfo.id)
 		try await client.containers.start(container.id)
 		try await Task.sleep(nanoseconds: 3_000_000_000)
 
@@ -170,7 +173,8 @@ final class ContainerTests: XCTestCase {
 
 	// Log entries parsing is quite different depending on whether the container has a TTY
 	func testRetrievingLogsTty() async throws {
-		let container = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: true))
+		let containerInfo = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: true))
+		let container = try await client.containers.get(containerInfo.id)
 		try await client.containers.start(container.id)
 
 		var output = ""
