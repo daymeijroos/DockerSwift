@@ -20,7 +20,7 @@ extension DockerClient {
 		///   - credentials: Optional `RegistryAuth` as returned by `registries.login()`
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Fetches the latest image information and returns the `Image` that has been fetched.
-		public func pull(byName name: String, tag: String? = nil, digest: Digest? = nil, credentials: RegistryAuth? = nil) async throws -> Image {
+		public func pull(byName name: String, tag: String? = nil, digest: Digest? = nil, token: RegistryAuth.Token? = nil) async throws -> Image {
 			var identifier = name
 			if let tag = tag {
 				identifier += ":\(tag)"
@@ -28,7 +28,7 @@ extension DockerClient {
 			if let digest = digest {
 				identifier += "@\(digest.rawValue)"
 			}
-			return try await pull(byIdentifier: identifier, credentials: credentials)
+			return try await pull(byIdentifier: identifier, token: token)
 		}
 		
 		/// Pulls an image by a given identifier. The identifier can be build manually.
@@ -37,8 +37,8 @@ extension DockerClient {
 		///   - credentials: Optional `RegistryAuth` as returned by `registries.login()`
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Fetches the latest image information and returns the `Image` that has been fetched.
-		public func pull(byIdentifier identifier: String, credentials: RegistryAuth? = nil) async throws -> Image {
-			try await client.run(PullImageEndpoint(imageName: identifier, credentials: credentials, logger: client.logger))
+		public func pull(byIdentifier identifier: String, token: RegistryAuth.Token? = nil) async throws -> Image {
+			try await client.run(PullImageEndpoint(imageName: identifier, token: token, logger: client.logger))
 			return try await self.get(identifier)
 		}
 		

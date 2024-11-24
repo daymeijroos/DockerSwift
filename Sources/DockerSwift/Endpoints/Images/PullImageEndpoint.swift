@@ -8,7 +8,7 @@ struct PullImageEndpoint: PipelineEndpoint {
 	let method: HTTPMethod = .POST
 
 	let imageName: String
-	let credentials: RegistryAuth?
+	let token: RegistryAuth.Token?
 	var queryArugments: [URLQueryItem] {
 		[URLQueryItem(name: "fromImage", value: imageName)]
 	}
@@ -21,11 +21,11 @@ struct PullImageEndpoint: PipelineEndpoint {
 
 	var headers: HTTPHeaders? = nil
 
-	init(imageName: String, credentials: RegistryAuth?, logger: Logger) {
+	init(imageName: String, token: RegistryAuth.Token?, logger: Logger) {
 		self.imageName = imageName
-		self.credentials = credentials
-		if let credentials = credentials, let token = credentials.token {
-			self.headers = .init([("X-Registry-Auth", token)])
+		self.token = token
+		if let token {
+			self.headers = .init([("X-Registry-Auth", token.rawValue)])
 		}
 		self.logger = logger
 	}
