@@ -87,13 +87,12 @@ extension DockerClient {
 		///   - privileges: Optional privileges to grant to the plugin. The list of privileges requested by the plugin can be obtained by calling `getPrivileges()`.
 		///   - credentials: Optional `RegistryAuth` as returned by `registries.login()`
 		/// - Throws: Errors that can occur when executing the request.
-		public func upgrade(name: String, remote: String, privileges: [PluginPrivilege]? = [], credentials: RegistryAuth? = nil) async throws {
+		public func upgrade(name: String, remote: String, privileges: [PluginPrivilege]? = [], token: RegistryAuth.Token? = nil) async throws {
 			let endpoint = UpgradePluginEndpoint(
 				name: name,
 				remote: remote,
 				privileges: privileges,
-				credentials: credentials
-			)
+				token: token)
 			try await client.run(endpoint)
 		}
 		

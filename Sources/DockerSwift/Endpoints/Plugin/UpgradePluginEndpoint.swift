@@ -17,15 +17,15 @@ struct UpgradePluginEndpoint: SimpleEndpoint {
 	
 	private let name: String
 	private let remote: String
-	private let credentials: RegistryAuth?
-	
-	init(name: String, remote: String, privileges: [PluginPrivilege]?, credentials: RegistryAuth?) {
+	private let token: RegistryAuth.Token?
+
+	init(name: String, remote: String, privileges: [PluginPrivilege]?, token: RegistryAuth.Token?) {
 		self.body = privileges ?? []
 		self.name = name
 		self.remote = remote
-		self.credentials = credentials
-		if let credentials = credentials, let token = credentials.token {
-			self.headers = .init([("X-Registry-Auth", token)])
+		self.token = token
+		if let token {
+			self.headers = ["X-Registry-Auth": token.rawValue]
 		}
 	}
 }

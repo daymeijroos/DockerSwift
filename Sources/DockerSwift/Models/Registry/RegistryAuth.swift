@@ -13,10 +13,6 @@ public struct RegistryAuth: Codable {
 	
 	/// The URL of the registry. Defaults to the Docker Hub.
 	public var serverAddress: URL = URL(string: "https://index.docker.io/v1/")!
-	
-	/// The token obtained after logging into the registry
-	@available(*, deprecated)
-	internal(set) public var token: String? = nil
 
 	public init(username: String, email: String? = nil, password: String, serverAddress: URL = URL(string: "https://index.docker.io/v1/")!) {
 		self.username = username

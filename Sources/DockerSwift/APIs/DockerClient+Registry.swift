@@ -20,7 +20,6 @@ extension DockerClient {
 			logger.debug("\(response.status)")
 
 			let encodedToken = credentials.entoken()
-			credentials.token = encodedToken.rawValue
 			return encodedToken
 		}
 	}
