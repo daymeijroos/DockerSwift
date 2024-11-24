@@ -42,13 +42,12 @@ extension DockerClient {
 		///   - privileges: Optional privileges to grant to the plugin. The list of privileges requested by the plugin can be obtained by calling `getPrivileges()`.
 		///   - credentials: Optional `RegistryAuth` as returned by `registries.login()`
 		/// - Throws: Errors that can occur when executing the request.
-		public func install(remote: String, alias: String? = nil, privileges: [PluginPrivilege]? = [], credentials: RegistryAuth? = nil) async throws {
+		public func install(remote: String, alias: String? = nil, privileges: [PluginPrivilege]? = [], token: RegistryAuth.Token? = nil) async throws {
 			let endpoint = InstallPluginEndpoint(
 				remote: remote,
 				alias: alias,
 				privileges: privileges,
-				credentials: credentials
-			)
+				token: token)
 			try await client.run(endpoint)
 		}
 		
