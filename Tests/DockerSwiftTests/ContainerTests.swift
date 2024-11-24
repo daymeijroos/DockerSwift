@@ -224,7 +224,8 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testPauseUnpauseContainers() async throws {
-		let image = try await client.images.pull(byName: "nginx", tag: "latest")
+		let imageInfo = try await client.images.pull(byName: "nginx", tag: "latest")
+		let image = try await client.images.get(imageInfo.digest)
 		let container = try await client.containers.create(imageID: image.id)
 		try await client.containers.start(container.id)
 

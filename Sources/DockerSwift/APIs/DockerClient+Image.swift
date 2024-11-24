@@ -10,17 +10,15 @@ extension DockerClient {
 	
 	public struct ImagesAPI {
 		fileprivate var client: DockerClient
-		
+
 		/// Pulls an image from a remote registry
 		/// If you want to customize the identifier of the image you can use `pullImage(byIdentifier:)` to do this.
 		/// - Parameters:
 		///   - name: Image name that is fetched
 		///   - tag: Optional tag name. Default is `nil`.
 		///   - digest: Optional digest value. Default is `nil`.
-		///   - credentials: Optional `RegistryAuth` as returned by `registries.login()`
 		/// - Throws: Errors that can occur when executing the request.
-		/// - Returns: Fetches the latest image information and returns the `Image` that has been fetched.
-		public func pull(byName name: String, tag: String? = nil, digest: Digest? = nil, token: RegistryAuth.Token? = nil) async throws -> Image {
+		public func pull(byName name: String, tag: String? = nil, digest: Digest? = nil, token: RegistryAuth.Token? = nil) async throws -> PullImageEndpoint.Response {
 			var identifier = name
 			if let tag = tag {
 				identifier += ":\(tag)"
@@ -28,20 +26,17 @@ extension DockerClient {
 			if let digest = digest {
 				identifier += "@\(digest.rawValue)"
 			}
-			return try await pull(byIdentifier: identifier, token: token)
+			return try await pull(byIdentifier: identifier)
 		}
-		
+
 		/// Pulls an image by a given identifier. The identifier can be build manually.
 		/// - Parameters:
 		///   - identifier: Identifier of an image that is pulled.
-		///   - credentials: Optional `RegistryAuth` as returned by `registries.login()`
 		/// - Throws: Errors that can occur when executing the request.
-		/// - Returns: Fetches the latest image information and returns the `Image` that has been fetched.
-		public func pull(byIdentifier identifier: String, token: RegistryAuth.Token? = nil) async throws -> Image {
+		public func pull(byIdentifier identifier: String, token: RegistryAuth.Token? = nil) async throws -> PullImageEndpoint.Response {
 			try await client.run(PullImageEndpoint(imageName: identifier, token: token, logger: client.logger))
-			return try await self.get(identifier)
 		}
-		
+
 		/// Push an image to a registry.
 		/// - Parameters:
 		///   - nameOrId: Name or ID of the `Image` that should be pushed.
@@ -98,7 +93,7 @@ extension DockerClient {
 			let response =  try await client.run(endpoint, timeout: timeout, separators: [UInt8(ascii: "}"), UInt8(13)])
 			return try await endpoint.map(response: response)
 		}
-		
+
 		/// Creates an image from an existing Container (`docker commit`).
 		/// - Parameters:
 		///   - nameOrId: Name or id of the Container that should be used to build the Image.
@@ -108,13 +103,18 @@ extension DockerClient {
 		///   - tag: Optional Tag name to give to the resulting image.
 		///   - comment: An optional commit message.
 		/// - Throws: Errors that can occur when executing the request.
-		/// - Returns: Returns an `Image` when the image has been built, or an error is thrown.
-		public func createFromContainer(_ nameOrId: String, spec: ContainerConfig? = nil, pause: Bool = true, repo: String? = nil, tag: String? = nil, comment: String? = nil) async throws -> Image {
-			let ep = CommitContainerEndpoint(nameOrId: nameOrId, spec: spec, pause: pause, repo: repo, tag: tag, comment: comment)
-			let response = try await client.run(ep)
-			return try await get(response.Id)
+		public func commitFromContainer(
+			named nameOrId: String,
+			config: ContainerConfig? = nil,
+			pause: Bool = true,
+			repo: String? = nil,
+			tag: String? = nil,
+			comment: String? = nil
+		) async throws -> CommitContainerEndpoint.Response {
+			let request = CommitContainerEndpoint(nameOrId: nameOrId, spec: config, pause: pause, repo: repo, tag: tag, comment: comment)
+			return try await client.run(request)
 		}
-		
+
 		/// Tags an image.
 		/// - Parameters:
 		///   - nameOrId: Name or ID of the image to tag.

@@ -32,7 +32,8 @@ final class ImageTests: XCTestCase {
 	}
 
 	func testPullImage() async throws {
-		let image = try await client.images.pull(byName: "nginx", tag: "latest")
+		let imageInfo = try await client.images.pull(byName: "nginx", tag: "latest")
+		let image = try await client.images.get(imageInfo.digest)
 
 		XCTAssertTrue(image.repoTags!.contains(where: { $0.contains("nginx:latest") }))
 	}
@@ -146,7 +147,8 @@ final class ImageTests: XCTestCase {
 	func testCommit() async throws {
 		let container = try await client.containers.create(spec: ContainerConfig(image: "nginx:latest"))
 		try await client.containers.start(container.id)
-		let image = try await client.images.createFromContainer(container.id, repo: "test-commit", tag: "latest")
+		let imageID = try await client.images.commitFromContainer(named: container.id, repo: "test-commit", tag: "latest")
+		let image = try await client.images.get(imageID.id)
 		let repoTags = try XCTUnwrap(image.repoTags)
 		XCTAssertTrue(repoTags.contains(where: { $0.contains("test-commit:latest") }), "Ensure image has custom repo and tag")
 	}

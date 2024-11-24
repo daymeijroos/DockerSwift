@@ -2,9 +2,8 @@ import NIOHTTP1
 import Foundation
 import Logging
 
-struct PullImageEndpoint: PipelineEndpoint {
+public struct PullImageEndpoint: PipelineEndpoint {
 	typealias Body = NoBody
-	typealias Response = PullImageResponse
 	let method: HTTPMethod = .POST
 
 	let imageName: String
@@ -30,8 +29,9 @@ struct PullImageEndpoint: PipelineEndpoint {
 		self.logger = logger
 	}
 
-	struct PullImageResponse: Codable {
-		let digest: String
+	public struct Response: Codable {
+		/// digest of the pulled image
+		public let digest: String
 	}
 
 	struct Status: Codable {
@@ -39,7 +39,7 @@ struct PullImageEndpoint: PipelineEndpoint {
 		let id: String?
 	}
 
-	func map(data: String) throws -> PullImageResponse {
+	func map(data: String) throws -> Response {
 		if let message = try? MessageResponse.decode(from: data) {
 			throw DockerError.message(message.message)
 		}

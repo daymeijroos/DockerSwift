@@ -262,8 +262,13 @@ public class DockerClient {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
-					let buffer = try await mockEndpoint.mockedResponse(request)
-					return try decodeOut(buffer)
+					let stream = try await mockEndpoint.mockedStreamingResponse(request)
+					var buff = ByteBuffer()
+					for try await chunk in stream {
+						buff.writeBytes(chunk.readableBytesView)
+						buff.writeString("\n")
+					}
+					return try decodeOut(buff)
 				} else {
 					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 				}

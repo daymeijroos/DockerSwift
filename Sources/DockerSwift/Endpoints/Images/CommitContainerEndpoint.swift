@@ -1,8 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-struct CommitContainerEndpoint: SimpleEndpoint {
-	typealias Response = CommitContainerResponse
+public struct CommitContainerEndpoint: SimpleEndpoint {
 	typealias Body = ContainerConfig?
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
@@ -36,7 +35,12 @@ struct CommitContainerEndpoint: SimpleEndpoint {
 		self.comment = comment
 	}
 	
-	struct CommitContainerResponse: Codable {
-		let Id: String
+	public struct Response: Codable {
+		/// ID of the created image
+		public let id: String
+
+		enum CodingKeys: String, CodingKey {
+			case id = "Id"
+		}
 	}
 }
