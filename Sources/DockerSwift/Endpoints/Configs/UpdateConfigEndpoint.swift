@@ -4,7 +4,7 @@ import Foundation
 struct UpdateConfigEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = ConfigSpec
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
 			URLQueryItem(name: "version", value: version.description)

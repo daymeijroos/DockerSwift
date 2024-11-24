@@ -5,7 +5,7 @@ import Logging
 struct InspectImagesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = Image
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	let logger: Logger

@@ -4,7 +4,7 @@ import NIOHTTP1
 struct InspectVolumeEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = Volume
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	private let nameOrId: String

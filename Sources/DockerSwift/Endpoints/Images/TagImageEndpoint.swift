@@ -4,7 +4,7 @@ import Foundation
 struct TagImageEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = NoBody
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	
 	private let nameOrId: String
 	private let repoName: String

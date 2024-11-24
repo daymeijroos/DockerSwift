@@ -5,7 +5,7 @@ import NIOHTTP1
 struct ListNodesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = [SwarmNode]
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	var path: String {

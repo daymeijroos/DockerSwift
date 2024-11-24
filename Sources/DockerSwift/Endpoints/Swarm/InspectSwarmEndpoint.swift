@@ -4,7 +4,7 @@ import Foundation
 public struct InspectSwarmEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = SwarmResponse
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	var path: String {

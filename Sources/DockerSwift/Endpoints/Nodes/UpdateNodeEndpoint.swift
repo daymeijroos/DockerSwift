@@ -4,7 +4,7 @@ import NIOHTTP1
 struct UpdateNodeEndpoint: SimpleEndpoint {
 	typealias Body = SwarmNodeSpec
 	typealias Response = NoBody
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[URLQueryItem(name: "version", value: version.description)]
 	}

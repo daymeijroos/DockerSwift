@@ -5,7 +5,7 @@ struct ConnectContainerEndpoint: SimpleEndpoint {
 	typealias Body = ContainerConnect
 	
 	typealias Response = NoBody?
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 	var path: String {
 		"networks/\(networkNameOrId)/connect"

@@ -4,7 +4,7 @@ import NIOHTTP1
 struct CommitContainerEndpoint: SimpleEndpoint {
 	typealias Response = CommitContainerResponse
 	typealias Body = ContainerConfig?
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
 			URLQueryItem(name: "container", value: nameOrId),

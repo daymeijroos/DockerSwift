@@ -7,7 +7,7 @@ struct VersionEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = DockerVersion
 	
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 	let path: String = "version"
 }

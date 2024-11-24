@@ -6,7 +6,7 @@ struct CreateConfigEndpoint: SimpleEndpoint {
 	
 	typealias Response = CreateConfigResponse
 	typealias Body = ConfigSpec
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 
 	var queryArugments: [URLQueryItem] { [] }
 

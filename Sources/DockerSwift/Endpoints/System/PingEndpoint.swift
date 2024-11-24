@@ -6,6 +6,6 @@ struct PingEndpoint: SimpleEndpoint {
 	typealias Response = String
 	var queryArugments: [URLQueryItem] { [] }
 
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	let path: String = "_ping"
 }

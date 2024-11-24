@@ -8,7 +8,7 @@ final class ContainerAttachEndpoint {
 	typealias Body = NoBody
 	typealias Response = ContainerAttach
 	
-	private var method: HTTPMethod = .GET
+	private let method: HTTPMethod = .GET
 	private var path: String {
 		"containers/\(nameOrId)/attach/ws"
 	}

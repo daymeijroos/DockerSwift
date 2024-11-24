@@ -5,7 +5,7 @@ import Logging
 struct PullImageEndpoint: PipelineEndpoint {
 	typealias Body = NoBody
 	typealias Response = PullImageResponse
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 
 	let imageName: String
 	let credentials: RegistryAuth?

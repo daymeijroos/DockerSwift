@@ -6,7 +6,7 @@ struct RemoveContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
-	var method: HTTPMethod = .DELETE
+	let method: HTTPMethod = .DELETE
 	var queryArugments: [URLQueryItem] {
 		[
 			URLQueryItem(name: "force", value: force.description),

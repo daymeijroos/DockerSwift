@@ -6,7 +6,7 @@ struct CreateNetworkEndpoint: SimpleEndpoint {
 	
 	typealias Response = CreateNetworkResponse
 	typealias Body = NetworkSpec
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	init(spec: NetworkSpec) {

@@ -6,6 +6,6 @@ struct SystemInformationEndpoint: SimpleEndpoint {
 	typealias Response = SystemInformation
 	var queryArugments: [URLQueryItem] { [] }
 
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	let path: String = "info"
 }

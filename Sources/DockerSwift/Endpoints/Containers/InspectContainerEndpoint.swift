@@ -4,7 +4,7 @@ import NIOHTTP1
 struct InspectContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = Container
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	let nameOrId: String

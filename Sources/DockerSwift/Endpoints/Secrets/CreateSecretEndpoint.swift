@@ -6,7 +6,7 @@ struct CreateSecretEndpoint: SimpleEndpoint {
 	
 	typealias Response = CreateSecretResponse
 	typealias Body = SecretSpec
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	var path: String {

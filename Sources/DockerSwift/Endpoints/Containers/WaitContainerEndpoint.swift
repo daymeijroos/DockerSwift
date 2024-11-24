@@ -4,7 +4,7 @@ import NIOHTTP1
 struct WaitContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = ContainerWaitResponse
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	let nameOrId: String

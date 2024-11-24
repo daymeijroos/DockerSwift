@@ -4,7 +4,7 @@ import Foundation
 struct ListImagesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = [ImageSummary]
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] {
 		[URLQueryItem(name: "all", value: all.description)]
 	}

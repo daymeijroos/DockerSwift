@@ -4,7 +4,7 @@ import Foundation
 struct PushImageEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = NoBody
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
 			tag.map { URLQueryItem(name: "tag", value: $0) }

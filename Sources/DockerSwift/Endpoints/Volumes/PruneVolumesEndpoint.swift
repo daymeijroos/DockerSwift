@@ -7,7 +7,7 @@ struct PruneVolumesEndpoint: SimpleEndpoint {
 
 	typealias Response = PrunedVolumes
 	typealias Body = NoBody
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 		
 	init() {}
 	

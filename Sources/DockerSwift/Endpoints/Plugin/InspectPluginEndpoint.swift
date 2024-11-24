@@ -4,7 +4,7 @@ import NIOHTTP1
 struct InspectPluginEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = Plugin
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	private let name: String

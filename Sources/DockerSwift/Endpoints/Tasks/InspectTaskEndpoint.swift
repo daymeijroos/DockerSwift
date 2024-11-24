@@ -4,7 +4,7 @@ import NIOHTTP1
 struct InspectTaskEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = SwarmTask
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	private let id: String

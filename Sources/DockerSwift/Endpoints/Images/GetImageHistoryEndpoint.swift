@@ -4,7 +4,7 @@ import Foundation
 struct GetImageHistoryEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = [ImageLayer]
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	private var nameOrId: String

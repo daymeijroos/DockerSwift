@@ -17,7 +17,7 @@ class GetContainerLogsEndpoint: StreamingEndpoint {
 		]
 	}
 
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 
 	private let containerId: String
 	let follow: Bool

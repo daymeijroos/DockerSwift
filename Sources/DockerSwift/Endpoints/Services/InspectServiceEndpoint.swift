@@ -4,7 +4,7 @@ import NIOHTTP1
 struct InspectServiceEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = Service
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] {
 		[
 			URLQueryItem(name: "insertDefaults", value: insertDefaults.description)

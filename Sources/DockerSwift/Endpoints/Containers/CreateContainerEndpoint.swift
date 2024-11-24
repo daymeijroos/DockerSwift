@@ -3,7 +3,7 @@ import Foundation
 
 struct CreateContainerEndpoint: SimpleEndpoint {
 	typealias Body = ContainerConfig
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
 			name.map { URLQueryItem(name: "name", value: $0) }

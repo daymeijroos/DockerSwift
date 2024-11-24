@@ -5,7 +5,7 @@ struct RemoveServiceEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
-	var method: HTTPMethod = .DELETE
+	let method: HTTPMethod = .DELETE
 	var queryArugments: [URLQueryItem] { [] }
 
 	private let nameOrId: String

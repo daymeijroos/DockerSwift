@@ -5,7 +5,7 @@ struct PauseUnpauseContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	private let nameOrId: String

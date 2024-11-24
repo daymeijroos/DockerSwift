@@ -6,7 +6,7 @@ public struct InitSwarmEndpoint: SimpleEndpoint {
 	
 	typealias Body = SwarmConfig
 	typealias Response = String
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	var path: String {

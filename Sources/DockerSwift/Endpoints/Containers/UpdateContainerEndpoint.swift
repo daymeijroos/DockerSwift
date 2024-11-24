@@ -6,7 +6,7 @@ struct UpdateContainerEndpoint: SimpleEndpoint {
 	
 	typealias Response = NoBody
 	typealias Body = ContainerUpdate
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	private let nameOrId: String

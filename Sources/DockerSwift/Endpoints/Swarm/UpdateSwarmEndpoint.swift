@@ -4,7 +4,7 @@ import Foundation
 struct UpdateSwarmEndpoint: SimpleEndpoint {
 	typealias Response = NoBody
 	typealias Body = SwarmSpec
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
 			URLQueryItem(name: "version", value: version.description),

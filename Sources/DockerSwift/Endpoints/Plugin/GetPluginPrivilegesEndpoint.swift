@@ -4,7 +4,7 @@ import NIOHTTP1
 struct GetPluginPrivilegesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = [PluginPrivilege]
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] {
 		[URLQueryItem(name: "remote", value: remote)]
 	}

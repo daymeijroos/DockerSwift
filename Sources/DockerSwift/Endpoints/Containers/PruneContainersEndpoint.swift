@@ -6,7 +6,7 @@ struct PruneContainersEndpoint: SimpleEndpoint {
 	
 	typealias Response = PruneContainersResponse
 	typealias Body = NoBody
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	init() {

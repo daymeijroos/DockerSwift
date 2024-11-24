@@ -6,7 +6,7 @@ struct PruneNetworksEndpoint: SimpleEndpoint {
 
 	typealias Response = PrunedNetworks
 	typealias Body = NoBody
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	var path: String {

@@ -6,7 +6,7 @@ struct PruneImagesEndpoint: SimpleEndpoint {
 	
 	typealias Response = PruneImagesResponse
 	typealias Body = NoBody
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		let value = ["dangling": ["\(dangling)"]]
 		let json = try! JSONEncoder().encode(value)

@@ -4,7 +4,7 @@ import NIOHTTP1
 struct GetContainerChangesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = [ContainerFsChange]
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	let nameOrId: String

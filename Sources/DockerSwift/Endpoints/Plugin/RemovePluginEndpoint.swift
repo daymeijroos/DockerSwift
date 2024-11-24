@@ -10,7 +10,7 @@ struct RemovePluginEndpoint: SimpleEndpoint {
 		]
 	}
 
-	var method: HTTPMethod = .DELETE
+	let method: HTTPMethod = .DELETE
 	var path: String {
 		"plugins/\(name)"
 	}

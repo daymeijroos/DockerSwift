@@ -6,7 +6,7 @@ struct RegistryLoginEndpoint: SimpleEndpoint {
 	
 	typealias Response = RegistryLoginResponse
 	typealias Body = RegistryAuth
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
 	init(credentials: RegistryAuth) {

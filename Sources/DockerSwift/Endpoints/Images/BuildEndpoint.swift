@@ -7,7 +7,7 @@ struct BuildEndpoint: UploadEndpoint {
 
 	typealias Response = AsyncThrowingStream<ByteBuffer, Error>
 	typealias Body = ByteBuffer
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 
 	private let buildConfig: BuildConfig
 

@@ -4,7 +4,7 @@ import NIOHTTP1
 struct ContainerTopEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = ContainerTop
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] {
 		[URLQueryItem(name: "ps_args", value: psArgs)]
 	}

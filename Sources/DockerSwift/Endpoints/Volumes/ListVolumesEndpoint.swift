@@ -4,7 +4,7 @@ import NIOHTTP1
 struct ListVolumesEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	typealias Response = ListVolumesResponse
-	var method: HTTPMethod = .GET
+	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
 	init(filters: ListVolumesFilter? = nil) {}

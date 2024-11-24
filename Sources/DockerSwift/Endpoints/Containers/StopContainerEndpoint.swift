@@ -5,7 +5,7 @@ struct StopContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	
 	typealias Response = NoBody?
-	var method: HTTPMethod = .POST
+	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
 			timeout.map { URLQueryItem(name: "t", value: $0.description) }
