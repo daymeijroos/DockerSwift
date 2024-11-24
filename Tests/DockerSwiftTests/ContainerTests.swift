@@ -77,15 +77,12 @@ final class ContainerTests: XCTestCase {
 		let container = try await client.containers.create(name: name, spec: spec)
 		XCTAssert(container.name.trimmingPrefix("/") == name, "Ensure name is set")
 		XCTAssert(container.config.command == cmd, "Ensure custom command is set")
-		XCTAssert(
-			container.config.exposedPorts != nil && container.config.exposedPorts![0].port == 80,
-			"Ensure Exposed Port was set and retrieved"
-		)
+		let exposedPorts = try XCTUnwrap(container.config.exposedPorts)
+		XCTAssert(exposedPorts[0].port == 80, "Ensure Exposed Port was set and retrieved")
 
-		XCTAssert(
-			container.hostConfig.portBindings != nil && container.hostConfig.portBindings![.tcp(80)] != nil,
-			"Ensure Published Port was set and retrieved"
-		)
+		let portBindings = try XCTUnwrap(container.hostConfig.portBindings)
+
+		XCTAssert(portBindings[.tcp(80)] != nil, "Ensure Published Port was set and retrieved")
 		XCTAssert(container.hostConfig.memoryLimit == .mb(64), "Ensure MemoryLimit is set")
 
 		try await client.containers.remove(container.id)
