@@ -27,7 +27,7 @@ final class NetworkTests: XCTestCase {
 
 	func testCreateNetwork() async throws {
 		let name = UUID().uuidString
-		let network = try await client.networks.create(
+		let networkInfo = try await client.networks.create(
 			spec: .init(
 				name: name,
 				ipam: .init(
@@ -35,6 +35,7 @@ final class NetworkTests: XCTestCase {
 				)
 			)
 		)
+		let network = try await client.networks.get(networkInfo.id)
 		XCTAssert(network.id != "", "Ensure Network ID is parsed")
 		XCTAssert(network.name == name, "Ensure Network name is set")
 		XCTAssert(network.ipam.config[0].subnet == "192.168.2.0/24", "Ensure custom subnet is set")
@@ -44,9 +45,10 @@ final class NetworkTests: XCTestCase {
 
 	func testPruneNetworks() async throws {
 		let name = UUID().uuidString
-		let network = try await client.networks.create(
+		let networkInfo = try await client.networks.create(
 			spec: .init(name: name)
 		)
+		let network = try await client.networks.get(networkInfo.id)
 		let pruned = try await client.networks.prune()
 		XCTAssert(pruned.contains(network.name), "Ensure created Network has been deleted")
 	}
@@ -55,7 +57,8 @@ final class NetworkTests: XCTestCase {
 		let name = UUID().uuidString
 		let imageInfo = try await client.images.pull(byIdentifier: "nginx:latest")
 		let image = try await client.images.get(imageInfo.digest)
-		let network = try await client.networks.create(spec: .init(name: name))
+		let networkInfo = try await client.networks.create(spec: .init(name: name))
+		let network = try await client.networks.get(networkInfo.id)
 		let containerInfo = try await client.containers.create(spec: ContainerConfig(image: image.id, name: name))
 		var container = try await client.containers.get(containerInfo.id)
 		try await client.networks.connect(container: container.id, to: network.id)

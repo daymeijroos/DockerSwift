@@ -1,10 +1,9 @@
 import NIOHTTP1
 import Foundation
 
-struct CreateNetworkEndpoint: SimpleEndpoint {
+public struct CreateNetworkEndpoint: SimpleEndpoint {
 	var body: Body?
 	
-	typealias Response = CreateNetworkResponse
 	typealias Body = NetworkSpec
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
@@ -17,8 +16,13 @@ struct CreateNetworkEndpoint: SimpleEndpoint {
 		"networks/create"
 	}
 	
-	struct CreateNetworkResponse: Codable {
-		let Id: String
-		let Warning: String?
+	public struct Response: Codable {
+		let id: String
+		let warning: String?
+
+		enum CodingKeys: String, CodingKey {
+			case id = "Id"
+			case warning = "Warning"
+		}
 	}
 }
