@@ -53,8 +53,9 @@ final class ServiceTests: XCTestCase {
 			mode: .replicated(1),
 			endpointSpec: .init(ports: [.init(name: "HTTP", targetPort: 80, publishedPort: 8000)])
 		)
-		let service = try await client.services.create(spec: spec)
-		
+		let serviceInfo = try await client.services.create(spec: spec)
+		let service = try await client.services.get(serviceInfo.id)
+
 		XCTAssert(service.spec.name == name, "Ensure custom service name is set")
 		XCTAssert(service.spec.taskTemplate.resources?.limits?.memoryBytes == .mb(64), "Ensure memory limit is set")
 		
@@ -86,7 +87,8 @@ final class ServiceTests: XCTestCase {
 			endpointSpec: .init(ports: [.init(name: "HTTP", targetPort: 80, publishedPort: 8000)])
 		)
 		do {
-			let service = try await client.services.create(spec: spec)
+			let serviceInfo = try await client.services.create(spec: spec)
+			let service = try await client.services.get(serviceInfo.id)
 			XCTAssert(service.spec.taskTemplate.restartPolicy?.delay == .seconds(2), "Ensure custom RestartPolicy is set")
 			XCTAssert(service.spec.endpointSpec?.ports?.first?.publishedPort == 8000, "Ensure published port is set")
 			try await client.services.remove(service.id)
@@ -106,8 +108,9 @@ final class ServiceTests: XCTestCase {
 			),
 			mode: .replicated(1)
 		)
-		let service = try await client.services.create(spec: spec)
-		
+		let serviceInfo = try await client.services.create(spec: spec)
+		let service = try await client.services.get(serviceInfo.id)
+
 		spec.mode = .replicated(2)
 		let updated = try await client.services.update(name, spec: spec)
 		
@@ -130,8 +133,9 @@ final class ServiceTests: XCTestCase {
 			),
 			mode: .replicated(UInt32(replicas))
 		)
-		let service = try await client.services.create(spec: spec)
-		
+		let serviceInfo = try await client.services.create(spec: spec)
+		let service = try await client.services.get(serviceInfo.id)
+
 		var index = 0
 		repeat {
 			try await Task.sleep(nanoseconds: 1_000_000_000)
