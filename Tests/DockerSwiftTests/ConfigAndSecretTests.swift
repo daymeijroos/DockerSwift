@@ -24,12 +24,13 @@ final class ConfigAndSecretTests: XCTestCase {
 	func testCreateConfig() async throws {
 		let name = UUID().uuidString
 		let configData = "test config value 💥".data(using: .utf8)!
-		let config = try await client.configs.create(
+		let configInfo = try await client.configs.create(
 			spec: .init(
 				name: name,
 				data: configData
 			)
 		)
+		let config = try await client.configs.get(configInfo.id)
 		XCTAssert(config.id != "", "Ensure ID is parsed")
 		XCTAssert(config.spec.name == name, "Ensure name is set")
 		XCTAssert(config.spec.data == configData, "Ensure Config data is correct")

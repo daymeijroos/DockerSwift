@@ -30,10 +30,9 @@ extension DockerClient {
 		/// - Parameters:
 		///   - spec: configuration as a `ConfigSpec`.
 		/// - Throws: Errors that can occur when executing the request.
-		/// - Returns: Returns the newly created `Config`.
-		public func create(spec: ConfigSpec) async throws -> Config {
-			let createResponse = try await client.run(CreateConfigEndpoint(spec: spec))
-			return try await client.configs.get(createResponse.ID)
+		/// - Returns: Returns the newly created `Config` id object.
+		public func create(spec: ConfigSpec) async throws -> CreateConfigEndpoint.Response {
+			try await client.run(CreateConfigEndpoint(spec: spec))
 		}
 		
 		/// Updates a  Config. Currently, only the `labels` field can be updated (Docker limitation)

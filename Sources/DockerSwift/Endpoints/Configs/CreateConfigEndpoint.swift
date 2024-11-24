@@ -1,10 +1,9 @@
 import NIOHTTP1
 import Foundation
 
-struct CreateConfigEndpoint: SimpleEndpoint {
+public struct CreateConfigEndpoint: SimpleEndpoint {
 	var body: Body?
 	
-	typealias Response = CreateConfigResponse
 	typealias Body = ConfigSpec
 	let method: HTTPMethod = .POST
 
@@ -18,7 +17,11 @@ struct CreateConfigEndpoint: SimpleEndpoint {
 		"configs/create"
 	}
 	
-	struct CreateConfigResponse: Codable {
-		let ID: String
+	public struct Response: Codable {
+		let id: String
+
+		enum CodingKeys: String, CodingKey {
+			case id = "ID"
+		}
 	}
 }
