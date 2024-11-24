@@ -197,7 +197,7 @@ public class DockerClient {
 			return try decoder.decode(T.Response.self, from: buffer)
 		}
 
-		if case .testing(useMocks: let useMocks) = testMode{
+		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
@@ -258,7 +258,7 @@ public class DockerClient {
 			return try endpoint.map(data: bufferString)
 		}
 
-		if case .testing(useMocks: let useMocks) = testMode{
+		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
@@ -305,7 +305,7 @@ public class DockerClient {
 			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
 			headers: headers)
 
-		if case .testing(useMocks: let useMocks) = testMode{
+		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
@@ -343,7 +343,7 @@ public class DockerClient {
 			headers: headers)
 
 
-		if case .testing(useMocks: let useMocks) = testMode{
+		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
