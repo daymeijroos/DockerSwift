@@ -25,7 +25,7 @@ extension DockerClient {
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns the `Container` and its information.
 		public func get(_ nameOrId: String) async throws -> Container {
-			return try await client.run(InspectContainerEndpoint(nameOrId: nameOrId))
+			try await client.run(InspectContainerEndpoint(nameOrId: nameOrId, logger: client.logger))
 		}
 
 		/// Creates a new container from a given image. If specified the commands override the default commands from the image.

@@ -1,5 +1,6 @@
 import Foundation
 import NIOHTTP1
+import Logging
 
 struct InspectContainerEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
@@ -8,9 +9,11 @@ struct InspectContainerEndpoint: SimpleEndpoint {
 	var queryArugments: [URLQueryItem] { [] }
 
 	let nameOrId: String
+	let logger: Logger
 
-	init(nameOrId: String) {
+	init(nameOrId: String, logger: Logger) {
 		self.nameOrId = nameOrId
+		self.logger = logger
 	}
 
 	var path: String {
