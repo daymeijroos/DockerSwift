@@ -1,5 +1,6 @@
 import NIOHTTP1
 import Foundation
+import Logging
 
 struct CreateContainerEndpoint: SimpleEndpoint {
 	typealias Body = ContainerConfig
@@ -14,10 +15,12 @@ struct CreateContainerEndpoint: SimpleEndpoint {
 
 	var body: ContainerConfig
 	private let name: String?
+	let logger: Logger
 
-	init(name: String? = nil, spec: ContainerConfig) {
+	init(name: String? = nil, spec: ContainerConfig, logger: Logger) {
 		self.name = name
 		self.body = spec
+		self.logger = logger
 	}
 
 	struct Response: Codable {

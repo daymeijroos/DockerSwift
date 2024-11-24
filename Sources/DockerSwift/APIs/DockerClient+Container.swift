@@ -44,7 +44,11 @@ extension DockerClient {
 		///   - spec: a `ContainerCreate` representing the container configuration.
 		/// - Returns: Returns  the created `Container`.
 		public func create(name: String? = nil, spec: ContainerConfig) async throws -> Container {
-			let response = try await client.run(CreateContainerEndpoint(name: name, spec: spec))
+			let response = try await client.run(
+				CreateContainerEndpoint(
+					name: name,
+					spec: spec,
+					logger: client.logger))
 			let container = try await get(response.Id)
 			return container
 		}
