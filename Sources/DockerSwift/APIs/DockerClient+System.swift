@@ -28,7 +28,7 @@ extension DockerClient {
 	/// Get data usage information.
 	/// - Throws: Errors that can occur when executing the request.
 	/// - Returns: Returns the `DataUsageInformation`.
-	public func dataUsage() async throws -> DataUsageInformation {
+	public func dataUsage() async throws -> DiskUsageInformationEndpoint.Response {
 		return try await run(DiskUsageInformationEndpoint())
 	}
 	
