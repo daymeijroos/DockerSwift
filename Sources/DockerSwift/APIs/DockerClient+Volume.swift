@@ -32,7 +32,7 @@ extension DockerClient {
 		///   - spec: configuration as a `VolumeSpec`.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns the newly created `Volume`.
-		public func create(spec: VolumeSpec) async throws -> Volume {
+		public func create(spec: CreateVolumeEndpoint.VolumeSpec) async throws -> Volume {
 			return try await client.run(CreateVolumeEndpoint(spec: spec))
 		}
 		
