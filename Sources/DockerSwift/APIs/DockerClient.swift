@@ -155,18 +155,12 @@ public class DockerClient {
 		}
 
 		if case .testing(useMocks: let useMocks) = testMode {
-			if useMocks {
-				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
-					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+			do {
+				return try await performTest(useMocks: useMocks, endpoint: endpoint) { mockEndpoint in
 					let buffer = try await mockEndpoint.mockedResponse(request)
 					return try decodeOut(buffer)
-				} else {
-					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 				}
-			} else {
-				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
-			}
+			} catch is NoMock {}
 		}
 
 		let response = try await client.execute(request, timeout: .minutes(2))
@@ -259,24 +253,35 @@ public class DockerClient {
 		}
 
 		if case .testing(useMocks: let useMocks) = testMode {
-			if useMocks {
-				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
-					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+			do {
+				return try await performTest(useMocks: useMocks, endpoint: endpoint) { mockEndpoint in
 					let mockStream = try await mockEndpoint.mockedStreamingResponse(request)
 					return consumeStream(mockStream)
-				} else {
-					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 				}
-			} else {
-				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
-			}
+			} catch is NoMock {}
 		}
 
 		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout, logger: logger)
 		try await _initialize(with: headers)
 
 		return consumeStream(stream)
+	}
+
+	private struct NoMock: Error {}
+	private func performTest<EP: Endpoint, T>(useMocks: Bool, endpoint: EP, mockBlock: (any MockedResponseEndpoint) async throws -> T) async throws -> T {
+		if useMocks {
+			if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
+				try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
+				logger.debug("(\(EP.self) / \(EP.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+				return try await mockBlock(mockEndpoint)
+			} else {
+				logger.debug("(\(EP.self) / \(EP.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
+			}
+		} else {
+			let isMockStr = (endpoint is any MockedResponseEndpoint) ? "(🍀 mock available)" : "(🥵 no mock available)"
+			logger.debug("(\(EP.self) / \(EP.Response.self)) ⚡️🔌 Live Socket Testing \(isMockStr) \(endpoint.method.rawValue) \(endpoint.path)")
+		}
+		throw NoMock()
 	}
 
 	package enum TestMode {
