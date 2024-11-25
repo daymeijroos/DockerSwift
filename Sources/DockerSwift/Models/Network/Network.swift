@@ -1,7 +1,21 @@
 import Foundation
 
 public struct Network: Codable {
-	public init(name: String, id: String, createdAt: Date, scope: DockerScope, driver: String? = nil, `internal`: Bool, attachable: Bool, ingress: Bool, ipam: IPAM, enableIPv6: Bool, containers: [String : Network.NetworkContainer]? = nil, options: [String : String], labels: [String : String]? = nil) {
+	public init(
+		name: String,
+		id: String,
+		createdAt: Date,
+		scope: DockerScope,
+		driver: String? = nil,
+		`internal`: Bool,
+		attachable: Bool,
+		ingress: Bool,
+		ipam: IPAM,
+		enableIPv6: Bool,
+		containers: [String : Network.NetworkContainer]? = nil,
+		options: [String : String],
+		labels: [String : String]? = nil
+	) {
 		self.name = name
 		self.id = id
 		self.createdAt = createdAt
