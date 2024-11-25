@@ -4,9 +4,9 @@ import WebSocketKit
 import Foundation
 
 /// Attach to a container via Websocket
-final class ContainerAttachEndpoint {
+public final class ContainerAttachEndpoint {
 	typealias Body = NoBody
-	typealias Response = ContainerAttach
+	typealias Response = AttachControl
 	
 	private let method: HTTPMethod = .GET
 	private var path: String {
@@ -59,7 +59,7 @@ final class ContainerAttachEndpoint {
 		self.detachKeys = detachKeys
 	}
 	
-	func connect() async throws -> ContainerAttach {
+	func connect() async throws -> AttachControl {
 		let config = WebSocketClient.Configuration(tlsConfiguration: self.dockerClient.tlsConfig)
 		
 		let scheme = self.dockerClient.daemonURL.scheme
@@ -91,7 +91,7 @@ final class ContainerAttachEndpoint {
 				}
 			}
 		}
-		return ContainerAttach(attach: self, output: output)
+		return AttachControl(attach: self, output: output)
 	}
 	
 	func send(_ text: String) async throws {
@@ -104,4 +104,23 @@ final class ContainerAttachEndpoint {
 		
 		try await ws.send(text + "\n")
 	}
+}
+
+public extension ContainerAttachEndpoint {
+	/// Gives access to the output and the standard input of an attached container.
+	final class AttachControl {
+		public let output: AsyncThrowingStream<String, Error>
+
+		private let attachEndpoint: ContainerAttachEndpoint
+
+		public func send(_ text: String) async throws {
+			try await self.attachEndpoint.send(text)
+		}
+
+		internal init(attach: ContainerAttachEndpoint, output: AsyncThrowingStream<String, Error>) {
+			self.attachEndpoint = attach
+			self.output = output
+		}
+	}
+
 }
