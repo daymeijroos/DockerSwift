@@ -10,9 +10,9 @@ public struct UpdateContainerEndpoint: SimpleEndpoint {
 
 	private let nameOrId: String
 	
-	init(nameOrId: String, spec: Update) {
+	init(nameOrId: String, config: Update) {
 		self.nameOrId = nameOrId
-		self.body = spec
+		self.body = config
 	}
 	
 	var path: String {

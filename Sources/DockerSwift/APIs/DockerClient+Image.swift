@@ -110,7 +110,7 @@ extension DockerClient {
 			tag: String? = nil,
 			comment: String? = nil
 		) async throws -> CommitContainerEndpoint.Response {
-			let request = CommitContainerEndpoint(nameOrId: nameOrId, spec: config, pause: pause, repo: repo, tag: tag, comment: comment)
+			let request = CommitContainerEndpoint(nameOrId: nameOrId, config: config, pause: pause, repo: repo, tag: tag, comment: comment)
 			return try await client.run(request)
 		}
 

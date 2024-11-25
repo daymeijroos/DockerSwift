@@ -145,7 +145,7 @@ final class ImageTests: XCTestCase {
 	}
 
 	func testCommit() async throws {
-		let container = try await client.containers.create(spec: ContainerConfig(image: "nginx:latest"))
+		let container = try await client.containers.create(config: ContainerConfig(image: "nginx:latest"))
 		try await client.containers.start(container.id)
 		let imageID = try await client.images.commitFromContainer(named: container.id, repo: "test-commit", tag: "latest")
 		let image = try await client.images.get(imageID.id)

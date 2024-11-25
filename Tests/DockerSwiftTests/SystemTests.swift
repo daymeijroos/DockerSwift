@@ -30,7 +30,7 @@ final class SystemTests: XCTestCase {
 		let name = "81A5DB11-78E9-4B21-9943-23FB75818224"
 		async let events = try client.events(since: Date())
 		try await Task.sleep(nanoseconds: 2_000_000_000)
-		let _ = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", name: name))
+		let _ = try await client.containers.create(config: ContainerConfig(image: "hello-world:latest", name: name))
 		addTeardownBlock { [client] in
 			try await client?.containers.remove(name, force: true, removeAnonymousVolumes: true)
 		}

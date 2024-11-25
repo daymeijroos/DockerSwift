@@ -59,7 +59,7 @@ final class NetworkTests: XCTestCase {
 		let image = try await client.images.get(imageInfo.digest)
 		let networkInfo = try await client.networks.create(spec: .init(name: name))
 		let network = try await client.networks.get(networkInfo.id)
-		let containerInfo = try await client.containers.create(spec: ContainerConfig(image: image.id, name: name))
+		let containerInfo = try await client.containers.create(config: ContainerConfig(image: image.id, name: name))
 		var container = try await client.containers.get(containerInfo.id)
 		try await client.networks.connect(container: container.id, to: network.id)
 		container = try await client.containers.get(container.id)

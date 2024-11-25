@@ -23,14 +23,14 @@ final class ContainerTests: XCTestCase {
 
 	func testAttach() async throws {
 		let _ = try await client.images.pull(byName: "alpine", tag: "latest")
-		let spec = ContainerConfig(
+		let config = ContainerConfig(
 			attachStdin: true,
 			attachStdout: true,
 			attachStderr: true,
 			image: "alpine:latest",
 			openStdin: true
 		)
-		let containerInfo = try await client.containers.create(spec: spec)
+		let containerInfo = try await client.containers.create(config: config)
 		let container = try await client.containers.get(containerInfo.id)
 		let attach = try await client.containers.attach(container: container, stream: true, logs: true)
 		do {
@@ -54,7 +54,7 @@ final class ContainerTests: XCTestCase {
 
 	func testCreateContainer() async throws {
 		let cmd = ["/custom/command", "--option"]
-		let spec = ContainerConfig(
+		let config = ContainerConfig(
 			// Override the default command of the Image
 			command: cmd,
 			// Add new environment variables
@@ -75,7 +75,7 @@ final class ContainerTests: XCTestCase {
 				portBindings: [.tcp(80): [.publishTo(hostIp: "0.0.0.0", hostPort: 8008)]]))
 
 		let name = "81A5DB11-78E9-4B21-9943-23FB75818224"
-		let containerInfo = try await client.containers.create(name: name, spec: spec)
+		let containerInfo = try await client.containers.create(name: name, config: config)
 		let container = try await client.containers.get(containerInfo.id)
 		XCTAssert(container.name.trimmingPrefix("/") == name, "Ensure name is set")
 		XCTAssert(container.config.command == cmd, "Ensure custom command is set")
@@ -92,12 +92,12 @@ final class ContainerTests: XCTestCase {
 
 	func testUpdateContainers() async throws {
 		let name = UUID.init().uuidString
-		let spec = ContainerConfig(image: "hello-world:latest")
-		let container = try await client.containers.create(name: name, spec: spec)
+		let config = ContainerConfig(image: "hello-world:latest")
+		let container = try await client.containers.create(name: name, config: config)
 		try await client.containers.start(container.id)
 
 		let newConfig = UpdateContainerEndpoint.Update(memoryLimit: 64 * 1024 * 1024, memorySwap: 64 * 1024 * 1024)
-		try await client.containers.update(container.id, spec: newConfig)
+		try await client.containers.update(container.id, config: newConfig)
 
 		let updated = try await client.containers.get(container.id)
 		XCTAssert(updated.hostConfig.memoryLimit == 64 * 1024 * 1024, "Ensure param has been updated")
@@ -120,7 +120,7 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testRetrievingLogsNoTty() async throws {
-		let containerInfo = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: false))
+		let containerInfo = try await client.containers.create(config: ContainerConfig(image: "hello-world:latest", tty: false))
 		let container = try await client.containers.get(containerInfo.id)
 		try await client.containers.start(container.id)
 		try await Task.sleep(nanoseconds: 3_000_000_000)
@@ -173,7 +173,7 @@ final class ContainerTests: XCTestCase {
 
 	// Log entries parsing is quite different depending on whether the container has a TTY
 	func testRetrievingLogsTty() async throws {
-		let containerInfo = try await client.containers.create(spec: ContainerConfig(image: "hello-world:latest", tty: true))
+		let containerInfo = try await client.containers.create(config: ContainerConfig(image: "hello-world:latest", tty: true))
 		let container = try await client.containers.get(containerInfo.id)
 		try await client.containers.start(container.id)
 

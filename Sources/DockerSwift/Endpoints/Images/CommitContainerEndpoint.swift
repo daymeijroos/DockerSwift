@@ -26,9 +26,9 @@ public struct CommitContainerEndpoint: SimpleEndpoint {
 	private let tag: String?
 	private let comment: String?
 
-	init(nameOrId: String, spec: ContainerConfig?, pause: Bool, repo: String?, tag: String?, comment: String?) {
+	init(nameOrId: String, config: ContainerConfig?, pause: Bool, repo: String?, tag: String?, comment: String?) {
 		self.nameOrId = nameOrId
-		self.body = spec
+		self.body = config
 		self.pause = pause
 		self.repo = repo
 		self.tag = tag
