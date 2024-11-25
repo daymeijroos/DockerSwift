@@ -27,7 +27,7 @@ extension DockerClient {
 		}
 		
 		/// Add the Docker daemon we are connected to, to an existing Docker Swarm cluster
-		public func join(config: SwarmJoin) async throws {
+		public func join(config: JoinSwarmEndpoint.Body) async throws {
 			try await client.run(JoinSwarmEndpoint(config: config))
 		}
 		
