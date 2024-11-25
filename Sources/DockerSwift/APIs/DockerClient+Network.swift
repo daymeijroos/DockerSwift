@@ -57,7 +57,7 @@ extension DockerClient {
 		///   - to: Name or Id of the`Network`.
 		///   - endpointSettings: Configures the network endpoint (IP Address...)
 		/// - Throws: Errors that can occur when executing the request.
-		public func connect(container: String, to networkId: String, endpointSettings: ContainerConnect.EndpointSettings? = nil) async throws {
+		public func connect(container: String, to networkId: String, endpointSettings: ConnectContainerEndpoint.ConnectSettings.EndpointSettings? = nil) async throws {
 			try await client.run(
 				ConnectContainerEndpoint(
 					networkNameOrId: networkId,
