@@ -16,9 +16,9 @@ public struct CreateContainerEndpoint: SimpleEndpoint {
 	private let name: String?
 	let logger: Logger
 
-	init(name: String? = nil, spec: ContainerConfig, logger: Logger) {
+	init(name: String? = nil, config: ContainerConfig, logger: Logger) {
 		self.name = name
-		self.body = spec
+		self.body = config
 		self.logger = logger
 	}
 
