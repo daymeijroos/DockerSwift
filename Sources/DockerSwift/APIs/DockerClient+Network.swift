@@ -31,7 +31,7 @@ extension DockerClient {
 		///   - spec: configuration as a `NetworkSpec`.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns the newly created `Network` info object.
-		public func create(spec: NetworkSpec) async throws -> CreateNetworkEndpoint.Response {
+		public func create(spec: CreateNetworkEndpoint.NetworkSpec) async throws -> CreateNetworkEndpoint.Response {
 			try await client.run(CreateNetworkEndpoint(spec: spec))
 		}
 	
