@@ -21,7 +21,7 @@ extension DockerClient {
 	/// Get the version of the Docker runtime.
 	/// - Throws: Errors that can occur when executing the request.
 	/// - Returns: Returns the `DockerVersion`.
-	public func version() async throws -> DockerVersion {
+	public func version() async throws -> VersionEndpoint.Response {
 		return try await run(VersionEndpoint())
 	}
 	

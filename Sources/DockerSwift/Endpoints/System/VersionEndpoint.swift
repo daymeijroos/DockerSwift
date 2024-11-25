@@ -1,11 +1,153 @@
 import NIOHTTP1
 import Foundation
+import BetterCodable
 
-struct VersionEndpoint: SimpleEndpoint {
+public struct VersionEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
-	typealias Response = DockerVersion
-	
+
 	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 	let path: String = "version"
+}
+
+public extension VersionEndpoint {
+	struct Response: Codable {
+		public init(
+			platform: Platform,
+			components: [Component],
+			version: String,
+			apiVersion: String,
+			minAPIVersion: String,
+			gitCommit: String,
+			goVersion: String,
+			os: OsType,
+			arch: Architecture,
+			kernelVersion: String? = nil,
+			buildTime: Date,
+			experimental: Bool? = nil
+		) {
+			self.platform = platform
+			self.components = components
+			self.version = version
+			self.apiVersion = apiVersion
+			self.minAPIVersion = minAPIVersion
+			self.gitCommit = gitCommit
+			self.goVersion = goVersion
+			self.os = os
+			self.arch = arch
+			self.kernelVersion = kernelVersion
+			self.buildTime = buildTime
+			self.experimental = experimental
+		}
+
+		public let platform: Platform
+
+		/// Information about system components
+		public let components: [Component]
+
+		/// The version of the daemon
+		public let version: String
+
+		/// The default (and highest) API version that is supported by the daemon
+		public let apiVersion: String
+
+		/// The minimum API version that is supported by the daemon
+		public let minAPIVersion: String
+
+		/// The Git commit of the source code that was used to build the daemon
+		public let gitCommit: String
+
+		/// The version Go used to compile the daemon, and the version of the Go runtime in use.
+		public let goVersion: String
+
+		/// The operating system that the daemon is running on ("linux" or "windows")
+		public let os: OsType
+
+		/// The CPU  architecture that the daemon is running on
+		public let arch: Architecture
+
+		/// The kernel version (uname -r) that the daemon is running on.
+		public let kernelVersion: String?
+
+		/// The date and time that the daemon was compiled.
+		@DateValue<WeirdDockerStrategy>
+		private(set) public var buildTime: Date
+
+		/// Indicates if the daemon is started with experimental features enabled.
+		/// This field is omitted when empty / false.
+		public let experimental: Bool?
+
+		enum CodingKeys: String, CodingKey {
+			case platform = "Platform"
+			case components = "Components"
+			case version = "Version"
+			case apiVersion = "ApiVersion"
+			case minAPIVersion = "MinAPIVersion"
+			case gitCommit = "GitCommit"
+			case goVersion = "GoVersion"
+			case os = "Os"
+			case arch = "Arch"
+			case kernelVersion = "KernelVersion"
+			case buildTime = "BuildTime"
+			case experimental = "Experimental"
+		}
+
+		// MARK: - Platform
+		public struct Platform: Codable {
+			public init(name: String) {
+				self.name = name
+			}
+
+			public let name: String
+
+			enum CodingKeys: String, CodingKey {
+				case name = "Name"
+			}
+		}
+
+		// MARK: - Component
+		public struct Component: Codable {
+			public init(name: String, version: String, details: Details? = nil) {
+				self.name = name
+				self.version = version
+				self.details = details
+			}
+
+			public let name, version: String
+			public let details: Details?
+
+			enum CodingKeys: String, CodingKey {
+				case name = "Name"
+				case version = "Version"
+				case details = "Details"
+			}
+
+			public struct Details: Codable {
+				public let apiVersion, arch: String?
+
+				// This is a boolean, but encoded as a String
+				public let experimental: String?
+
+				// This is a Date but is not encoded using the format used elsewhere in the Docker API.
+				public let buildTime: String?
+
+				public let gitCommit: String?
+				public let goVersion, kernelVersion, minAPIVersion: String?
+
+				public let os: OsType?
+
+				enum CodingKeys: String, CodingKey {
+					case apiVersion = "ApiVersion"
+					case arch = "Arch"
+					case buildTime = "BuildTime"
+					case experimental = "Experimental"
+					case gitCommit = "GitCommit"
+					case goVersion = "GoVersion"
+					case kernelVersion = "KernelVersion"
+					case minAPIVersion = "MinAPIVersion"
+					case os = "Os"
+				}
+			}
+		}
+	}
 }
