@@ -3,7 +3,6 @@ import Foundation
 import Logging
 
 public struct CreateContainerEndpoint: SimpleEndpoint {
-	typealias Body = ContainerConfig
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
@@ -13,7 +12,7 @@ public struct CreateContainerEndpoint: SimpleEndpoint {
 	}
 	var path: String { "containers/create" }
 
-	var body: ContainerConfig
+	let body: ContainerConfig?
 	private let name: String?
 	let logger: Logger
 
