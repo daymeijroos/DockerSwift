@@ -1,10 +1,13 @@
 import NIOHTTP1
 import Foundation
 import Logging
+import NIO
 
 public struct PullImageEndpoint: PipelineEndpoint {
 	typealias Body = NoBody
 	let method: HTTPMethod = .POST
+
+	private static let decoder = JSONDecoder()
 
 	let imageName: String
 	let token: RegistryAuth.Token?
@@ -13,6 +16,8 @@ public struct PullImageEndpoint: PipelineEndpoint {
 	}
 
 	let logger: Logger
+
+	var body: NoBody?
 
 	var path: String {
 		"images/create"
@@ -29,24 +34,17 @@ public struct PullImageEndpoint: PipelineEndpoint {
 		self.logger = logger
 	}
 
-	public struct Response: Codable {
+	public struct FinalResponse: Codable {
 		/// digest of the pulled image
 		public let digest: String
 	}
 
-	struct Status: Codable {
+	public struct Response: Codable {
 		let status: String
 		let id: String?
 	}
 
-	func map(data: String) throws -> Response {
-		if let message = try? MessageResponse.decode(from: data) {
-			throw DockerError.message(message.message)
-		}
-		let parts = data.components(separatedBy: .newlines)
-			.filter({ $0.count > 0 })
-			.compactMap({ try? Status.decode(from: $0) })
-
+	func finalize(_ parts: [Response]) async throws -> FinalResponse {
 		if let digestPart = parts.last(where: { $0.status.hasPrefix("Digest:")}) {
 			// docker flavor
 			let digest = digestPart.status.replacingOccurrences(of: "Digest: ", with: "")
@@ -55,8 +53,13 @@ public struct PullImageEndpoint: PipelineEndpoint {
 			// podman flavor
 			return .init(digest: id)
 		} else {
-			throw DockerError.unknownResponse(data)
+			throw DockerError.unknownResponse("\(parts)")
 		}
 	}
 }
 
+extension PullImageEndpoint: StreamingEndpoint {
+	func mapStreamChunk(_ buffer: ByteBuffer, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [Response] {
+		try await mapDecodableStreamChunk(buffer, decoder: Self.decoder, remainingBytes: &remainingBytes)
+	}
+}

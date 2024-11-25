@@ -122,10 +122,7 @@ public class DockerClient {
 		try await client.shutdown()
 	}
 
-	/// Executes a request to a specific endpoint. The `Endpoint` struct provides all necessary data and parameters for the request.
-	/// - Parameter endpoint: `Endpoint` instance with all necessary data and parameters.
-	/// - Throws: It can throw an error when encoding the body of the `Endpoint` request to JSON.
-	/// - Returns: Returns the expected result definied by the `Endpoint`.
+	/// Executes a request to a specific endpoint that is a single, simple operation. Call and response. No streaming.
 	@discardableResult
 	internal func run<T: SimpleEndpoint>(_ endpoint: T) async throws -> T.Response {
 		var finalHeaders: HTTPHeaders = self.headers
@@ -186,71 +183,24 @@ public class DockerClient {
 		return try decodeOut(buffer)
 	}
 	
-	/// Executes a request to a specific endpoint. The `PipelineEndpoint` struct provides all necessary data and parameters for the request.
-	/// The difference for between `Endpoint` and `EndpointPipeline` is that the second one needs to provide a function that transforms the response as a `String` to the expected result.
-	/// - Parameter endpoint: `PipelineEndpoint` instance with all necessary data and parameters.
-	/// - Throws: It can throw an error when encoding the body of the `PipelineEndpoint` request to JSON.
-	/// - Returns: Returns the expected result definied and transformed by the `PipelineEndpoint`.
+	/// Run an endpoint that is streaming, but the stream is only ancilary to the purpose of the endpoint. For example
+	/// The pull image endpoint. The final, pulled image id is the final purpose, but the stream keeps you apprised to
+	/// updates in the meantime. `progressUpdater` is run as data is provided, but the final result is returned after the
+	/// stream is completed.
 	@discardableResult
-	internal func run<T: PipelineEndpoint>(_ endpoint: T) async throws -> T.Response {
-		defer {
-			if logger.logLevel <= .debug {
-				// printing to avoid the logging prefix, making for an easier copy/pasta
-				try? print("💻⭐️\n\(genCurlCommand(endpoint))\n")
-			}
+	internal func run<T: PipelineEndpoint>(_ endpoint: T, progressUpdater: @escaping (T.Response) -> Void) async throws -> T.FinalResponse {
+		let responseStream = try await run(endpoint, timeout: .hours(1), separators: [])
+
+		var accumulator: [T.Response] = []
+		for try await response in responseStream {
+			progressUpdater(response)
+			accumulator.append(response)
 		}
 
-		let request = try HTTPClientRequest(
-			daemonURL: daemonURL,
-			urlPath: "/\(apiVersion)/\(endpoint.path)",
-			queryItems: endpoint.queryArugments,
-			method: endpoint.method,
-			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
-			headers: headers)
-
-		func decodeOut(_ buffer: ByteBuffer) throws -> T.Response {
-			var buffer = buffer
-			guard
-				let bufferString = buffer.readString(length: buffer.readableBytes)
-			else { throw DockerError.corruptedData("Expected a string") }
-
-			return try endpoint.map(data: bufferString)
-		}
-
-		if case .testing(useMocks: let useMocks) = testMode {
-			if useMocks {
-				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
-					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
-					let stream = try await mockEndpoint.mockedStreamingResponse(request)
-					var buff = ByteBuffer()
-					for try await chunk in stream {
-						buff.writeBytes(chunk.readableBytesView)
-						buff.writeString("\n")
-					}
-					return try decodeOut(buff)
-				} else {
-					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
-				}
-			} else {
-				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
-			}
-		}
-
-		let response = try await client.execute(request, timeout: .minutes(2))
-		try await _initialize(with: response.headers)
-		let responseBody = response.body
-
-		let buffer = try await responseBody.collect(upTo: .max)
-
-		if logger.logLevel <= .debug {
-			var debugResponseCopy = buffer
-			logger.debug("Response: \(debugResponseCopy.readString(length: debugResponseCopy.readableBytes) ?? "No Response Data")")
-		}
-
-		return try decodeOut(buffer)
+		return try await endpoint.finalize(accumulator)
 	}
-	
+
+	/// Run an endpoint that streams data. Log updates might be a good example.
 	@discardableResult
 	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool = false, separators: [UInt8]) async throws -> AsyncThrowingStream<T.Response, Error> {
 		defer {

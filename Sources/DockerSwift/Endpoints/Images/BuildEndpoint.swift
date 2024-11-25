@@ -64,29 +64,7 @@ public struct BuildEndpoint: StreamingEndpoint {
 	}
 
 	func mapStreamChunk(_ buffer: ByteBuffer, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [StreamOutput] {
-		var buffer = buffer
-		guard
-			buffer.readableBytes > 0
-		else { return [] }
-		guard
-			let data = buffer.readData(length: buffer.readableBytes),
-			case let chunks = data.split(separator: "\n".utf8.first!),
-			chunks.isEmpty == false
-		else { throw .noValidData }
-
-		var output: [StreamOutput] = []
-		for (index, chunk) in chunks.enumerated() {
-			do {
-				let decoded = try decoder.decode(StreamOutput.self, from: chunk)
-				output.append(decoded)
-			} catch {
-				guard index == chunks.count - 1 else {
-					throw .decodeError(error)
-				}
-				remainingBytes.writeBytes(chunk)
-			}
-		}
-		return output
+		try await mapDecodableStreamChunk(buffer, decoder: decoder, remainingBytes: &remainingBytes)
 	}
 }
 
