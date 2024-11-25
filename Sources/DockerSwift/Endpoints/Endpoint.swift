@@ -31,13 +31,6 @@ extension StreamingEndpoint {
 	var body: Body? { nil }
 }
 
-/// A Docker API endpoint that receives a stream of bytes in the request body
-protocol UploadEndpoint: Endpoint where Response == AsyncThrowingStream<ByteBuffer, Error>, Body == ByteBuffer {}
-
-extension UploadEndpoint {
-	var headers: HTTPHeaders? { nil }
-}
-
 /// A Docker API endpoint that returns  a progressive stream of JSON objects separated by line returns
 class JSONStreamingEndpoint<T>: StreamingEndpoint where T: Codable {
 	internal init(path: String, method: HTTPMethod = .GET) {

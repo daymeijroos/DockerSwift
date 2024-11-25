@@ -252,7 +252,7 @@ public class DockerClient {
 	}
 	
 	@discardableResult
-	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool, separators: [UInt8]) async throws -> T.Response {
+	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool = false, separators: [UInt8]) async throws -> T.Response {
 		defer {
 			if logger.logLevel <= .debug {
 				// printing to avoid the logging prefix, making for an easier copy/pasta
@@ -260,50 +260,21 @@ public class DockerClient {
 			}
 		}
 
-		let request = try HTTPClientRequest(
-			daemonURL: daemonURL,
-			urlPath: "/\(apiVersion)/\(endpoint.path)",
-			queryItems: endpoint.queryArugments,
-			method: endpoint.method,
-			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
-			headers: headers)
-
-		if case .testing(useMocks: let useMocks) = testMode {
-			if useMocks {
-				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
-					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
-					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
-					return try await mockEndpoint.mockedStreamingResponse(request)
-				} else {
-					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
-				}
+		let body = try {
+			if let endpointBody = endpoint.body as? ByteBuffer {
+				HTTPClientRequest.Body.bytes(endpointBody)
 			} else {
-				logger.debug("(\(T.self) / \(T.Response.self)) ⚡️🔌 Live Socket Testing \(endpoint.method.rawValue) \(endpoint.path)")
+				try endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) }
 			}
-		}
-
-		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout, logger: logger)
-		try await _initialize(with: headers)
-		return stream
-	}
-	
-	@discardableResult
-	internal func run<T: UploadEndpoint>(_ endpoint: T, timeout: TimeAmount, separators: [UInt8]) async throws -> T.Response {
-		defer {
-			if logger.logLevel <= .debug {
-				// printing to avoid the logging prefix, making for an easier copy/pasta
-				try? print("💻⭐️\n\(genCurlCommand(endpoint))\n")
-			}
-		}
+		}()
 
 		let request = HTTPClientRequest(
 			daemonURL: daemonURL,
 			urlPath: "/\(apiVersion)/\(endpoint.path)",
 			queryItems: endpoint.queryArugments,
 			method: endpoint.method,
-			body: endpoint.body.map { HTTPClientRequest.Body.bytes($0) },
+			body: body,
 			headers: headers)
-
 
 		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
@@ -342,15 +313,6 @@ extension DockerClient {
 	}
 
 	func genCurlCommand<E: StreamingEndpoint>(_ endpoint: E) throws -> String {
-		try genCurlCommand(
-			method: endpoint.method,
-			path: endpoint.path,
-			queryItems: endpoint.queryArugments,
-			headers: nil,
-			body: endpoint.body)
-	}
-
-	func genCurlCommand<E: UploadEndpoint>(_ endpoint: E) throws -> String {
 		try genCurlCommand(
 			method: endpoint.method,
 			path: endpoint.path,

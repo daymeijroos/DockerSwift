@@ -2,11 +2,10 @@ import NIOHTTP1
 import NIO
 import Foundation
 
-public struct BuildEndpoint: UploadEndpoint {
-	var body: Body?
+public struct BuildEndpoint: StreamingEndpoint {
+	var body: ByteBuffer?
 
 	public typealias Response = AsyncThrowingStream<ByteBuffer, Error>
-	typealias Body = ByteBuffer
 	let method: HTTPMethod = .POST
 
 	private let buildConfig: Configuration
