@@ -3,3 +3,4 @@
 * Move models into endpoints except when shared between endpoints
 * uint64 untyped extensions for mb, gb, ms, etc -> RawRepresentable types
 * rename `spec` to `config`
+* disabled streaming endpoints
