@@ -51,7 +51,7 @@ extension DockerClient {
 		///   - nameOrId: Name or id of a container.
 		///   - spec: a `ContainerUpdate` representing the configuration to update.
 		/// - Throws: Errors that can occur when executing the request.
-		public func update(_ nameOrId: String, spec: ContainerUpdate) async throws {
+		public func update(_ nameOrId: String, spec: UpdateContainerEndpoint.Update) async throws {
 			try await client.run(UpdateContainerEndpoint(nameOrId: nameOrId, spec: spec))
 		}
 		
