@@ -48,7 +48,7 @@ extension DockerClient {
 		/// Deletes all unused volumes.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns a `PrunedVolumes` details about removed volumes and the reclaimed space.
-		public func prune(all: Bool = false) async throws -> PrunedVolumes {
+		public func prune(all: Bool = false) async throws -> PruneVolumesEndpoint.Response {
 			return try await client.run(PruneVolumesEndpoint())
 		}
 	}
