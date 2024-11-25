@@ -96,7 +96,7 @@ final class ContainerTests: XCTestCase {
 		let container = try await client.containers.create(name: name, spec: spec)
 		try await client.containers.start(container.id)
 
-		let newConfig = ContainerUpdate(memoryLimit: 64 * 1024 * 1024, memorySwap: 64 * 1024 * 1024)
+		let newConfig = UpdateContainerEndpoint.Update(memoryLimit: 64 * 1024 * 1024, memorySwap: 64 * 1024 * 1024)
 		try await client.containers.update(container.id, spec: newConfig)
 
 		let updated = try await client.containers.get(container.id)
