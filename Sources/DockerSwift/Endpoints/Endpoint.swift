@@ -14,13 +14,8 @@ protocol Endpoint {
 }
 
 extension SimpleEndpoint {
-	public var body: Body? {
-		return nil
-	}
-	
-	public var headers: HTTPHeaders? {
-		return nil
-	}
+	public var headers: HTTPHeaders? { nil }
+	public var body: Body? { nil }
 }
 
 protocol SimpleEndpoint: Endpoint where Response: Codable {}
