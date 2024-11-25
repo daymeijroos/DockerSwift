@@ -194,7 +194,7 @@ extension DockerClient {
 		/// - Parameter nameOrId: Name or ID of the`Container`.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns a list of `ContainerFsChange`.
-		public func getFsChanges(_ nameOrId: String) async throws -> [ContainerFsChange] {
+		public func getFsChanges(_ nameOrId: String) async throws -> GetContainerChangesEndpoint.Response {
 			return try await client.run(GetContainerChangesEndpoint(nameOrId: nameOrId))
 		}
 		
