@@ -77,7 +77,7 @@ extension DockerClient {
 		/// - Parameter nameOrId: Name or id of an image that should be fetched.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns a list of `ImageLayer`. Layers are sorted from uuswer to
-		public func history(_ nameOrId: String) async throws -> [ImageLayer] {
+		public func history(_ nameOrId: String) async throws -> GetImageHistoryEndpoint.Response {
 			return try await client.run(GetImageHistoryEndpoint(nameOrId: nameOrId))
 		}
 		
