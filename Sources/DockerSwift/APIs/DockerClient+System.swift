@@ -6,7 +6,7 @@ extension DockerClient {
 	/// Get system information
 	/// - Throws: Errors that can occur when executing the request.
 	/// - Returns: Returns the `SystemInformation`.
-	public func info() async throws -> SystemInformation {
+	public func info() async throws -> SystemInformationEndpoint.Response {
 		return try await run(SystemInformationEndpoint())
 	}
 	
