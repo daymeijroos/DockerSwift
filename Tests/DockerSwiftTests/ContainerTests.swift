@@ -281,10 +281,10 @@ final class ContainerTests: XCTestCase {
 //	}
 
 	func testWaitContainer() async throws {
-		let container = try await client.containers.create(imageID: "hello-world:latest")
+		let containerInfo = try await client.containers.create(imageID: "hello-world:latest")
 
-		try await client.containers.start(container.id)
-		let statusCode = try await client.containers.wait(container.id)
+		try await client.containers.start(containerInfo.id)
+		let statusCode = try await client.containers.wait(containerInfo.id)
 		XCTAssert(statusCode == 0, "Ensure container exited properly")
 	}
 }
