@@ -31,8 +31,9 @@ extension StreamingEndpoint {
 	var body: Body? { nil }
 }
 
+@available(*, deprecated)
 /// A Docker API endpoint that returns  a progressive stream of JSON objects separated by line returns
-class JSONStreamingEndpoint<T>: StreamingEndpoint where T: Codable {
+public class JSONStreamingEndpoint<T>: StreamingEndpoint where T: Codable {
 	internal init(path: String, method: HTTPMethod = .GET) {
 		self.path = path
 		self.method = method
@@ -48,7 +49,11 @@ class JSONStreamingEndpoint<T>: StreamingEndpoint where T: Codable {
 	typealias Body = NoBody
 	
 	private let decoder = JSONDecoder()
-	
+
+	func mapStreamChunk(_ buffer: ByteBuffer, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [AsyncThrowingStream<ByteBuffer, any Error>] {
+		fatalError()
+	}
+
 	func map(response: Response, as: T.Type) async throws -> AsyncThrowingStream<T, Error>  {
 		return AsyncThrowingStream<T, Error> { continuation in
 			Task {

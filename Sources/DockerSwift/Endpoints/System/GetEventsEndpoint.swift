@@ -1,6 +1,7 @@
 import Foundation
 import BetterCodable
 
+@available(*, deprecated)
 final class GetEventsEndpoint: JSONStreamingEndpoint<DockerEvent> {
 
 	override var path: String {

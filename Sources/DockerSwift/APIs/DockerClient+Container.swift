@@ -215,11 +215,11 @@ extension DockerClient {
 		///   - oneShot: Set to `true`to only get a single stat instead of waiting for 2 cycles. Must be used with `stream`=`false`.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns a stream of `ContainerStats`instances.
-		public func stats(_ nameOrId: String, stream: Bool = true, oneShot: Bool = false) async throws -> AsyncThrowingStream<ContainerStats, Error> {
-			let endpoint = GetContainerStatsEndpoint(nameOrId: nameOrId, stream: stream, oneShot: oneShot)
-			let stream = try await client.run(endpoint, timeout: .hours(12), hasLengthHeader: false, separators: [UInt8(13)])
-			return try await endpoint.map(response: stream, as: ContainerStats.self)
-		}
+//		public func stats(_ nameOrId: String, stream: Bool = true, oneShot: Bool = false) async throws -> AsyncThrowingStream<ContainerStats, Error> {
+//			let endpoint = GetContainerStatsEndpoint(nameOrId: nameOrId, stream: stream, oneShot: oneShot)
+//			let strem = try await client.run(endpoint, timeout: .hours(12), hasLengthHeader: false, separators: [UInt8(13)])
+//			return strem
+//		}
 	}
 }
 

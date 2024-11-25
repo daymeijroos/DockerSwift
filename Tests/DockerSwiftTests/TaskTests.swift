@@ -58,35 +58,35 @@ final class TaskTests: XCTestCase {
 		
 	}
 	
-	func testGetTaskLogs() async throws {
-		let name = UUID().uuidString
-		let spec = ServiceSpec(
-			name: name,
-			taskTemplate: .init(
-				containerSpec: .init(image: "nginx:latest"),
-				resources: .init(
-					limits: .init(memoryBytes: UInt64(64 * 1024 * 1024))
-				)
-			),
-			mode: .replicated(1)
-		)
-		let _ = try await client.services.create(spec: spec)
-		let tasks = try await client.tasks.list()
-		let task = try await client.tasks.get(tasks[0].id)
-		
-		var containerStatus: SwarmTask.TaskStatus.TaskState = .pending
-		var index = 0
-		repeat {
-			let task = try await client.tasks.get(tasks[0].id)
-			containerStatus = task.status.state
-			try await Task.sleep(nanoseconds: 1_000_000_000)
-			index += 1
-		} while containerStatus != .running && index < 15
-		
-		for try await entry in try await client.tasks.logs(task: task) {
-			XCTAssert(entry.timestamp != Date.distantPast, "Ensure timestamp is parsed properly")
-		}
-	}
+//	func testGetTaskLogs() async throws {
+//		let name = UUID().uuidString
+//		let spec = ServiceSpec(
+//			name: name,
+//			taskTemplate: .init(
+//				containerSpec: .init(image: "nginx:latest"),
+//				resources: .init(
+//					limits: .init(memoryBytes: UInt64(64 * 1024 * 1024))
+//				)
+//			),
+//			mode: .replicated(1)
+//		)
+//		let _ = try await client.services.create(spec: spec)
+//		let tasks = try await client.tasks.list()
+//		let task = try await client.tasks.get(tasks[0].id)
+//		
+//		var containerStatus: SwarmTask.TaskStatus.TaskState = .pending
+//		var index = 0
+//		repeat {
+//			let task = try await client.tasks.get(tasks[0].id)
+//			containerStatus = task.status.state
+//			try await Task.sleep(nanoseconds: 1_000_000_000)
+//			index += 1
+//		} while containerStatus != .running && index < 15
+//		
+//		for try await entry in try await client.tasks.logs(task: task) {
+//			XCTAssert(entry.timestamp != Date.distantPast, "Ensure timestamp is parsed properly")
+//		}
+//	}
 	
 	func testZzzLeaveSwarm() async throws {
 		try await client.swarm.leave(force: true)

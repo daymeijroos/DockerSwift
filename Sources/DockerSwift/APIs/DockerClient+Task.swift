@@ -36,38 +36,38 @@ extension DockerClient {
 		///   - tail: number of last existing log lines to return. Default: all.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns  a  sequence of `DockerLogEntry`.
-		public func logs(task: SwarmTask, details: Bool = false, stdErr: Bool = true, stdOut: Bool = true, timestamps: Bool = true, follow: Bool = false, tail: UInt? = nil, since: Date = .distantPast, until: Date = .distantFuture) async throws -> AsyncThrowingStream<DockerLogEntry, Error> {
-			let endpoint = GetTaskLogsEndpoint(
-				taskId: task.id,
-				details: details,
-				stdout: stdOut,
-				stderr: stdErr,
-				timestamps: timestamps,
-				follow: follow,
-				tail: tail == nil ? "all" : "\(tail!)",
-				since: since,
-				until: until
-			)
-			
-			var tty: Bool!
-			if let hasTty = task.spec.containerSpec.tty {
-				tty = hasTty
-			}
-			else {
-				let image = try await self.client.images.get(task.spec.containerSpec.image)
-				tty = image.containerConfig.tty
-			}
-			
-			let response = try await client.run(
-				endpoint,
-				// Arbitrary timeouts.
-				// TODO: should probably make these configurable
-				timeout: follow ? .hours(12) : .seconds(60),
-				hasLengthHeader: !tty,
-				separators: [UInt8(10)]
-			)
-			return try await endpoint.map(response: response, tty: task.spec.containerSpec.tty ?? false)
-		}
+//		public func logs(task: SwarmTask, details: Bool = false, stdErr: Bool = true, stdOut: Bool = true, timestamps: Bool = true, follow: Bool = false, tail: UInt? = nil, since: Date = .distantPast, until: Date = .distantFuture) async throws -> AsyncThrowingStream<DockerLogEntry, Error> {
+//			let endpoint = GetTaskLogsEndpoint(
+//				taskId: task.id,
+//				details: details,
+//				stdout: stdOut,
+//				stderr: stdErr,
+//				timestamps: timestamps,
+//				follow: follow,
+//				tail: tail == nil ? "all" : "\(tail!)",
+//				since: since,
+//				until: until
+//			)
+//			
+//			var tty: Bool!
+//			if let hasTty = task.spec.containerSpec.tty {
+//				tty = hasTty
+//			}
+//			else {
+//				let image = try await self.client.images.get(task.spec.containerSpec.image)
+//				tty = image.containerConfig.tty
+//			}
+//			
+//			let response = try await client.run(
+//				endpoint,
+//				// Arbitrary timeouts.
+//				// TODO: should probably make these configurable
+//				timeout: follow ? .hours(12) : .seconds(60),
+//				hasLengthHeader: !tty,
+//				separators: [UInt8(10)]
+//			)
+//			return try await endpoint.map(response: response, tty: task.spec.containerSpec.tty ?? false)
+//		}
 	
 	}
 }

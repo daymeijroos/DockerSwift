@@ -3,6 +3,7 @@ import NIOHTTP1
 import Foundation
 import BetterCodable
 
+@available(*, deprecated)
 final class GetContainerStatsEndpoint: JSONStreamingEndpoint<ContainerStats> {
 	typealias Body = NoBody
 	typealias Response = AsyncThrowingStream<ContainerStats, Error>
