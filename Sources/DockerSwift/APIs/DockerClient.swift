@@ -252,7 +252,7 @@ public class DockerClient {
 	}
 	
 	@discardableResult
-	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool = false, separators: [UInt8]) async throws -> T.Response {
+	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool = false, separators: [UInt8]) async throws -> AsyncThrowingStream<T.Response, Error> {
 		defer {
 			if logger.logLevel <= .debug {
 				// printing to avoid the logging prefix, making for an easier copy/pasta
@@ -276,12 +276,45 @@ public class DockerClient {
 			body: body,
 			headers: headers)
 
+		func consumeStream(_ stream: AsyncThrowingStream<ByteBuffer, Error>) -> AsyncThrowingStream<T.Response, Error> {
+			let (responseStream, responseContinuation) = AsyncThrowingStream<T.Response, Error>.makeStream()
+			Task {
+				do {
+					var chunkyBuffer = ByteBuffer()
+					for try await var buffer in stream {
+						chunkyBuffer.writeBuffer(&buffer)
+
+						do throws(StreamChunkError) {
+							var remaining = ByteBuffer()
+							defer { chunkyBuffer = remaining }
+							let results = try await endpoint.mapStreamChunk(chunkyBuffer, remainingBytes: &remaining)
+							for result in results {
+								responseContinuation.yield(result)
+							}
+						} catch {
+							switch error {
+							case .noValidData:
+								continue
+							case .decodeError(let error):
+								responseContinuation.finish(throwing: error)
+							}
+						}
+					}
+					responseContinuation.finish()
+				} catch {
+					responseContinuation.finish(throwing: error)
+				}
+			}
+			return responseStream
+		}
+
 		if case .testing(useMocks: let useMocks) = testMode {
 			if useMocks {
 				if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
 					try await _initialize(with: type(of: mockEndpoint).podmanHeaders)
 					logger.debug("(\(T.self) / \(T.Response.self)) 🍀🍀 Mocked \(endpoint.method.rawValue) \(endpoint.path)")
-					return try await mockEndpoint.mockedStreamingResponse(request)
+					let mockStream = try await mockEndpoint.mockedStreamingResponse(request)
+					return consumeStream(mockStream)
 				} else {
 					logger.debug("(\(T.self) / \(T.Response.self)) 🤬🥵 Not Mocked \(endpoint.method.rawValue) \(endpoint.path)")
 				}
@@ -292,7 +325,8 @@ public class DockerClient {
 
 		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout, logger: logger)
 		try await _initialize(with: headers)
-		return stream
+
+		return consumeStream(stream)
 	}
 
 	package enum TestMode {

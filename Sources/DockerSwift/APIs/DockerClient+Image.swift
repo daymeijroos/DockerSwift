@@ -90,8 +90,7 @@ extension DockerClient {
 		/// - Returns: Returns an `EventLoopFuture` when the image has been removed or an error is thrown.
 		public func build(config: BuildEndpoint.Configuration, context: ByteBuffer, timeout: TimeAmount = .minutes(10)) async throws -> AsyncThrowingStream<BuildEndpoint.StreamOutput, Error> {
 			let endpoint = BuildEndpoint(buildConfig: config, context: context)
-			let response =  try await client.run(endpoint, timeout: timeout, separators: [UInt8(ascii: "}"), UInt8(13)])
-			return try await endpoint.map(response: response)
+			return try await client.run(endpoint, timeout: timeout, separators: [])
 		}
 
 		/// Creates an image from an existing Container (`docker commit`).

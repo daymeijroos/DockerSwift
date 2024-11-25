@@ -24,7 +24,14 @@ protocol PipelineEndpoint: SimpleEndpoint {
 	func map(data: String) throws -> Self.Response
 }
 
-protocol StreamingEndpoint: Endpoint where Response == AsyncThrowingStream<ByteBuffer, Error> {}
+protocol StreamingEndpoint: Endpoint {
+	func mapStreamChunk(_ buffer: ByteBuffer, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [Response]
+}
+
+enum StreamChunkError: Error {
+	case noValidData
+	case decodeError(Error)
+}
 
 extension StreamingEndpoint {
 	var headers: HTTPHeaders? { nil }

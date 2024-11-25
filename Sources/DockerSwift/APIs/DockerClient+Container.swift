@@ -128,7 +128,7 @@ extension DockerClient {
 		/// - Returns: Returns  a  sequence of `DockerLogEntry`.
 		public func logs(container: Container, stdErr: Bool = true, stdOut: Bool = true, timestamps: Bool = true, follow: Bool = false, tail: UInt? = nil, since: Date = .distantPast, until: Date = .distantFuture) async throws -> AsyncThrowingStream<DockerLogEntry, Error> {
 			let endpoint = GetContainerLogsEndpoint(
-				containerId: container.id,
+				container: container,
 				stdout: stdOut,
 				stderr: stdErr,
 				timestamps: timestamps,
@@ -137,16 +137,13 @@ extension DockerClient {
 				since: since,
 				until: until
 			)
-			let response = try await client.run(
+			return try await client.run(
 				endpoint,
 				// Arbitrary timeouts.
 				// TODO: should probably make these configurable
 				timeout: follow ? .hours(12) : .seconds(60),
 				hasLengthHeader: !container.config.tty,
-				separators: [UInt8(13)]
-			)
-			
-			return try await endpoint.map(response: response, tty: container.config.tty)
+				separators: [UInt8(13)])
 		}
 		
 		/// Attaches to a container. Allows to retrieve a stream of the container output, and sending commands if it listens on the standard input.

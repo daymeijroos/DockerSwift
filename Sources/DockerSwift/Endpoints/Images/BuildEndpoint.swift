@@ -5,7 +5,7 @@ import Foundation
 public struct BuildEndpoint: StreamingEndpoint {
 	var body: ByteBuffer?
 
-	public typealias Response = AsyncThrowingStream<ByteBuffer, Error>
+	public typealias Response = StreamOutput
 	let method: HTTPMethod = .POST
 
 	private let buildConfig: Configuration
@@ -63,45 +63,30 @@ public struct BuildEndpoint: StreamingEndpoint {
 		self.encoder = .init()
 	}
 
-	func map(response: Response) async throws -> AsyncThrowingStream<StreamOutput, Error>  {
-		return AsyncThrowingStream<StreamOutput, Error> { continuation in
-			Task {
-				for try await var buffer in response {
-					let totalDataSize = buffer.readableBytes
-					while buffer.readerIndex < totalDataSize {
-						if buffer.readableBytes == 0 {
-							continuation.finish()
-						}
-						guard let data = buffer.readData(length: buffer.readableBytes) else {
-							continuation.finish(throwing: DockerLogDecodingError.dataCorrupted("Unable to read \(totalDataSize) bytes as Data"))
-							return
-						}
-						let splat = data.split(separator: 10 /* ascii code for \n */)
-						guard splat.count >= 1 else {
-							print("\n!!! Expected json terminated by line return")
-							continuation.finish(throwing: DockerError.unknownResponse("Expected json terminated by line return"))
-							return
-						}
-						for streamItem in splat {
-							let model: StreamOutput!
-							do {
-								model = try decoder.decode(StreamOutput.self, from: streamItem)
-							}
-							catch(let error) {
-								continuation.finish(throwing: error)
-								return
-							}
-							guard model.message == nil else {
-								continuation.finish(throwing: DockerError.message(model.message!))
-								return
-							}
-							continuation.yield(model)
-						}
-					}
+	func mapStreamChunk(_ buffer: ByteBuffer, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [StreamOutput] {
+		var buffer = buffer
+		guard
+			buffer.readableBytes > 0
+		else { return [] }
+		guard
+			let data = buffer.readData(length: buffer.readableBytes),
+			case let chunks = data.split(separator: "\n".utf8.first!),
+			chunks.isEmpty == false
+		else { throw .noValidData }
+
+		var output: [StreamOutput] = []
+		for (index, chunk) in chunks.enumerated() {
+			do {
+				let decoded = try decoder.decode(StreamOutput.self, from: chunk)
+				output.append(decoded)
+			} catch {
+				guard index == chunks.count - 1 else {
+					throw .decodeError(error)
 				}
-				continuation.finish()
+				remainingBytes.writeBytes(chunk)
 			}
 		}
+		return output
 	}
 }
 
