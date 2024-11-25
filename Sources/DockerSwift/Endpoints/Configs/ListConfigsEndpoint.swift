@@ -7,9 +7,6 @@ struct ListConfigsEndpoint: SimpleEndpoint {
 	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 
-	init() {
-	}
-	
 	var path: String {
 		"configs"
 	}
