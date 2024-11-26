@@ -9,7 +9,8 @@ extension CreateContainerEndpoint: MockedResponseEndpoint {
 		switch (body.image, body.command) {
 		case
 			("nginx:latest", nil),
-			("hello-world:latest", ["/custom/command", "--option"]):
+			("hello-world:latest", ["/custom/command", "--option"]),
+			("sha256:7a3f95c078122f959979fac556ae6f43746c9f32e5a66526bb503ed1d4adbd07", _):
 			return [
 				.string(#"{"Id":"ce25040926ba103e72dd4070db9a07c4510291a3a3475b0cb175dd06dddfbc93","Warnings":[]}"#)
 			]
