@@ -6,7 +6,7 @@ import AsyncHTTPClient
 import Logging
 
 /// The entry point for Docker client commands.
-public class DockerClient {
+public class DockerClient: @unchecked Sendable {
 	internal let apiVersion = "v1.41"
 	private let headers = HTTPHeaders([
 		("Host", "localhost"), // Required by Docker
