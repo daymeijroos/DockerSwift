@@ -37,7 +37,7 @@ extension StreamingEndpoint {
 	var headers: HTTPHeaders? { nil }
 	var body: Body? { nil }
 
-	func mapDecodableStreamChunk(_ buffer: ByteBuffer, decoder: AnyDecoder, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [Response] where Response: Decodable {
+	func mapDecodableStreamChunk(_ buffer: ByteBuffer, decoder: JSONDecoder, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [Response] where Response: Decodable {
 		var buffer = buffer
 		guard
 			buffer.readableBytes > 0
