@@ -64,6 +64,13 @@ extension MockedResponseEndpoint {
 		try await superMockedStreamingResponse(request, intermittentSleepDuration: .milliseconds(20))
 	}
 
+	func validate(method: HTTPMethod, andGetURLFromRequest request: HTTPClientRequest) throws -> URL {
+		guard request.method == method else { throw DockerError.message("require post method") }
+		guard
+			let url = URL(string: request.url)
+		else { throw DockerError.message("invalid url") }
+		return url
+	}
 	func validate(request: HTTPClientRequest) throws {}
 }
 

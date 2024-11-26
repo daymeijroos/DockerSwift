@@ -11,10 +11,7 @@ extension StopContainerEndpoint: MockedResponseEndpoint {
 	}
 
 	public func validate(request: HTTPClientRequest) throws {
-		guard request.method == .POST else { throw DockerError.message("require post method") }
-		guard
-			let url = URL(string: request.url)
-		else { throw DockerError.message("invalid url") }
+		let url = try validate(method: .POST, andGetURLFromRequest: request)
 
 		let components = url.pathComponents
 
