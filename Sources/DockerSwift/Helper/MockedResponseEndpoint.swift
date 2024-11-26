@@ -8,6 +8,8 @@ protocol MockedResponseEndpoint: Endpoint {
 
 	func mockedResponse(_ request: HTTPClientRequest) async throws -> ByteBuffer
 	func mockedStreamingResponse(_ request: HTTPClientRequest) async throws -> AsyncThrowingStream<ByteBuffer, Error>
+
+	func validate(request: HTTPClientRequest) throws
 }
 
 extension MockedResponseEndpoint {
@@ -61,6 +63,8 @@ extension MockedResponseEndpoint {
 	func mockedStreamingResponse(_ request: HTTPClientRequest) async throws -> AsyncThrowingStream<ByteBuffer, Error> {
 		try await superMockedStreamingResponse(request, intermittentSleepDuration: .milliseconds(20))
 	}
+
+	func validate(request: HTTPClientRequest) throws {}
 }
 
 enum MockedResponseData {

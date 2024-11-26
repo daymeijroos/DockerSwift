@@ -157,6 +157,7 @@ public class DockerClient {
 		if case .testing(useMocks: let useMocks) = testMode {
 			do {
 				return try await performTest(useMocks: useMocks, endpoint: endpoint) { mockEndpoint in
+					try mockEndpoint.validate(request: request)
 					let buffer = try await mockEndpoint.mockedResponse(request)
 					return try decodeOut(buffer)
 				}
@@ -255,6 +256,7 @@ public class DockerClient {
 		if case .testing(useMocks: let useMocks) = testMode {
 			do {
 				return try await performTest(useMocks: useMocks, endpoint: endpoint) { mockEndpoint in
+					try mockEndpoint.validate(request: request)
 					let mockStream = try await mockEndpoint.mockedStreamingResponse(request)
 					return consumeStream(mockStream)
 				}
