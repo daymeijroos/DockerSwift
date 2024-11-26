@@ -28,16 +28,20 @@ extension MockedResponseEndpoint {
 		]
 	}
 
-	func mockedResponse(_ request: HTTPClientRequest) async throws -> ByteBuffer {
+	func superMockedResponse(_ request: HTTPClientRequest, sleepDelay: Duration) async throws -> ByteBuffer {
 		guard
 			let first = responseData.first
 		else { throw DockerError.message("Error retrieving mock data") }
 
-		try await Task.sleep(for: .milliseconds(5))
+		try await Task.sleep(for: sleepDelay)
 		return first.data
 	}
 
-	func mockedStreamingResponse(_ request: HTTPClientRequest) async throws -> AsyncThrowingStream<ByteBuffer, Error> {
+	func mockedResponse(_ request: HTTPClientRequest) async throws -> ByteBuffer {
+		try await superMockedResponse(request, sleepDelay: .milliseconds(5))
+	}
+
+	func superMockedStreamingResponse(_ request: HTTPClientRequest, intermittentSleepDuration: Duration) async throws -> AsyncThrowingStream<ByteBuffer, Error> {
 		guard responseData.isEmpty == false else { throw DockerError.message("No mocked data available") }
 
 		let (stream, continuation) = AsyncThrowingStream<ByteBuffer, Error>.makeStream()
@@ -45,13 +49,17 @@ extension MockedResponseEndpoint {
 		Task {
 			for data in responseData {
 				continuation.yield(data.data)
-				try await Task.sleep(for: .milliseconds(20))
+				try await Task.sleep(for: intermittentSleepDuration)
 			}
-			
+
 			continuation.finish()
 		}
 
 		return stream
+	}
+
+	func mockedStreamingResponse(_ request: HTTPClientRequest) async throws -> AsyncThrowingStream<ByteBuffer, Error> {
+		try await superMockedStreamingResponse(request, intermittentSleepDuration: .milliseconds(20))
 	}
 }
 
