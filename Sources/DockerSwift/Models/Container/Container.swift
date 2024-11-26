@@ -16,7 +16,7 @@ public struct Container: Codable {
 	/// Container configuration that depends on the host we are running on
 	public let hostConfig: ContainerHostConfig
 
-	@DateValue<WeirdDockerStrategy>
+	@DateValue<DockerDateVarietyStrategy>
 	/// The time the container was created
 	public var createdAt: Date
 	
@@ -210,11 +210,11 @@ public struct Container: Codable {
 		
 		// TODO: fix parsing these inconsistent dates (different format when set and not set)
 		/// The time when this container was last started.
-		@DateValue<WeirdDockerStrategy>
+		@DateValue<DockerDateVarietyStrategy>
 		private(set)public var startedAt: Date
 		
 		/// The time when this container last exited.
-		@DateValue<WeirdDockerStrategy>
+		@DateValue<DockerDateVarietyStrategy>
 		private(set)public var finishedAt: Date
 		
 		/// The state of this container (e.g. `exited`)

@@ -70,7 +70,7 @@ public extension VersionEndpoint {
 		public let kernelVersion: String?
 
 		/// The date and time that the daemon was compiled.
-		@DateValue<WeirdDockerStrategy>
+		@DateValue<DockerDateVarietyStrategy>
 		private(set) public var buildTime: Date
 
 		/// Indicates if the daemon is started with experimental features enabled.

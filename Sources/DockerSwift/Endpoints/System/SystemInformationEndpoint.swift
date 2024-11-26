@@ -221,7 +221,7 @@ public extension SystemInformationEndpoint {
 		public let nGoroutines: UInt
 
 		/// Current system-time in RFC 3339 format with nano-seconds.
-		@DateValue<WeirdDockerStrategy>
+		@DateValue<DockerDateVarietyStrategy>
 		public var systemTime: Date
 
 		/// The logging driver to use as a default for new containers.
@@ -612,9 +612,9 @@ public extension SystemInformationEndpoint.Response {
 
 			public let id: String
 			public let version: SwarmVersion
-			@DateValue<WeirdDockerStrategy>
+			@DateValue<DockerDateVarietyStrategy>
 			public var createdAt: Date
-			@DateValue<WeirdDockerStrategy>
+			@DateValue<DockerDateVarietyStrategy>
 			public var updatedAt: Date
 			public let spec: SwarmSpec
 			public let tlsInfo: SwarmTLSInfo

@@ -68,7 +68,7 @@ public extension InspectImagesEndpoint {
 
 		/// Date when the image was created.
 		/// This is **not** the date when the image was pulled.
-		@DateValue<WeirdDockerStrategy>
+		@DateValue<DockerDateVarietyStrategy>
 		public var created: Date
 
 		/// The version of Docker that was used to build the image.
@@ -166,7 +166,7 @@ public extension InspectImagesEndpoint {
 			// otherwise default to different format ""0001-01-01T00:00:00Z". Nice Docker, well done! So convenient and consistent
 			/// Date and time at which the image was last tagged.
 			/// This information is only available if the image was tagged locally, and omitted otherwise.
-			@DateValue<WeirdDockerStrategy>
+			@DateValue<DockerDateVarietyStrategy>
 			private(set) public var lastTagTime: Date
 
 			enum CodingKeys: String, CodingKey {

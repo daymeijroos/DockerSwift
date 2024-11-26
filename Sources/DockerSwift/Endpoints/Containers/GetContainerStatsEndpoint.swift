@@ -23,10 +23,10 @@ final class GetContainerStatsEndpoint: JSONStreamingEndpoint<ContainerStats> {
 
 public struct ContainerStats: Codable {
 	/// Date and time when the statistics were read
-	@DateValue<WeirdDockerStrategy>
+	@DateValue<DockerDateVarietyStrategy>
 	private(set) public var readAt: Date
 
-	@DateValue<WeirdDockerStrategy>
+	@DateValue<DockerDateVarietyStrategy>
 	private(set) public var previousReadAt: Date
 
 	/// Number of processes

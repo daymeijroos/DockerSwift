@@ -3,7 +3,7 @@ import BetterCodable
 
 /// Docker sometimes provides timestamps with fractional seconds and sometimes without.
 /// Both are valid ISO8601 standards, but require different configurations.
-public struct WeirdDockerStrategy: DateValueCodableStrategy {
+public struct DockerDateVarietyStrategy: DateValueCodableStrategy {
 	private static let isoFractionsFormatter: ISO8601DateFormatter = {
 		let new = ISO8601DateFormatter()
 		new.formatOptions = [.withInternetDateTime, .withFractionalSeconds]

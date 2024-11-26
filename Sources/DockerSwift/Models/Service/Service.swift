@@ -15,10 +15,10 @@ public struct Service {
 	
 	public let id: String
 	
-	@DateValue<WeirdDockerStrategy>
+	@DateValue<DockerDateVarietyStrategy>
 	private(set) public var createdAt: Date
 	
-	@DateValue<WeirdDockerStrategy>
+	@DateValue<DockerDateVarietyStrategy>
 	private(set) public var updatedAt: Date
 	
 	/// The version number of the service. This is needed to avoid conflicting writes.

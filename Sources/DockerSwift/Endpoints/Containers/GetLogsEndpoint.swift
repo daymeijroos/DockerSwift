@@ -114,7 +114,7 @@ public struct GetLogsEndpoint: StreamingEndpoint {
 		let dateStrSlice = logLine.prefix(while: { $0.isWhitespace == false })
 		let	dateStr = String(dateStrSlice)
 		guard dateStrSlice.endIndex != logLine.endIndex else {
-			if let date = try? WeirdDockerStrategy.decode(dateStr) {
+			if let date = try? DockerDateVarietyStrategy.decode(dateStr) {
 				return (date, "")
 			} else {
 				return (nil, logLine)
@@ -123,7 +123,7 @@ public struct GetLogsEndpoint: StreamingEndpoint {
 		let remaining = logLine.suffix(from: logLine.index(after: dateStrSlice.endIndex))
 
 		guard
-			let date = try? WeirdDockerStrategy.decode(dateStr)
+			let date = try? DockerDateVarietyStrategy.decode(dateStr)
 		else { return (nil, logLine) }
 		return (date, String(remaining))
 	}
