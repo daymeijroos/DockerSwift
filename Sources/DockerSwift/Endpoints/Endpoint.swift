@@ -13,12 +13,16 @@ protocol Endpoint {
 	var body: Body? { get }
 }
 
+protocol SimpleEndpoint: Endpoint where Response: Codable {
+	func responseValidation(_ response: Response) throws(DockerError)
+}
+
 extension SimpleEndpoint {
 	public var headers: HTTPHeaders? { nil }
 	public var body: Body? { nil }
+	
+	func responseValidation(_ response: Response) throws(DockerError) {}
 }
-
-protocol SimpleEndpoint: Endpoint where Response: Codable {}
 
 enum StreamChunkError: Error {
 	case noValidData

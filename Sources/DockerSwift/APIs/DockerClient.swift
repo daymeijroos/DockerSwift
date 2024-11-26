@@ -151,7 +151,9 @@ public class DockerClient {
 			guard T.Response.self != String.self else {
 				return String(buffer: buffer) as! T.Response
 			}
-			return try decoder.decode(T.Response.self, from: buffer)
+			let decodedResponse = try decoder.decode(T.Response.self, from: buffer)
+			try endpoint.responseValidation(decodedResponse)
+			return decodedResponse
 		}
 
 		if case .testing(useMocks: let useMocks) = testMode {
