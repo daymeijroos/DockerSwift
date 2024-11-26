@@ -13,8 +13,9 @@ public class DockerClient: @unchecked Sendable {
 		("Accept", "application/json;charset=utf-8"),
 		("Content-Type", "application/json")
 	])
-	private let decoder: JSONDecoder
-	
+	private let decoder = JSONDecoder()
+	private let encoder = JSONEncoder()
+
 	internal let daemonURL: URL
 	internal let tlsConfig: TLSConfiguration?
 	internal let client: HTTPClient
@@ -95,9 +96,6 @@ public class DockerClient: @unchecked Sendable {
 		self.client = httpClient
 		self.logger = logger
 		self.testMode = testMode
-
-		let decoder = JSONDecoder()
-		self.decoder = decoder
 	}
 
 	@MainActor
@@ -141,7 +139,7 @@ public class DockerClient: @unchecked Sendable {
 			urlPath: "/\(apiVersion)/\(endpoint.path)",
 			queryItems: endpoint.queryArugments,
 			method: endpoint.method,
-			body: endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) },
+			body: endpoint.body.map { try HTTPClientRequest.Body.bytes(encoder.encode($0)) },
 			headers: finalHeaders)
 
 		func decodeOut(_ buffer: ByteBuffer) throws -> T.Response {
@@ -211,7 +209,7 @@ public class DockerClient: @unchecked Sendable {
 			if let endpointBody = endpoint.body as? ByteBuffer {
 				HTTPClientRequest.Body.bytes(endpointBody)
 			} else {
-				try endpoint.body.map { try HTTPClientRequest.Body.bytes($0.encode()) }
+				try endpoint.body.map { try HTTPClientRequest.Body.bytes(encoder.encode($0)) }
 			}
 		}()
 
@@ -337,7 +335,7 @@ extension DockerClient {
 		}()
 		let curlBody: String? = try {
 			if let body = body {
-				let data = String(decoding: try body.encode(), as: UTF8.self)
+				let data = String(decoding: try encoder.encode(body), as: UTF8.self)
 					.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
 					.replacingOccurrences(of: "'", with: "\'")
 				return "-d '\(data)'"

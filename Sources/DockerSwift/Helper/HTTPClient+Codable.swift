@@ -117,7 +117,7 @@ extension HTTPClient.Response {
 	/// - Throws: Throws a `DockerError.errorCode` error. If the response is a `MessageResponse` it uses the `message` content for the message, otherwise the body will be used.
 	func checkStatusCode() throws {
 		guard 200...299 ~= self.status.code else {
-			if let data = self.bodyData, let message = try? MessageResponse.decode(from: data) {
+			if let data = self.bodyData, let message = try? JSONDecoder().decode(MessageResponse.self, from: data) {
 				throw DockerError.errorCode(Int(self.status.code), message.message)
 			} else {
 				throw DockerError.errorCode(Int(self.status.code), self.bodyData.map({ String(data: $0, encoding: .utf8) ?? "" }))
