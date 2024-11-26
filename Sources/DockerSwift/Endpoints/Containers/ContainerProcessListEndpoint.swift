@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-public struct ContainerTopEndpoint: SimpleEndpoint {
+public struct ContainerProcessListEndpoint: SimpleEndpoint {
 	typealias Body = NoBody
 	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] {
@@ -12,7 +12,7 @@ public struct ContainerTopEndpoint: SimpleEndpoint {
 	let psArgs: String
 	
 	var path: String {
-		"containers/\(nameOrId)/"
+		"containers/\(nameOrId)/top"
 	}
 	
 	init(nameOrId: String, psArgs: String) {
@@ -32,5 +32,4 @@ public struct ContainerTopEndpoint: SimpleEndpoint {
 			case processes = "Processes"
 		}
 	}
-
 }

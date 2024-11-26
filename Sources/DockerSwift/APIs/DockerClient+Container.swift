@@ -205,8 +205,8 @@ extension DockerClient {
 		///   - psArgs: options to pass to the `ps` command. Defaults to `-ef`
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns a `ContainerTop`instance.
-		public func processes(_ nameOrId: String, psArgs: String = "-ef") async throws -> ContainerTopEndpoint.Response {
-			return try await client.run(ContainerTopEndpoint(nameOrId: nameOrId, psArgs: psArgs))
+		public func processes(_ nameOrId: String, psArgs: String = "-ef") async throws -> ContainerProcessListEndpoint.Response {
+			return try await client.run(ContainerProcessListEndpoint(nameOrId: nameOrId, psArgs: psArgs))
 		}
 		
 		/// Returns a stream of metrics about a running container.

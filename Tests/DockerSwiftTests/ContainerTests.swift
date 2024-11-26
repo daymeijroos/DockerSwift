@@ -246,9 +246,7 @@ final class ContainerTests: XCTestCase {
 		try await client.containers.start(container.id)
 
 		let psInfo = try await client.containers.processes(container.id)
-		XCTAssert(psInfo.processes.count > 0, "Ensure processes are parsed")
-		
-		try? await client.containers.remove(container.id, force: true)
+		XCTAssertGreaterThan(psInfo.processes.count, 0, "Ensure processes are parsed")
 	}
 
 //	func testStatsContainer() async throws {
