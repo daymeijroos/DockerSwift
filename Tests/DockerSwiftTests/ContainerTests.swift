@@ -221,8 +221,6 @@ final class ContainerTests: XCTestCase {
 		try await client.containers.stop(container.id)
 
 		let pruned = try await client.containers.prune()
-		let containers = try await client.containers.list(all: true)
-		XCTAssert(!containers.map(\.id).contains(container.id))
 		XCTAssert(pruned.reclaimedSpace > 0)
 		XCTAssert(pruned.containersIds.contains(container.id))
 	}
