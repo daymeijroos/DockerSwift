@@ -8,7 +8,7 @@ public struct DockerLogEntry: Codable {
 	
 	/// Optional labels when reading logs for a Service
 	//public let labels: [String:String] = [:]
-	
+
 	public let message: String
 	
 	public enum Source: UInt8, Codable {

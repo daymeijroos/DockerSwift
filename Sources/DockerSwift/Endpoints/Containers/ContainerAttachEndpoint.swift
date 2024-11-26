@@ -122,5 +122,4 @@ public extension ContainerAttachEndpoint {
 			self.output = output
 		}
 	}
-
 }

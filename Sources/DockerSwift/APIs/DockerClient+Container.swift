@@ -126,23 +126,65 @@ extension DockerClient {
 		///   - tail: Number of last existing log lines to return. Default: all.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns  a  sequence of `DockerLogEntry`.
-		public func logs(container: Container, stdErr: Bool = true, stdOut: Bool = true, timestamps: Bool = true, follow: Bool = false, tail: UInt? = nil, since: Date = .distantPast, until: Date = .distantFuture) async throws -> AsyncThrowingStream<DockerLogEntry, Error> {
-			let endpoint = GetContainerLogsEndpoint(
-				container: container,
+		public func logs(
+			container: Container,
+			stdErr: Bool = true,
+			stdOut: Bool = true,
+			timestamps: Bool = true,
+			follow: Bool = false,
+			tail: UInt? = nil,
+			since: Date = .distantPast,
+			until: Date = .distantFuture
+		) async throws -> AsyncThrowingStream<DockerLogEntry, Error> {
+			try await logs(
+				containerID: container.id,
+				containerIsTTY: container.config.tty,
+				stdErr: stdErr,
+				stdOut: stdOut,
+				timestamps: timestamps,
+				follow: follow,
+				tail: tail,
+				since: since,
+				until: until)
+		}
+
+		/// Gets the logs of a container.
+		/// - Parameters:
+		///   - container: Instance of an `Container`.
+		///   - stdErr: Whether to return log lines from the standard error.
+		///   - stdOut: Whether to return log lines from the standard output.
+		///   - timestamps: Whether to return the timestamp of each log line
+		///   - follow: Whether to wait for new logs to become available and stream them.
+		///   - tail: Number of last existing log lines to return. Default: all.
+		/// - Throws: Errors that can occur when executing the request.
+		/// - Returns: Returns  a  sequence of `DockerLogEntry`.
+		public func logs(
+			containerID: String,
+			containerIsTTY: Bool,
+			stdErr: Bool = true,
+			stdOut: Bool = true,
+			timestamps: Bool = true,
+			follow: Bool = false,
+			tail: UInt? = nil,
+			since: Date = .distantPast,
+			until: Date = .distantFuture
+		) async throws -> AsyncThrowingStream<DockerLogEntry, Error> {
+			let endpoint = GetLogsEndpoint(
+				id: containerID,
+				isTTY: containerIsTTY,
 				stdout: stdOut,
 				stderr: stdErr,
 				timestamps: timestamps,
 				follow: follow,
 				tail: tail == nil ? "all" : "\(tail!)",
 				since: since,
-				until: until
-			)
+				until: until,
+				logger: client.logger)
 			return try await client.run(
 				endpoint,
 				// Arbitrary timeouts.
 				// TODO: should probably make these configurable
 				timeout: follow ? .hours(12) : .seconds(60),
-				hasLengthHeader: !container.config.tty,
 				separators: [UInt8(13)])
 		}
 		
