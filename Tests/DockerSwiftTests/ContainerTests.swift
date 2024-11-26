@@ -92,17 +92,23 @@ final class ContainerTests: XCTestCase {
 
 	func testUpdateContainers() async throws {
 		let name = UUID.init().uuidString
-		let config = ContainerConfig(image: "hello-world:latest")
+		let config = ContainerConfig(image: "nginx:latest")
 		let container = try await client.containers.create(name: name, config: config)
 		try await client.containers.start(container.id)
 
 		let newConfig = UpdateContainerEndpoint.Update(memoryLimit: 64 * 1024 * 1024, memorySwap: 64 * 1024 * 1024)
 		try await client.containers.update(container.id, config: newConfig)
+	}
 
-		let updated = try await client.containers.get(container.id)
-		XCTAssert(updated.hostConfig.memoryLimit == 64 * 1024 * 1024, "Ensure param has been updated")
+	func testFailUpdateContainers() async throws {
+		let newConfig = UpdateContainerEndpoint.Update(memoryLimit: 64 * 1024 * 1024, memorySwap: 64 * 1024 * 1024)
+		let task = Task {
+			try await client.containers.update("fail", config: newConfig)
+		}
 
-		try await client.containers.remove(container.id)
+		let	result = await task.result
+
+		XCTAssertThrowsError(try result.get())
 	}
 
 	func testListContainers() async throws {

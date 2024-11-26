@@ -4,11 +4,10 @@ import Foundation
 public struct UpdateContainerEndpoint: SimpleEndpoint {
 	var body: Update?
 	
-	typealias Response = NoBody
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
-	private let nameOrId: String
+	let nameOrId: String
 	
 	init(nameOrId: String, config: Update) {
 		self.nameOrId = nameOrId
@@ -17,6 +16,22 @@ public struct UpdateContainerEndpoint: SimpleEndpoint {
 	
 	var path: String {
 		"containers/\(nameOrId)/update"
+	}
+
+	func responseValidation(_ response: Response) throws(DockerError) {
+		// I'm not really sure if this should throw here, but it's what I have for now.
+		if let warnings = response.warnings, warnings.isEmpty == false {
+			let message = warnings.joined(separator: "\n-----\n")
+			throw DockerError.corruptedData("Warnings on update: \(message)")
+		}
+	}
+
+	struct Response: Codable, Hashable, Sendable {
+		let warnings: [String]?
+
+		enum CodingKeys: String, CodingKey {
+			case warnings = "Warnings"
+		}
 	}
 }
 
