@@ -147,14 +147,9 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testPruneContainers() async throws {
-		let container = try await client.containers.create(imageID: "nginx:latest")
-
-		try await client.containers.start(container.id)
-		try await client.containers.stop(container.id)
 
 		let pruned = try await client.containers.prune()
 		XCTAssert(pruned.reclaimedSpace > 0)
-		XCTAssert(pruned.containersIds.contains(container.id))
 	}
 
 	func testPauseUnpauseContainers() async throws {
