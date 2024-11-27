@@ -70,6 +70,70 @@ protocol PipelineEndpoint: StreamingEndpoint {
 	func finalize(_ parts: [Response]) async throws -> FinalResponse
 }
 
+protocol LogStreamCommon: StreamingEndpoint {}
+extension LogStreamCommon {
+	func mapLogStreamChunk(
+		_ buffer: ByteBuffer,
+		isTTY: Bool,
+		loglineIncludesTimestamps: Bool,
+		remainingBytes: inout ByteBuffer
+	) async throws(StreamChunkError) -> [DockerLogEntry] {
+		guard
+			buffer.readableBytes > 0
+		else { throw .noValidData }
+
+		var buffer = buffer
+
+		if isTTY {
+			var entries: [DockerLogEntry] = []
+			let data = Data(buffer: buffer)
+			let lines = data.split(separator: [0xd, 0xa]) // crlf
+
+			for line in lines {
+				let string = String(decoding: line, as: UTF8.self)
+				let (timestamp, logLine) = extractTimestamp(from: string, loglineIncludesTimestamps: loglineIncludesTimestamps)
+
+				entries.append(DockerLogEntry(source: .stdout, timestamp: timestamp, message: logLine))
+			}
+			return entries
+		} else {
+			guard
+				let sourceRawValue: UInt8 = buffer.readInteger(),
+				let source = DockerLogEntry.Source(rawValue: sourceRawValue),
+				case _ = buffer.readBytes(length: 3),
+				let messageSize: UInt32 = buffer.readInteger(endianness: .big),
+				messageSize > 0,
+				let messageBytes = buffer.readBytes(length: Int(messageSize))
+			else { throw .noValidData }
+
+			let rawString = String(decoding: messageBytes, as: UTF8.self)
+			let (timestamp, logLine) = extractTimestamp(from: rawString, loglineIncludesTimestamps: loglineIncludesTimestamps)
+
+			return [DockerLogEntry(source: source, timestamp: timestamp, message: logLine)]
+		}
+	}
+
+	private func extractTimestamp(from logLine: String, loglineIncludesTimestamps: Bool) -> (Date?, String) {
+		guard loglineIncludesTimestamps else { return (nil, logLine) }
+
+		let dateStrSlice = logLine.prefix(while: { $0.isWhitespace == false })
+		let	dateStr = String(dateStrSlice)
+		guard dateStrSlice.endIndex != logLine.endIndex else {
+			if let date = try? DockerDateVarietyStrategy.decode(dateStr) {
+				return (date, "")
+			} else {
+				return (nil, logLine)
+			}
+		}
+		let remaining = logLine.suffix(from: logLine.index(after: dateStrSlice.endIndex))
+
+		guard
+			let date = try? DockerDateVarietyStrategy.decode(dateStr)
+		else { return (nil, logLine) }
+		return (date, String(remaining))
+	}
+}
+
 @available(*, deprecated)
 /// A Docker API endpoint that returns  a progressive stream of JSON objects separated by line returns
 public class JSONStreamingEndpoint<T>: StreamingEndpoint where T: Codable {

@@ -20,7 +20,6 @@ final class ContainerTests: XCTestCase {
 		try client.syncShutdown()
 	}
 
-
 	func testAttach() async throws {
 		let _ = try await client.images.pull(byName: "alpine", tag: "latest")
 		let config = ContainerConfig(

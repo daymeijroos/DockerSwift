@@ -4,7 +4,7 @@ import Foundation
 import Logging
 
 public typealias GetContainerLogsEndpoint = GetLogsEndpoint
-public struct GetLogsEndpoint: StreamingEndpoint {
+public struct GetLogsEndpoint: LogStreamCommon {
 
 	typealias Body = NoBody
 	public typealias Response = DockerLogEntry
@@ -73,58 +73,10 @@ public struct GetLogsEndpoint: StreamingEndpoint {
 		_ buffer: ByteBuffer,
 		remainingBytes: inout ByteBuffer
 	) async throws(StreamChunkError) -> [DockerLogEntry] {
-		guard
-			buffer.readableBytes > 0
-		else { throw .noValidData }
-
-		var buffer = buffer
-
-		if isTTY {
-			var entries: [DockerLogEntry] = []
-			let data = Data(buffer: buffer)
-			let lines = data.split(separator: [0xd, 0xa]) // crlf
-
-			for line in lines {
-				let string = String(decoding: line, as: UTF8.self)
-				let (timestamp, logLine) = extractTimestamp(from: string)
-
-				entries.append(DockerLogEntry(source: .stdout, timestamp: timestamp, message: logLine))
-			}
-			return entries
-		} else {
-			guard
-				let sourceRawValue: UInt8 = buffer.readInteger(),
-				let source = DockerLogEntry.Source(rawValue: sourceRawValue),
-				case _ = buffer.readBytes(length: 3),
-				let messageSize: UInt32 = buffer.readInteger(endianness: .big),
-				messageSize > 0,
-				let messageBytes = buffer.readBytes(length: Int(messageSize))
-			else { throw .noValidData }
-
-			let rawString = String(decoding: messageBytes, as: UTF8.self)
-			let (timestamp, logLine) = extractTimestamp(from: rawString)
-			
-			return [DockerLogEntry(source: source, timestamp: timestamp, message: logLine)]
-		}
-	}
-
-	private func extractTimestamp(from logLine: String) -> (Date?, String) {
-		guard timestamps else { return (nil, logLine) }
-
-		let dateStrSlice = logLine.prefix(while: { $0.isWhitespace == false })
-		let	dateStr = String(dateStrSlice)
-		guard dateStrSlice.endIndex != logLine.endIndex else {
-			if let date = try? DockerDateVarietyStrategy.decode(dateStr) {
-				return (date, "")
-			} else {
-				return (nil, logLine)
-			}
-		}
-		let remaining = logLine.suffix(from: logLine.index(after: dateStrSlice.endIndex))
-
-		guard
-			let date = try? DockerDateVarietyStrategy.decode(dateStr)
-		else { return (nil, logLine) }
-		return (date, String(remaining))
+		try await mapLogStreamChunk(
+			buffer,
+			isTTY: isTTY,
+			loglineIncludesTimestamps: timestamps,
+			remainingBytes: &remainingBytes)
 	}
 }
