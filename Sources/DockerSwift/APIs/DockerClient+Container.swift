@@ -10,7 +10,7 @@ extension DockerClient {
 	}
 	
 	public struct ContainersAPI {
-		fileprivate var client: DockerClient
+		let client: DockerClient
 		
 		/// Fetches all containers in the Docker system.
 		/// - Parameter all: If `true` all containers are fetched, otherwise only running containers.

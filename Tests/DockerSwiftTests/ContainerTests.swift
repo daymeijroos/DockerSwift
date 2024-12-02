@@ -20,35 +20,63 @@ final class ContainerTests: XCTestCase {
 		try client.syncShutdown()
 	}
 
-	func testAttach() async throws {
-		let _ = try await client.images.pull(byName: "alpine", tag: "latest")
+	func testNewAttach() async throws {
+		let imageInfo = try await client.images.pull(byName: "alpine", tag: "latest")
+		let image = try await client.images.get(imageInfo.digest)
+
 		let config = ContainerConfig(
 			attachStdin: true,
 			attachStdout: true,
 			attachStderr: true,
-			image: "alpine:latest",
-			openStdin: true
-		)
+			command: nil,
+			entrypoint: ["sh"],
+			image: image.id,
+			name: "testttt",
+			openStdin: true,
+			tty: true)
 		let containerInfo = try await client.containers.create(config: config)
-		let container = try await client.containers.get(containerInfo.id)
-		let attach = try await client.containers.attach(container: container, stream: true, logs: true)
-		do {
-			Task {
-				for try await output in attach.output {
-					XCTAssert(output == "Linux\n", "Ensure command output is properly read")
+		try await client.containers.start(containerInfo.id)
+
+		let attachEndpoint = ContainerAttach2(
+			containerID: containerInfo.id,
+			containerWithTTY: config.tty,
+			logs: true,
+			stream: true,
+			stdin: true,
+			stdout: true,
+			stderr: true)
+
+		let handle = try await client.containers.attach(attachEndpoint)
+
+		let output = await handle.stream
+
+		let t = Task {
+			while Task.isCancelled == false {
+				do {
+					try await Task.sleep(for: .seconds(TimeInterval.random(in: 0.01...0.10)))
+					try await handle.send("echo \"fizz buzz\"\n")
+				} catch is CancellationError {
+					break
+				} catch {
+					print("Error sending: \(error)")
 				}
 			}
-			try await client.containers.start(container.id)
-
-			try await Task.sleep(nanoseconds: 1_000_000_000)
-			try await attach.send("uname")
-			try await Task.sleep(nanoseconds: 1_000_000_000)
-		} catch(let error) {
-			print("\n••••• BOOM! \(error)")
-			throw error
 		}
 
-		try await client.containers.remove(container.id, force: true)
+		var rawLines = ""
+		for try await var line in output {
+			let str = line.readString(length: line.readableBytes)
+			print("\(str ?? "not string")", terminator: "")
+			rawLines += str ?? ""
+			guard rawLines.split(separator: "\r\n").count < 10 else { break }
+		}
+		t.cancel()
+
+		let lines = rawLines.split(separator: "\r\n")
+		let commandIndex = try XCTUnwrap(lines.firstIndex(of: "echo \"fizz buzz\""))
+		XCTAssertEqual(lines[commandIndex], #"echo "fizz buzz""#)
+		XCTAssertEqual(lines[commandIndex + 1], #"fizz buzz"#)
+		XCTAssertTrue(lines[commandIndex + 2].hasPrefix("/ # "))
 	}
 
 	func testCreateContainer() async throws {
