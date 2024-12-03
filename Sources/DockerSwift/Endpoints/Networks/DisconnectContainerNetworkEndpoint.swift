@@ -2,8 +2,6 @@ import NIOHTTP1
 import Foundation
 
 struct DisconnectContainerNetworkEndpoint: SimpleEndpoint {
-	typealias Body = DisconnectContainerRequest
-	
 	typealias Response = NoBody?
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
@@ -14,15 +12,20 @@ struct DisconnectContainerNetworkEndpoint: SimpleEndpoint {
 	
 	init(nameOrId: String, containerNameOrId: String, force: Bool) {
 		self.nameOrId = nameOrId
-		self.body = .init(Container: containerNameOrId, Force: force)
+		self.body = .init(container: containerNameOrId, force: force)
 	}
 	
 	var path: String {
 		"networks/\(nameOrId)/disconnect"
 	}
 	
-	struct DisconnectContainerRequest: Codable {
-		let Container: String
-		let Force: Bool
+	struct Body: Codable {
+		let container: String
+		let force: Bool
+
+		enum CodingKeys: String, CodingKey {
+			case container = "Container"
+			case force = "Force"
+		}
 	}
 }
