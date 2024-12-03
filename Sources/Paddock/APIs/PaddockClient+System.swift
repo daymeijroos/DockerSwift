@@ -11,8 +11,8 @@ extension PaddockClient {
 	}
 	
 	/// Endpoint you can use to test if the Docker server is accessible.
-	public func ping() async throws {
-		let ping = try await run(PingEndpoint())
+	public func ping(timeout: TimeAmount? = nil) async throws {
+		let ping = try await run(PingEndpoint(responseTimeout: timeout))
 		guard ping == "OK" else {
 			throw DockerError.unknownResponse(ping)
 		}
