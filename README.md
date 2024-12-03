@@ -1,9 +1,9 @@
-# Docker Client
+# Paddock (Podman/Docker Client)
 [![Language](https://img.shields.io/badge/Swift-5.9-brightgreen.svg)](http://swift.org)
 [![Docker Engine API](https://img.shields.io/badge/Docker%20Engine%20API-%20%201.41-blue)](https://docs.docker.com/engine/api/v1.41/)
 [![Platforms](https://img.shields.io/badge/platform-linux--64%20%7C%20osx--64-blue)]()
 
-This is a low-level Docker Client written in Swift. It very closely follows the Docker API. It is forked from [DockerSwift](https://github.com/m-barthelemy/DockerSwift.git)
+This is a low-level Docker/Podman Client written in Swift. It very closely follows the Docker API. It is forked from [DockerSwift](https://github.com/m-barthelemy/DockerSwift.git)
 with the goal of adding mocked tests with addditional support and focus for [Podman](https://podman.io).
 
 ## Docker API version support
@@ -122,7 +122,7 @@ let package = Package(
 ```
 
 ### Xcode Project
-To add DockerClientSwift to your existing Xcode project, select File -> Swift Packages -> Add Package Dependancy. 
+To add Paddock to your existing Xcode project, select File -> Swift Packages -> Add Package Dependancy. 
 Enter `https://github.com/mredig/Paddock.git` for the URL.
 
 
@@ -654,6 +654,10 @@ defer { try! docker.syncShutdown() }
   try await docker.plugins.enable("vieux/sshfs:latest")
   ```
 </details>
+
+
+## Why "Paddock"?
+In short, ***Pod***man + ***Dock***er = "Poddock", which sounds similar to the actual word "Paddock". Now I just need to get a logo that evokes the imagery of horses frolicking in a meadow.
 
 ## Credits
 This is a fork of the foundational work by [m-barthelemy](https://github.com/m-barthelemy/DockerSwift.git), which itself is also a fork of [alexsteinerde's](https://github.com/alexsteinerde/docker-client-swift) work.
