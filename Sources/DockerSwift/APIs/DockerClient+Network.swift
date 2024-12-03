@@ -23,7 +23,7 @@ extension DockerClient {
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Return the `Network`.
 		public func get(_ nameOrId: String) async throws -> Network {
-			return try await client.run(InspectNetworkEndpoint(nameOrId: nameOrId))
+			return try await client.run(InspectNetworkEndpoint(nameOrId: nameOrId, logger: client.logger))
 		}
 
 		/// Create a new Network.

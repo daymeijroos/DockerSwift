@@ -15,9 +15,8 @@ final class NetworkTests: XCTestCase {
 	}
 
 	func testNetworkInpsect() async throws {
-		let networks = try await client.networks.list()
-		let network = try await client.networks.get(networks.first!.id)
-		XCTAssert(network.createdAt > Date.distantPast, "ensure createdAt field is parsed")
+		let network = try await client.networks.get("7e77192f93582449e5806dc32639808ae078e0d5f38cc4636f1d7b9057e8c6e1")
+		XCTAssertEqual(network.ipam.config.first?.gateway, "192.168.2.1")
 	}
 
 	func testListNetworks() async throws {
