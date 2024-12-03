@@ -47,8 +47,8 @@ extension DockerClient {
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns the list of **names** of the networks that got deleted.
 		/// - SeeAlso: https://docs.docker.com/engine/api/v1.41/#operation/NetworkPrune
-		public func prune() async throws -> [String] {
-			return try await client.run(PruneNetworksEndpoint()).NetworksDeleted
+		public func prune() async throws -> PruneNetworksEndpoint.Response {
+			return try await client.run(PruneNetworksEndpoint())
 		}
 		
 		/// Connects a Container to an existing Network.

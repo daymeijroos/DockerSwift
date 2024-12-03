@@ -1,10 +1,9 @@
 import NIOHTTP1
 import Foundation
 
-struct PruneNetworksEndpoint: SimpleEndpoint {
+public struct PruneNetworksEndpoint: SimpleEndpoint {
 	var body: Body?
 
-	typealias Response = PrunedNetworks
 	typealias Body = NoBody
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
@@ -13,8 +12,11 @@ struct PruneNetworksEndpoint: SimpleEndpoint {
 		"networks/prune"
 	}
 
-	struct PrunedNetworks: Codable {
-		let NetworksDeleted: [String]
+	public struct Response: Codable {
+		public let networksDeleted: [String]
+
+		enum CodingKeys: String, CodingKey {
+			case networksDeleted = "NetworksDeleted"
+		}
 	}
 }
-

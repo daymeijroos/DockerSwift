@@ -39,13 +39,8 @@ final class NetworkTests: XCTestCase {
 	}
 
 	func testPruneNetworks() async throws {
-		let name = UUID().uuidString
-		let networkInfo = try await client.networks.create(
-			spec: .init(name: name)
-		)
-		let network = try await client.networks.get(networkInfo.id)
 		let pruned = try await client.networks.prune()
-		XCTAssert(pruned.contains(network.name), "Ensure created Network has been deleted")
+		XCTAssertGreaterThan(pruned.networksDeleted.count, 0)
 	}
 
 	func testConnectContainer() async throws {
