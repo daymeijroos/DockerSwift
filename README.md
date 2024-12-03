@@ -1,12 +1,10 @@
 # Docker Client
-[![Language](https://img.shields.io/badge/Swift-5.5-brightgreen.svg)](http://swift.org)
+[![Language](https://img.shields.io/badge/Swift-5.9-brightgreen.svg)](http://swift.org)
 [![Docker Engine API](https://img.shields.io/badge/Docker%20Engine%20API-%20%201.41-blue)](https://docs.docker.com/engine/api/v1.41/)
 [![Platforms](https://img.shields.io/badge/platform-linux--64%20%7C%20osx--64-blue)]()
 
-This is a low-level Docker Client written in Swift. It very closely follows the Docker API.
-
-It fully uses the Swift concurrency features introduced with Swift 5.5 (`async`/`await`).
-
+This is a low-level Docker Client written in Swift. It very closely follows the Docker API. It is forked from [DockerSwift](https://github.com/m-barthelemy/DockerSwift.git)
+with the goal of adding mocked tests with addditional support and focus for [Podman](https://podman.io).
 
 ## Docker API version support
 This client library aims at implementing the Docker API version 1.41 (https://docs.docker.com/engine/api/v1.41).
@@ -111,7 +109,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/m-barthelemy/DockerSwift.git", .branch("main")),
+        .package(url: "https://github.com/mredig/DockerSwift.git", .branch("main")),
     ],
     targets: [
         .target(name: "App", dependencies: [
@@ -125,10 +123,12 @@ let package = Package(
 
 ### Xcode Project
 To add DockerClientSwift to your existing Xcode project, select File -> Swift Packages -> Add Package Dependancy. 
-Enter `https://github.com/m-barthelemy/DockerSwift.git` for the URL.
+Enter `https://github.com/mredig/DockerSwift.git` for the URL.
 
 
 ## Usage Examples
+
+#### *Note that these examples might be out of date as they are from prior to the fork*
 
 ### Connect to a Docker daemon
 
@@ -137,7 +137,7 @@ Local socket (defaults to `/var/run/docker.sock`):
 import DockerSwift
 
 let docker = DockerClient()
-defer {try! docker.syncShutdown()}
+defer { try! docker.syncShutdown() }
 ```
 
 Remote daemon over HTTP:
@@ -145,7 +145,7 @@ Remote daemon over HTTP:
 import DockerSwift
 
 let docker = DockerClient(daemonURL: URL(string: "http://127.0.0.1:2375")!)
-defer {try! docker.syncShutdown()}
+defer { try! docker.syncShutdown() }
 ```
 
 Remote daemon over HTTPS, using a client certificate for authentication:
@@ -162,7 +162,7 @@ let docker = DockerClient(
     daemonURL: .init(string: "https://your.docker.daemon:2376")!,
     tlsConfig: tlsConfig
 )
-defer {try! docker.syncShutdown()}
+defer { try! docker.syncShutdown() }
 ```
 
 ### Docker system info
@@ -568,257 +568,6 @@ defer {try! docker.syncShutdown()}
 </details>
 
 
-### Swarm
-<details>
-  <summary>Initialize Swarm mode</summary>
-  
-  ```swift
-  let swarmId = try await docker.swarm.initSwarm()
-  ```
-</details>
-
-<details>
-  <summary>Get Swarm cluster details (inspect)</summary>
-  
-  > The client must be connected to a Swarm manager node.
-  ```swift
-  let swarm = try await docker.swarm.get()
-  ```
-</details>
-
-<details>
-  <summary>Make the Docker daemon to join an existing Swarm cluster</summary>
-  
-  ```swift
-  // This first client points to an existing Swarm cluster manager
-  let swarmClient = Dockerclient(...)
-  let swarm = try await swarmClient.swarm.get()
-  
-  // This client is the docker daemon we want to add to the Swarm cluster
-  let client = Dockerclient(...)
-  try await client.swarm.join(
-      config: .init(
-          // To join the Swarm cluster as a Manager node
-          joinToken: swarmClient.joinTokens.manager,
-          // IP/Host of the existing Swarm managers
-          remoteAddrs: ["10.0.0.1"]
-      )
-  )
-  ```
-</details>
-
-<details>
-  <summary>Remove the current Node from the Swarm</summary>
-  
-  > Note: `force` is needed if the node is a manager
-  ```swift
-  try await docker.swarm.leave(force: true)
-  ```
-</details>
-
-
-### Nodes
-> This requires a Docker daemon with Swarm mode enabled.
-> Additionally, the client must be connected to a manager node.
-
-<details>
-  <summary>List the Swarm nodes</summary>
-  
-  ```swift
-  let nodes = try await docker.nodes.list()
-  ```
-</details>
-
-<details>
-  <summary>Remove a Node from a Swarm</summary>
-  
-  > Note: `force` is needed if the node is a manager
-  ```swift
-  try await docker.nodes.delete(id: "xxxxxx", force: true)
-  ```
-</details>
-
-
-### Services
-> This requires a Docker daemon with Swarm mode enabled.
-> Additionally, the client must be connected to a manager node.
-
-<details>
-  <summary>List services</summary>
-  
-  ```swift
-  let services = try await docker.services.list()
-  ```
-</details>
-
-<details>
-  <summary>Get a service details</summary>
-  
-  ```swift
-  let service = try await docker.services.get("nameOrId")
-  ```
-</details>
-
-<details>
-  <summary>Create a service</summary>
-  
-  Simplest possible example, we only specify the name of the service and the image to use:
-  ```swift
-  let spec = ServiceSpec(
-      name: "my-nginx",
-      taskTemplate: .init(
-          containerSpec: .init(image: "nginx:latest")
-      )
-  )
-  let service = try await docker.services.create(spec: spec)
-  ```
-  
-  Let's specify a number of replicas, a published port and a memory limit of 64MB for our service:
-  ```swift
-  let spec = ServiceSpec(
-      name: "my-nginx",
-      taskTemplate: .init(
-          containerSpec: .init(image: "nginx:latest"),
-          resources: .init(
-              limits: .init(memoryBytes: .mb(64))
-          ),
-          // Uses default Docker routing mesh mode
-          endpointSpec: .init(ports: [.init(name: "HTTP", targetPort: 80, publishedPort: 8000)])
-      ),
-      mode: .replicated(2)
-  )
-  let service = try await docker.services.create(spec: spec)
-  ```
-  
-  What if we then want to know when our service is fully running?
-  ```swift
-  var index = 0 // Keep track of how long we've been waiting
-  repeat {
-      try await Task.sleep(for: .seconds(1))
-      print("\n Service still not fully running!")
-      index += 1
-  } while try await docker.tasks.list()
-        .filter({$0.serviceId == service.id && $0.status.state == .running})
-        .count < 1 /* number of replicas */ && index < 15
-  print("\n Service is fully running!")
-  ```
-  
-  What if we want to create a one-off job instead of a service?
-  ```swift
-  let spec = ServiceSpec(
-      name: "hello-world-job",
-      taskTemplate: .init(
-          containerSpec: .init(image: "hello-world:latest"),
-          ...
-      ),
-      mode: .job(1)
-  )
-  let job = try await docker.services.create(spec: spec)
-  ```
-  
-  <br/>
-  
-  Something more advanced? Let's create a Service:
-  - connected to a custom Network
-  - storing data into a custom Volume, for each container
-  - requiring a Secret
-  - publishing the port 80 of the containers to the port 8000 of each Docker Swarm node
-  - getting restarted automatically in case of failure
-  ```swift
-  let network = try await docker.networks.create(spec: .init(name: "myNet", driver: "overlay"))
-  let secret = try await docker.secrets.create(spec: .init(name: "myPassword", value: "blublublu"))
-  let spec = ServiceSpec(
-      name: "my-nginx",
-      taskTemplate: .init(
-          containerSpec: .init(
-              image: "nginx:latest",
-              // Create and mount a dedicated Volume named "myStorage" on each running container. 
-              mounts: [.volume(name: "myVolume", to: "/mnt")],
-              // Add our Secret. Will appear as `/run/secrets/myPassword` in the containers.
-              secrets: [.init(secret)]
-          ),
-          resources: .init(
-              limits: .init(memoryBytes: .mb(64))
-          ),
-          // If a container exits or crashes, replace it with a new one.
-          restartPolicy: .init(condition: .any, delay: .seconds(2), maxAttempts: 2)
-      ),
-      mode: .replicated(1),
-      // Add our custom Network
-      networks: [.init(target: network.id)],
-      // Publish our Nginx image port 80 to 8000 on the Docker Swarm nodes
-      endpointSpec: .init(ports: [.init(name: "HTTP", targetPort: 80, publishedPort: 8000)])
-  )
-    
-  let service = try await docker.services.create(spec: spec)
-  ```
-</details>
- 
-<details>
-  <summary>Update a service</summary>
-  
-  Let's scale an existing service up to 3 replicas:
-  ```swift
-  let service = try await docker.services.get("nameOrId")
-  var updatedSpec = service.spec
-  updatedSpec.mode = .replicated(3)
-  try await docker.services.update("nameOrId", spec: updatedSpec)
-  ```
-</details>
-       
-<details>
-  <summary>Get service logs</summary>
-  
-  > Logs are streamed progressively in an asynchronous way.
-  
-  Get all logs:
-  ```swift
-  let service = try await docker.services.get("nameOrId")
-        
-  for try await line in try await docker.services.logs(service: service) {
-      print(line.message + "\n")
-  }
-  ```
-  
-  Wait for future log messages:
-  ```swift
-  let service = try await docker.services.get("nameOrId")
-        
-  for try await line in try await docker.services.logs(service: service, follow: true) {
-      print(line.message + "\n")
-  }
-  ```
-  
-  Only the last 100 messages:
-  ```swift
-  let service = try await docker.services.get("nameOrId")
-        
-  for try await line in try await docker.services.logs(service: service, tail: 100) {
-      print(line.message + "\n")
-  }
-  ```
-  
-</details>
-
-<details>
-  <summary>Rollback a service</summary>
-  
-  Suppose that we updated our existing service configuration, and something is not working properly.
-  We want to revert back to the previous, working version.
-  ```swift
-  try await docker.services.rollback("nameOrId")
-  ```
-</details>
-
-<details>
-  <summary>Delete a service</summary>
-  
-  ```swift
-  try await docker.services.remove("nameOrId")
-  ```
-</details>
-
-
 ### Secrets
 > This requires a Docker daemon with Swarm mode enabled.
 > 
@@ -907,7 +656,7 @@ defer {try! docker.syncShutdown()}
 </details>
 
 ## Credits
-This is a fork of the great work at https://github.com/alexsteinerde/docker-client-swift
+This is a fork of the foundational work by [m-barthelemy](https://github.com/m-barthelemy/DockerSwift.git), which itself is also a fork of [alexsteinerde's](https://github.com/alexsteinerde/docker-client-swift) work.
 
 ## License
 This project is released under the MIT license. See [LICENSE](LICENSE) for details.
