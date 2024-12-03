@@ -98,13 +98,12 @@ public extension DockerClient.ContainersAPI {
 		guard endpoint.isStarting == false else { throw AttachError.alreadyStarting }
 		endpoint.isStarting = true
 
-		let privateHandler = ContainerAttachHandle._Handler()
-		let handle = ContainerAttachHandle(handler: privateHandler)
+		let handle = ContainerAttachEndpoint._HandleImplementation()
 
 		let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
 		let bootstrap = ClientBootstrap(group: group)
 			.channelInitializer { channel in
-				channel.pipeline.addHandler(privateHandler)
+				channel.pipeline.addHandler(handle)
 			}
 			.channelOption(.socketOption(.so_reuseaddr), value: 1)
 
@@ -149,76 +148,73 @@ public extension DockerClient.ContainersAPI {
 	}
 }
 
-@MainActor
-public class ContainerAttachHandle: Sendable, ContainerAttachEndpoint.AttachHandle {
-	private let handler: _Handler
-	fileprivate var runTask: Task<Void, Never>?
-
-	public weak var delegate: ContainerAttachEndpoint.AttachHandleDelegate?
-
-	public let stream: AsyncThrowingStream<ByteBuffer, Error>
-	private let continuation: AsyncThrowingStream<ByteBuffer, Error>.Continuation
-
-	fileprivate init(handler: _Handler) {
-		let (stream, continuation) = AsyncThrowingStream<ByteBuffer, Error>.makeStream()
-		self.stream = stream
-		self.continuation = continuation
-		self.handler = handler
-		handler.parent = self
-	}
-
-	public func send(_ buffer: ByteBuffer) async throws {
-		guard let context = handler.context else { throw DockerError.notconnected }
-		let prom = context.eventLoop.makePromise(of: Void.self)
-		context.eventLoop.execute { [handler] in
-			guard let context = handler.context else { return prom.fail(DockerError.notconnected) }
-			context.writeAndFlush(handler.wrapOutboundOut(buffer), promise: prom)
-		}
-		try await prom.futureResult.get()
-	}
-
-	fileprivate final class _Handler: ChannelInboundHandler, Sendable {
+extension ContainerAttachEndpoint {
+	@MainActor
+	fileprivate class _HandleImplementation: Sendable, ContainerAttachEndpoint.AttachHandle, ChannelInboundHandler {
 		typealias InboundIn = ByteBuffer
 		typealias OutboundOut = ByteBuffer
 
 		nonisolated(unsafe)
-		weak var parent: ContainerAttachHandle!
-
-		nonisolated(unsafe)
 		var context: ChannelHandlerContext?
 
+		fileprivate var runTask: Task<Void, Never>?
+
+		public weak var delegate: ContainerAttachEndpoint.AttachHandleDelegate?
+
+		public let stream: AsyncThrowingStream<ByteBuffer, Error>
+		private let continuation: AsyncThrowingStream<ByteBuffer, Error>.Continuation
+
+		fileprivate init() {
+			let (stream, continuation) = AsyncThrowingStream<ByteBuffer, Error>.makeStream()
+			self.stream = stream
+			self.continuation = continuation
+		}
+
+		public func send(_ buffer: ByteBuffer) async throws {
+			guard let context = context else { throw DockerError.notconnected }
+			let prom = context.eventLoop.makePromise(of: Void.self)
+			context.eventLoop.execute { [self] in
+				context.writeAndFlush(wrapOutboundOut(buffer), promise: prom)
+			}
+			try await prom.futureResult.get()
+		}
+
+		nonisolated
 		func channelActive(context: ChannelHandlerContext) {
 			Task {
 				await MainActor.run {
 					self.context = context
-					parent?.attachHandleDidConnect(parent)
+					attachHandleDidConnect(self)
 				}
 			}
 		}
 
+		nonisolated
 		func channelRead(context: ChannelHandlerContext, data: NIOAny) {
 			Task {
 				let byteBuffer = unwrapInboundIn(data)
-				await parent?.attachHandle(parent, didRecieveData: byteBuffer)
+				await attachHandle(self, didRecieveData: byteBuffer)
 			}
 		}
 
+		nonisolated
 		func errorCaught(context: ChannelHandlerContext, error: any Error) {
 			Task {
-				await parent?.attachHandle(parent, didRecieveError: error)
+				await attachHandle(self, didRecieveError: error)
 			}
 		}
 
+		nonisolated
 		func channelInactive(context: ChannelHandlerContext) {
 			context.close(promise: nil)
 			Task {
-				await parent?.attachHandleDidDisconnect(parent)
+				await attachHandleDidDisconnect(self)
 			}
 		}
 	}
 }
 
-extension ContainerAttachHandle: ContainerAttachEndpoint.AttachHandleDelegate {
+extension ContainerAttachEndpoint._HandleImplementation: ContainerAttachEndpoint.AttachHandleDelegate {
 	public func attachHandleDidConnect(_ containerAttachHandle: ContainerAttachEndpoint.AttachHandle) {
 		delegate?.attachHandleDidConnect(self)
 	}
