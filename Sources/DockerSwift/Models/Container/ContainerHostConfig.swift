@@ -144,14 +144,14 @@ public struct ContainerHostConfig: Codable {
 	public var maskedPaths: [String]? = nil
 	
 	/// Memory soft limit in bytes.
-	public var memoryReservation: UInt64 = 0
-	
+	public var memoryReservation: Int = 0
+
 	/// Memory limit in bytes.
-	public var memoryLimit: UInt64 = 0
-	
+	public var memoryLimit: Int = 0
+
 	/// Total memory limit (memory + swap). Set as -1 to enable unlimited swap.
-	public var memorySwap: Int64 = 0
-	
+	public var memorySwap: Int = 0
+
 	/// Tune a container's memory swappiness behavior. Accepts an integer between 0 and 100.
 	public var memorySwappiness: Int8? = -1
 	
@@ -273,9 +273,9 @@ public struct ContainerHostConfig: Codable {
 		kernelMemoryTcp: UInt64 = 0,
 		links: [String]? = nil,
 		maskedPaths: [String]? = nil,
-		memoryReservation: UInt64 = 0,
-		memoryLimit: UInt64 = 0,
-		memorySwap: Int64 = 0,
+		memoryReservation: Int = 0,
+		memoryLimit: Int = 0,
+		memorySwap: Int = 0,
 		memorySwappiness: Int8? = -1,
 		mounts: [ContainerHostConfig.ContainerMount]? = nil,
 		nanoCpus: UInt64 = 0,
