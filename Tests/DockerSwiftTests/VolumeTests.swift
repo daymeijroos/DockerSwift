@@ -22,7 +22,11 @@ final class VolumeTests: XCTestCase {
 
 		XCTAssertEqual(volume.name, name)
 	}
-	
+
+	func testRemoveVolume() async throws {
+		try await client.volumes.remove("TestVolumeStorage")
+	}
+
 	func testListVolumes() async throws {
 		// TODO: improve and check the actual content
 		let _ = try await client.volumes.list()
