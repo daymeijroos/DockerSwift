@@ -1,7 +1,7 @@
 import NIOHTTP1
 import Foundation
 
-public struct ConnectContainerEndpoint: SimpleEndpoint {
+public struct ConnectContainerNetworkEndpoint: SimpleEndpoint {
 	typealias Response = NoBody?
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
@@ -18,7 +18,7 @@ public struct ConnectContainerEndpoint: SimpleEndpoint {
 	}
 }
 
-public extension ConnectContainerEndpoint {
+public extension ConnectContainerNetworkEndpoint {
 	/// Configuration to connect and existing container to an existing Docker Network.
 	struct ConnectSettings: Codable {
 		public init(container: String, endpointConfig: EndpointSettings? = nil) {

@@ -1,7 +1,7 @@
 import AsyncHTTPClient
 @testable import DockerSwift
 
-extension ConnectContainerEndpoint: MockedResponseEndpoint {
+extension ConnectContainerNetworkEndpoint: MockedResponseEndpoint {
 	public var responseData: [MockedResponseData] {[.string("OK")]}
 
 	public func validate(request: HTTPClientRequest) throws {
