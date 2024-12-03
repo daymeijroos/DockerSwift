@@ -667,9 +667,19 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 
 
 ## Contribute
-You can contribute to this project by submitting a detailed issue or by forking this project and sending a pull request. Contributions of any kind are very welcome :)
+Contributions are welcome.
+Please adhere the established style
+* tab indentation (not spaces)
+* type based endpoints
+* create tests/mocks for all additions
+* keep a reasonable column width (roughly 120 characters max)
 
-To run tests, make sure you have docker or podman installed and, if the default path for the socket 
-(`/var/run/docker.sock`) is not correct, to set the env var `DOCKER_HOST` while running tests. On Linux, you may need 
+ 
+Mocked tests shouldn't require any podman or docker installation, but it's good to test your code through the socket as well.
+You can toggle whether mocks are used or not with `PaddockClient.forTesting(useLiveSocket: true/false)`. If you are using a 
+live socket, it's easiest to set the `DOCKER_HOST` env var to the correct socket, if it's not `/var/run/docker.sock`. 
+In Xcode, this can be done in the Test Plan configuration file.
+
+With live sockets on Linux, you may need 
 to activate the docker service. On Ubuntu, for example, run `systemctl start docker` and `systemctl enable docker`, 
 which should then populate the default socket location. 
