@@ -12,6 +12,15 @@ protocol MockedResponseEndpoint: Endpoint {
 	func validate(request: HTTPClientRequest) throws
 }
 
+protocol BidirectionalMockEndpoint: MockedResponseEndpoint {
+	var reactiveData: [ByteBuffer: [MockedResponseData]] { get }
+
+	var streamContinuation: AsyncThrowingStream<ByteBuffer, Error>.Continuation? { get set }
+
+	func send(_ buffer: ByteBuffer) async throws
+	mutating func mockedStreamingResponse(_ request: HTTPClientRequest) async throws -> AsyncThrowingStream<ByteBuffer, Error>
+}
+
 extension MockedResponseEndpoint {
 	static var podmanHeaders: HTTPHeaders {
 		[

@@ -18,6 +18,10 @@ extension CreateContainerEndpoint: MockedResponseEndpoint {
 			return [
 				.string(#"{"Id":"7eb61d5ac2202df115c7ef2875732b800d7e20c1e7e53e7eb470afa2b98bfd72","Warnings":[]}"#)
 			]
+		case ("sha256:511a44083d3a23416fadc62847c45d14c25cbace86e7a72b2b350436978a0450", _):
+			return [
+				.string(#"{"Id":"5d9b694144be16064d164a5453eb753953f9f68e40bbec8099048965ad4dbe50","Warnings":[]}"#)
+			]
 
 		default:
 			logger.debug("Unexpected mock request for \(Self.self) - \(body.image) \(body.command as Any)")

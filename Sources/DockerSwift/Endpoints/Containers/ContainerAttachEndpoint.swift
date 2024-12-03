@@ -21,6 +21,8 @@ public struct ContainerAttachEndpoint: LogStreamCommon {
 	public let stdout: Bool?
 	public let stderr: Bool?
 
+	package var streamContinuation: AsyncThrowingStream<ByteBuffer, any Error>.Continuation?
+
 	public init(
 		containerID: String,
 		containerWithTTY: Bool,
@@ -156,6 +158,32 @@ extension ContainerAttachEndpoint {
 			}
 		}
 	}
+
+	fileprivate class _MockHandleImplementation: Sendable, ContainerAttachEndpoint.AttachHandle {
+		weak var delegate: (any ContainerAttachEndpoint.AttachHandleDelegate)?
+
+		let stream: AsyncThrowingStream<ByteBuffer, any Error>
+
+		let mocker: any BidirectionalMockEndpoint
+
+		init(mocker: any BidirectionalMockEndpoint, client: DockerClient) async throws {
+			var mocker = mocker
+
+			let req = try mocker.request(
+				socketURL: client.daemonURL,
+				apiVersion: client.apiVersion,
+				additionalHeaders: client.headers,
+				encoder: client.encoder)
+
+			let stream = try await mocker.mockedStreamingResponse(req)
+			self.mocker = mocker
+			self.stream = stream
+		}
+
+		func send(_ buffer: ByteBuffer) async throws {
+			try await mocker.send(buffer)
+		}
+	}
 }
 
 extension ContainerAttachEndpoint._HandleImplementation: ContainerAttachEndpoint.AttachHandleDelegate {
@@ -183,9 +211,16 @@ extension ChannelHandlerContext: @retroactive @unchecked Sendable {}
 
 public extension DockerClient.ContainersAPI {
 	@MainActor
-	func attach(_ endpoint: consuming ContainerAttachEndpoint) async throws -> ContainerAttachEndpoint.AttachHandle {
+	func attach(_ endpoint: ContainerAttachEndpoint) async throws -> ContainerAttachEndpoint.AttachHandle {
+		var endpoint = endpoint
 		guard endpoint.isStarting == false else { throw AttachError.alreadyStarting }
 		endpoint.isStarting = true
+
+		if case .testing(useMocks: let useMocks) = client.testMode, useMocks, let mockEndpoint = endpoint as? (any BidirectionalMockEndpoint) {
+			let handle = try await ContainerAttachEndpoint._MockHandleImplementation(mocker: mockEndpoint, client: client)
+
+			return handle
+		}
 
 		let handle = ContainerAttachEndpoint._HandleImplementation()
 

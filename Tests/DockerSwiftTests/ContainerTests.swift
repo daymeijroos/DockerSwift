@@ -68,6 +68,7 @@ final class ContainerTests: XCTestCase {
 					break
 				} catch {
 					print("Error sending: \(error)")
+					throw error
 				}
 			}
 		}
