@@ -1,4 +1,5 @@
 import Foundation
+import BetterCodable
 
 public struct Network: Codable {
 	public init(
@@ -35,8 +36,9 @@ public struct Network: Codable {
 	public let name: String
 	
 	public let id: String
-	
-	public let createdAt: Date
+
+	@DateValue<DockerDateVarietyStrategy>
+	public var createdAt: Date
 	
 	/// `local` (this Docker host only) or `swarm` (available in the whole cluster)
 	public let scope: DockerScope
