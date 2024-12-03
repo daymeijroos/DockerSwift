@@ -13,14 +13,13 @@
       "targets" : [
         {
           "containerPath" : "container:",
-          "identifier" : "DockerSwift",
-          "name" : "DockerSwift"
+          "identifier" : "Paddock",
+          "name" : "Paddock"
         }
       ]
     },
     "environmentVariableEntries" : [
       {
-        "enabled" : false,
         "key" : "DOCKER_HOST",
         "value" : "\/var\/run\/docker.sock"
       }
@@ -28,10 +27,18 @@
   },
   "testTargets" : [
     {
+      "skippedTests" : [
+        "ConfigAndSecretTests",
+        "PluginTests",
+        "ServiceTests",
+        "SwarmTests",
+        "SystemTests\/testSystemInfoWithSwarm()",
+        "TaskTests"
+      ],
       "target" : {
         "containerPath" : "container:",
-        "identifier" : "DockerSwiftTests",
-        "name" : "DockerSwiftTests"
+        "identifier" : "PaddockTests",
+        "name" : "PaddockTests"
       }
     }
   ],
