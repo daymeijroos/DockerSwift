@@ -8,8 +8,6 @@ final class ConfigAndSecretTests: XCTestCase {
 
 	override func setUp() async throws {
 		client = DockerClient.testable()
-		try? await client.swarm.leave(force: true)
-		let _ = try! await client.swarm.initSwarm(config: SwarmConfig())
 	}
 
 	override func tearDownWithError() throws {
@@ -52,9 +50,5 @@ final class ConfigAndSecretTests: XCTestCase {
 		XCTAssert(secret.spec.name == name, "Ensure name is set")
 
 		try await client.secrets.remove(secret.id)
-	}
-
-	func textZzzLeaveSwarm() async throws {
-		try? await client.swarm.leave()
 	}
 }

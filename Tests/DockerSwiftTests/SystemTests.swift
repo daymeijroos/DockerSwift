@@ -51,12 +51,4 @@ final class SystemTests: XCTestCase {
 	func testPing() async throws {
 		try await client.ping()
 	}
-	
-	func testSystemInfoWithSwarm() async throws {
-		try? await client.swarm.leave(force: true)
-		let _ = try! await client.swarm.initSwarm(config: SwarmConfig())
-		let info = try await client.info()
-		XCTAssert(info.swarm != nil, "Ensure Swarm info is present")
-		try? await client.swarm.leave(force: true)
-	}
 }

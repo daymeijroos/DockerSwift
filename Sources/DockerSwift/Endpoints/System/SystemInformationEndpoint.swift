@@ -63,7 +63,6 @@ public extension SystemInformationEndpoint {
 			serverVersion: String,
 			runtimes: Runtimes? = nil,
 			defaultRuntime: String,
-			swarm: SwarmInfo? = nil,
 			liveRestoreEnabled: Bool,
 			isolation: Isolation = .default,
 			initBinary: String,
@@ -126,7 +125,6 @@ public extension SystemInformationEndpoint {
 			self.serverVersion = serverVersion
 			self.runtimes = runtimes
 			self.defaultRuntime = defaultRuntime
-			self.swarm = swarm
 			self.liveRestoreEnabled = liveRestoreEnabled
 			self.isolation = isolation
 			self.initBinary = initBinary
@@ -287,8 +285,6 @@ public extension SystemInformationEndpoint {
 		/// The default can be overridden per-container at create time.
 		public let defaultRuntime: String
 
-		public let swarm: SwarmInfo?
-
 		/// Indicates if live restore is enabled.
 		/// If enabled, containers are kept running when the daemon is shutdown or upon daemon start if running containers are detected.
 		public let liveRestoreEnabled: Bool
@@ -371,7 +367,6 @@ public extension SystemInformationEndpoint {
 			case serverVersion = "ServerVersion"
 			case runtimes = "Runtimes"
 			case defaultRuntime = "DefaultRuntime"
-			case swarm = "Swarm"
 			case liveRestoreEnabled = "LiveRestoreEnabled"
 			case isolation = "Isolation"
 			case initBinary = "InitBinary"
@@ -555,102 +550,6 @@ public extension SystemInformationEndpoint.Response {
 		// MARK: - Runc
 		public struct Runc: Codable {
 			public let path: String
-		}
-	}
-}
-
-
-public extension SystemInformationEndpoint.Response {
-	// MARK: - Swarm
-	struct SwarmInfo: Codable {
-		public init(nodeID: String, nodeAddr: String, localNodeState: String, controlAvailable: Bool, error: String, remoteManagers: [RemoteManager]? = nil, nodes: Int? = nil, managers: Int? = nil, cluster: ClusterInfo? = nil) {
-			self.nodeID = nodeID
-			self.nodeAddr = nodeAddr
-			self.localNodeState = localNodeState
-			self.controlAvailable = controlAvailable
-			self.error = error
-			self.remoteManagers = remoteManagers
-			self.nodes = nodes
-			self.managers = managers
-			self.cluster = cluster
-		}
-
-		public let nodeID, nodeAddr, localNodeState: String
-		/// Whether the current node is a manager.
-		public let controlAvailable: Bool
-		public let error: String
-		public let remoteManagers: [RemoteManager]?
-		public let nodes, managers: Int?
-		public let cluster: ClusterInfo?
-
-		enum CodingKeys: String, CodingKey {
-			case nodeID = "NodeID"
-			case nodeAddr = "NodeAddr"
-			case localNodeState = "LocalNodeState"
-			case controlAvailable = "ControlAvailable"
-			case error = "Error"
-			case remoteManagers = "RemoteManagers"
-			case nodes = "Nodes"
-			case managers = "Managers"
-			case cluster = "Cluster"
-		}
-
-		// MARK: - ClusterInfo
-		public struct ClusterInfo: Codable {
-			public init(id: String, version: SwarmVersion, createdAt: Date, updatedAt: Date, spec: SwarmSpec, tlsInfo: SwarmTLSInfo, rootRotationInProgress: Bool, dataPathPort: Int, defaultAddrPool: [String]? = nil, subnetSize: Int) {
-				self.id = id
-				self.version = version
-				self.createdAt = createdAt
-				self.updatedAt = updatedAt
-				self.spec = spec
-				self.tlsInfo = tlsInfo
-				self.rootRotationInProgress = rootRotationInProgress
-				self.dataPathPort = dataPathPort
-				self.defaultAddrPool = defaultAddrPool
-				self.subnetSize = subnetSize
-			}
-
-			public let id: String
-			public let version: SwarmVersion
-			@DateValue<DockerDateVarietyStrategy>
-			public var createdAt: Date
-			@DateValue<DockerDateVarietyStrategy>
-			public var updatedAt: Date
-			public let spec: SwarmSpec
-			public let tlsInfo: SwarmTLSInfo
-			public let rootRotationInProgress: Bool
-			public let dataPathPort: Int
-			public let defaultAddrPool: [String]?
-			public let subnetSize: Int
-
-			enum CodingKeys: String, CodingKey {
-				case id = "ID"
-				case version = "Version"
-				case createdAt = "CreatedAt"
-				case updatedAt = "UpdatedAt"
-				case spec = "Spec"
-				case tlsInfo = "TLSInfo"
-				case rootRotationInProgress = "RootRotationInProgress"
-				case dataPathPort = "DataPathPort"
-				case defaultAddrPool = "DefaultAddrPool"
-				case subnetSize = "SubnetSize"
-			}
-
-		}
-
-		// MARK: - RemoteManager
-		public struct RemoteManager: Codable {
-			public init(nodeID: String, addr: String) {
-				self.nodeID = nodeID
-				self.addr = addr
-			}
-
-			public let nodeID, addr: String
-
-			enum CodingKeys: String, CodingKey {
-				case nodeID = "NodeID"
-				case addr = "Addr"
-			}
 		}
 	}
 }
