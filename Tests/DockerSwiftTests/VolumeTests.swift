@@ -28,8 +28,8 @@ final class VolumeTests: XCTestCase {
 	}
 
 	func testListVolumes() async throws {
-		// TODO: improve and check the actual content
-		let _ = try await client.volumes.list()
+		let volumes = try await client.volumes.list()
+		XCTAssertGreaterThan(volumes.volumes.count, 0)
 	}
 	
 	func testPruneVolumes() async throws {

@@ -14,9 +14,9 @@ extension DockerClient {
 		/// Lists the volumes.
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns  a  list of `Volume`.
-		public func list() async throws -> [Volume] {
+		public func list() async throws -> ListVolumesEndpoint.Response {
 			let response = try await client.run(ListVolumesEndpoint())
-			return response.Volumes
+			return response
 		}
 		
 		/// Gets a Volume by a given name or id.
