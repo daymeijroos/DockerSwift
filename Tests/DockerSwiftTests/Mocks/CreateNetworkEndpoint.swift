@@ -2,7 +2,10 @@
 
 extension CreateNetworkEndpoint: MockedResponseEndpoint {
 	public var responseData: [MockedResponseData] {
-		guard let body else { return [] }
+		guard let body else {
+			logger.error("Create Network request body not found.")
+			return []
+		}
 		switch body.name {
 		case "11E46E6F-BF6B-474B-A6E5-E08E1E48D454":
 			return [
