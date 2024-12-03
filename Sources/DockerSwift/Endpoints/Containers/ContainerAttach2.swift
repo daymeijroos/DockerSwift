@@ -194,7 +194,7 @@ public class ContainerAttachHandle: Sendable {
 			Task {
 				await MainActor.run {
 					self.context = context
-					parent.containerAttachHandleDidConnect(parent)
+					parent?.containerAttachHandleDidConnect(parent)
 				}
 			}
 		}
@@ -202,20 +202,20 @@ public class ContainerAttachHandle: Sendable {
 		func channelRead(context: ChannelHandlerContext, data: NIOAny) {
 			Task {
 				let byteBuffer = unwrapInboundIn(data)
-				await parent.containerAttachHandle(parent, didRecieveData: byteBuffer)
+				await parent?.containerAttachHandle(parent, didRecieveData: byteBuffer)
 			}
 		}
 
 		func errorCaught(context: ChannelHandlerContext, error: any Error) {
 			Task {
-				await parent.containerAttachHandle(parent, didRecieveError: error)
+				await parent?.containerAttachHandle(parent, didRecieveError: error)
 			}
 		}
 
 		func channelInactive(context: ChannelHandlerContext) {
 			context.close(promise: nil)
 			Task {
-				await parent.containerAttachHandleDidDisconnect(parent)
+				await parent?.containerAttachHandleDidDisconnect(parent)
 			}
 		}
 	}

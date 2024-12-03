@@ -21,8 +21,13 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testNewAttach() async throws {
-		let imageInfo = try await client.images.pull(byName: "alpine", tag: "latest")
-		let image = try await client.images.get(imageInfo.digest)
+		let image: Image
+		if let existing = try? await client.images.get("alpine:latest") {
+			image = try await client.images.get(existing.id)
+		} else {
+			let imageInfo = try await client.images.pull(byName: "alpine", tag: "latest")
+			image = try await client.images.get(imageInfo.digest)
+		}
 
 		let config = ContainerConfig(
 			attachStdin: true,
@@ -36,6 +41,10 @@ final class ContainerTests: XCTestCase {
 			tty: true)
 		let containerInfo = try await client.containers.create(config: config)
 		try await client.containers.start(containerInfo.id)
+
+		addTeardownBlock {
+			try await self.client.containers.stop(containerInfo.id, stopTimeout: 1)
+		}
 
 		let attachEndpoint = ContainerAttach2(
 			containerID: containerInfo.id,
