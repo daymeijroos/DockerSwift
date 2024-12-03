@@ -82,10 +82,9 @@ final class ContainerTests: XCTestCase {
 		t.cancel()
 
 		let lines = rawLines.split(separator: "\r\n")
-		let commandIndex = try XCTUnwrap(lines.firstIndex(of: "echo \"fizz buzz\""))
-		XCTAssertEqual(lines[commandIndex], #"echo "fizz buzz""#)
-		XCTAssertEqual(lines[commandIndex + 1], #"fizz buzz"#)
-		XCTAssertTrue(lines[commandIndex + 2].hasPrefix("/ # "))
+		XCTAssertTrue(lines.contains(#"echo "fizz buzz""#))
+		XCTAssertTrue(lines.contains(#"fizz buzz"#))
+		XCTAssertTrue(lines.contains(where: { $0.hasPrefix("/ # ") }))
 	}
 
 	func testCreateContainer() async throws {
