@@ -1,3 +1,4 @@
+import Logging
 import NIOHTTP1
 import Foundation
 
@@ -7,8 +8,11 @@ public struct CreateNetworkEndpoint: SimpleEndpoint {
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
-	init(spec: NetworkSpec) {
+	let logger: Logger
+
+	init(spec: NetworkSpec, logger: Logger) {
 		self.body = spec
+		self.logger = logger
 	}
 	
 	var path: String {
@@ -59,7 +63,18 @@ public extension CreateNetworkEndpoint {
 		/// User-defined key/value metadata.
 		public var labels: [String:String]?
 
-		public init(name: String, checkDuplicate: Bool? = nil, driver: String = "bridge", internal: Bool = false, attachable: Bool = false, ingress: Bool = false, ipam: IPAM? = nil, enableIPv6: Bool? = nil, options: [String : String]? = nil, labels: [String : String]? = nil) {
+		public init(
+			name: String,
+			checkDuplicate: Bool? = nil,
+			driver: String = "bridge",
+			internal: Bool = false,
+			attachable: Bool = false,
+			ingress: Bool = false,
+			ipam: IPAM? = nil,
+			enableIPv6: Bool? = nil,
+			options: [String : String]? = nil,
+			labels: [String : String]? = nil
+		) {
 			self.name = name
 			self.checkDuplicate = checkDuplicate
 			self.driver = driver
@@ -85,5 +100,4 @@ public extension CreateNetworkEndpoint {
 			case labels = "Labels"
 		}
 	}
-
 }
