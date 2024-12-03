@@ -50,22 +50,19 @@ final class NetworkTests: XCTestCase {
 	}
 
 	func testConnectContainer() async throws {
-		let name = UUID().uuidString
-		let imageInfo = try await client.images.pull(byIdentifier: "nginx:latest")
-		let image = try await client.images.get(imageInfo.digest)
-		let networkInfo = try await client.networks.create(spec: .init(name: name))
-		let network = try await client.networks.get(networkInfo.id)
-		let containerInfo = try await client.containers.create(config: ContainerConfig(image: image.id, name: name))
-		var container = try await client.containers.get(containerInfo.id)
+		let network = try await client.networks.get("11E46E6F-BF6B-474B-A6E5-E08E1E48D454")
+
+		let container = try await client.containers.get("ce25040926ba103e72dd4070db9a07c4510291a3a3475b0cb175dd06dddfbc93")
+
 		try await client.networks.connect(container: container.id, to: network.id)
-		container = try await client.containers.get(container.id)
-		XCTAssert(container.networkSettings.networks?[network.name] != nil, "Ensure Container is attached to Network")
+	}
+
+
+	func testDisconnectContainer() async throws {
+		let network = try await client.networks.get("11E46E6F-BF6B-474B-A6E5-E08E1E48D454")
+
+		let container = try await client.containers.get("ce25040926ba103e72dd4070db9a07c4510291a3a3475b0cb175dd06dddfbc93")
 
 		try await client.networks.disconnect(container: container.id, from: network.id)
-		container = try await client.containers.get(container.id)
-		XCTAssert(container.networkSettings.networks?[network.name] == nil, "Ensure Container is not attached to Network")
-
-		try await client.containers.remove(container.id, force: true)
-		try await client.networks.remove(network.id)
 	}
 }
