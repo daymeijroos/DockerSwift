@@ -16,7 +16,7 @@ public class PaddockClient: @unchecked Sendable {
 	let decoder = JSONDecoder()
 	let encoder = JSONEncoder()
 
-	let daemonURL: URL
+	let socketURL: URL
 	let tlsConfig: TLSConfiguration?
 	let client: HTTPClient
 	let logger: Logger
@@ -27,14 +27,14 @@ public class PaddockClient: @unchecked Sendable {
 
 	/// Initialize the `DockerClient`.
 	/// - Parameters:
-	///   - daemonURL: The URL where the Docker API is listening on. Default is `http+unix:///var/run/docker.sock`.
+	///   - socketURL: The URL where the Docker API is listening on. Default is `http+unix:///var/run/docker.sock`.
 	///   - tlsConfig: `TLSConfiguration` for a Docker daemon requiring TLS authentication. Default is `nil`.
 	///   - logger: `Logger` for the `DockerClient`. Default is `.init(label: "docker-client")`.
 	///   - clientThreads: Number of threads to use for the HTTP client EventLoopGroup. Defaults to 2.
 	///   - timeout: Pass custom connect and read timeouts via a `HTTPClient.Configuration.Timeout` instance
 	///   - proxy: Proxy settings, defaults to `nil`.
 	public convenience init(
-		daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
+		socketURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
 		tlsConfig: TLSConfiguration? = nil,
 		logger: Logger = .init(label: "🪵docker-client"),
 		clientThreads: Int = 2,
@@ -42,7 +42,7 @@ public class PaddockClient: @unchecked Sendable {
 		proxy: HTTPClient.Configuration.Proxy? = nil
 	) {
 		self.init(
-			daemonURL: daemonURL,
+			socketURL: socketURL,
 			tlsConfig: tlsConfig,
 			logger: logger,
 			clientThreads: clientThreads,
@@ -52,7 +52,7 @@ public class PaddockClient: @unchecked Sendable {
 	}
 
 	package static func forTesting(
-		daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
+		socketURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
 		tlsConfig: TLSConfiguration? = nil,
 		clientThreads: Int = 2,
 		timeout: HTTPClient.Configuration.Timeout = .init(),
@@ -63,7 +63,7 @@ public class PaddockClient: @unchecked Sendable {
 		logger.logLevel = .debug
 
 		return PaddockClient(
-			daemonURL: daemonURL,
+			socketURL: socketURL,
 			tlsConfig: tlsConfig,
 			logger: logger,
 			clientThreads: clientThreads,
@@ -73,7 +73,7 @@ public class PaddockClient: @unchecked Sendable {
 	}
 
 	private init(
-		daemonURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
+		socketURL: URL = URL(httpURLWithSocketPath: DockerEnvironment.dockerHost)!,
 		tlsConfig: TLSConfiguration? = nil,
 		logger: Logger = .init(label: "🪵docker-client"),
 		clientThreads: Int = 2,
@@ -81,7 +81,7 @@ public class PaddockClient: @unchecked Sendable {
 		proxy: HTTPClient.Configuration.Proxy? = nil,
 		testMode: TestMode
 	) {
-		self.daemonURL = daemonURL
+		self.socketURL = socketURL
 		self.tlsConfig = tlsConfig
 		let clientConfig = HTTPClient.Configuration(
 			tlsConfiguration: tlsConfig,
@@ -131,7 +131,7 @@ public class PaddockClient: @unchecked Sendable {
 		}
 
 		let request = try endpoint.request(
-			socketURL: daemonURL,
+			socketURL: socketURL,
 			apiVersion: apiVersion,
 			additionalHeaders: headers,
 			encoder: encoder)
@@ -200,7 +200,7 @@ public class PaddockClient: @unchecked Sendable {
 		}
 
 		let request = try endpoint.request(
-			socketURL: daemonURL,
+			socketURL: socketURL,
 			apiVersion: apiVersion,
 			additionalHeaders: headers,
 			encoder: encoder)

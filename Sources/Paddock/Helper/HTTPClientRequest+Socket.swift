@@ -4,14 +4,14 @@ import NIOHTTP1
 
 extension HTTPClientRequest {
 	public init(
-		daemonURL: URL,
+		socketURL: URL,
 		urlPath: String,
 		queryItems: [URLQueryItem],
 		method: HTTPMethod,
 		body: HTTPClientRequest.Body? = nil,
 		headers: HTTPHeaders
 	) {
-		var newURL = daemonURL
+		var newURL = socketURL
 			.appending(path: urlPath.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
 		if queryItems.isEmpty == false {
 			newURL

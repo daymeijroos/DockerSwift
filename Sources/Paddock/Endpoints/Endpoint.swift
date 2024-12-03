@@ -36,7 +36,7 @@ extension Endpoint {
 		}()
 
 		return HTTPClientRequest(
-			daemonURL: url,
+			socketURL: url,
 			urlPath: urlPath,
 			queryItems: queryArugments,
 			method: method,

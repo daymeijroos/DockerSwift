@@ -144,7 +144,7 @@ Remote daemon over HTTP:
 ```swift
 import Paddock
 
-let docker = DockerClient(daemonURL: URL(string: "http://127.0.0.1:2375")!)
+let docker = DockerClient(socketURL: URL(string: "http://127.0.0.1:2375")!)
 defer { try! docker.syncShutdown() }
 ```
 
@@ -159,7 +159,7 @@ tlsConfig.additionalTrustRoots.append(.file("docker-daemon-ca.pem"))
 tlsConfig.certificateVerification = .noHostnameVerification
 
 let docker = DockerClient(
-    daemonURL: .init(string: "https://your.docker.daemon:2376")!,
+    socketURL: .init(string: "https://your.docker.daemon:2376")!,
     tlsConfig: tlsConfig
 )
 defer { try! docker.syncShutdown() }

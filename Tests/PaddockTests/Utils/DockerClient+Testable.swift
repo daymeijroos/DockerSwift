@@ -14,7 +14,7 @@ extension PaddockClient {
 		return PaddockClient(logger: logger)
 
 		// Remote via simple HTTP
-		//return DockerClient(daemonURL: .init(string: "http://127.0.0.1:2375")!, logger: logger)
+		//return DockerClient(socketURL: .init(string: "http://127.0.0.1:2375")!, logger: logger)
 
 		// Remote daemon, using HTTPS and client certs authentication
 //		var tlsConfig = TLSConfiguration.makeClientConfiguration()
@@ -23,7 +23,7 @@ extension PaddockClient {
 //		tlsConfig.additionalTrustRoots.append(.file("ca-public.pem"))
 //		tlsConfig.certificateVerification = .noHostnameVerification
 //		return DockerClient(
-//			daemonURL: .init(string: "https://51.15.19.7:2376")!,
+//			socketURL: .init(string: "https://51.15.19.7:2376")!,
 //			tlsConfig: tlsConfig,
 //			logger: logger
 //		)

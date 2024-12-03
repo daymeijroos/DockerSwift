@@ -170,7 +170,7 @@ extension ContainerAttachEndpoint {
 			var mocker = mocker
 
 			let req = try mocker.request(
-				socketURL: client.daemonURL,
+				socketURL: client.socketURL,
 				apiVersion: client.apiVersion,
 				additionalHeaders: client.headers,
 				encoder: client.encoder)
@@ -232,8 +232,8 @@ public extension PaddockClient.ContainersAPI {
 			.channelOption(.socketOption(.so_reuseaddr), value: 1)
 
 		guard
-			let socketPath = client.daemonURL.host(percentEncoded: false)
-		else { throw DockerError.message("Invalid unix domain socket path: \(client.daemonURL)") }
+			let socketPath = client.socketURL.host(percentEncoded: false)
+		else { throw DockerError.message("Invalid unix domain socket path: \(client.socketURL)") }
 		let channel = try await bootstrap.connect(unixDomainSocketPath: socketPath).get()
 
 		defer { endpoint.isStarting = false }
@@ -248,7 +248,7 @@ public extension PaddockClient.ContainersAPI {
 
 		let pathGen = {
 			let url = client
-				.daemonURL
+				.socketURL
 				.appending(path: endpoint.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
 			guard endpoint.queryArugments.isEmpty == false else { return url.path() }
 			let withQuery = url.appending(queryItems: endpoint.queryArugments)
