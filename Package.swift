@@ -2,10 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "DockerSwift",
+    name: "Paddock",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "DockerSwift", targets: ["DockerSwift"]),
+        .library(name: "Paddock", targets: ["Paddock"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.62.0"),
@@ -15,7 +15,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "DockerSwift",
+            name: "Paddock",
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
@@ -25,9 +25,9 @@ let package = Package(
 				.enableUpcomingFeature("BareSlashRegexLiterals"),
 			]),
         .testTarget(
-            name: "DockerSwiftTests",
+            name: "PaddockTests",
             dependencies: [
-                "DockerSwift",
+                "Paddock",
             ],
             resources: [
                 .copy("Assets")

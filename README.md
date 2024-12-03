@@ -109,12 +109,12 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/mredig/DockerSwift.git", .branch("main")),
+        .package(url: "https://github.com/mredig/Paddock.git", .branch("main")),
     ],
     targets: [
         .target(name: "App", dependencies: [
             ...
-            .product(name: "DockerSwift", package: "DockerSwift")
+            .product(name: "Paddock", package: "Paddock")
         ]),
     ...
     ]
@@ -123,7 +123,7 @@ let package = Package(
 
 ### Xcode Project
 To add DockerClientSwift to your existing Xcode project, select File -> Swift Packages -> Add Package Dependancy. 
-Enter `https://github.com/mredig/DockerSwift.git` for the URL.
+Enter `https://github.com/mredig/Paddock.git` for the URL.
 
 
 ## Usage Examples
@@ -134,7 +134,7 @@ Enter `https://github.com/mredig/DockerSwift.git` for the URL.
 
 Local socket (defaults to `/var/run/docker.sock`):
 ```swift
-import DockerSwift
+import Paddock
 
 let docker = DockerClient()
 defer { try! docker.syncShutdown() }
@@ -142,7 +142,7 @@ defer { try! docker.syncShutdown() }
 
 Remote daemon over HTTP:
 ```swift
-import DockerSwift
+import Paddock
 
 let docker = DockerClient(daemonURL: URL(string: "http://127.0.0.1:2375")!)
 defer { try! docker.syncShutdown() }
@@ -150,7 +150,7 @@ defer { try! docker.syncShutdown() }
 
 Remote daemon over HTTPS, using a client certificate for authentication:
 ```swift
-import DockerSwift
+import Paddock
 
 var tlsConfig = TLSConfiguration.makeClientConfiguration()
 tlsConfig.privateKey = NIOSSLPrivateKeySource.file("client-key.pem")
