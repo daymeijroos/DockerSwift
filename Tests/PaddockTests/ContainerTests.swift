@@ -4,10 +4,10 @@ import Logging
 
 final class ContainerTests: XCTestCase {
 
-	var client: DockerClient!
+	var client: PaddockClient!
 
 	override func setUp() async throws {
-		client = DockerClient.forTesting()
+		client = PaddockClient.forTesting()
 	}
 
 	override func tearDownWithError() throws {

@@ -1,7 +1,7 @@
 import Foundation
 import NIO
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// APIs related to images.
 	public var images: ImagesAPI {
@@ -9,7 +9,7 @@ extension DockerClient {
 	}
 	
 	public struct ImagesAPI {
-		fileprivate var client: DockerClient
+		fileprivate var client: PaddockClient
 
 		/// Pulls an image from a remote registry
 		/// If you want to customize the identifier of the image you can use `pullImage(byIdentifier:)` to do this.

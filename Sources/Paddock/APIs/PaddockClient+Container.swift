@@ -2,7 +2,7 @@ import Foundation
 import NIO
 import AsyncHTTPClient
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// APIs related to containers.
 	public var containers: ContainersAPI {
@@ -10,7 +10,7 @@ extension DockerClient {
 	}
 	
 	public struct ContainersAPI {
-		let client: DockerClient
+		let client: PaddockClient
 		
 		/// Fetches all containers in the Docker system.
 		/// - Parameter all: If `true` all containers are fetched, otherwise only running containers.

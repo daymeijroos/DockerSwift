@@ -4,10 +4,10 @@ import Logging
 
 final class NetworkTests: XCTestCase {
 
-	var client: DockerClient!
+	var client: PaddockClient!
 
 	override func setUp() {
-		client = DockerClient.forTesting()
+		client = PaddockClient.forTesting()
 	}
 
 	override func tearDownWithError() throws {

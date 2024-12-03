@@ -3,10 +3,10 @@ import XCTest
 import Logging
 
 final class PluginTests: XCTestCase {
-	var client: DockerClient!
+	var client: PaddockClient!
 	
 	override func setUp() async throws {
-		client = DockerClient.testable()
+		client = PaddockClient.testable()
 	}
 	
 	override func tearDownWithError() throws {

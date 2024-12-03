@@ -1,6 +1,6 @@
 import Foundation
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// APIs related to Docker configs.
 	public var secrets: SecretsAPI {
@@ -8,7 +8,7 @@ extension DockerClient {
 	}
 	
 	public struct SecretsAPI {
-		fileprivate var client: DockerClient
+		fileprivate var client: PaddockClient
 		
 		/// Lists the secrets.
 		/// - Throws: Errors that can occur when executing the request.

@@ -2,16 +2,16 @@ import Paddock
 import Logging
 import NIOSSL
 
-extension DockerClient {
+extension PaddockClient {
 	/// Creates a new `DockerClient` instance that can be used for testing.
 	/// It creates a new `Logger` with the log level `.debug` and passes it to the `DockerClient`.
 	/// - Returns: Returns a `DockerClient` that is meant for testing purposes.
-	static func testable() -> DockerClient {
+	static func testable() -> PaddockClient {
 		var logger = Logger(label: "🪵🪵docker-client-tests")
 		logger.logLevel = .debug
 
 		// Local Unix socket
-		return DockerClient(logger: logger)
+		return PaddockClient(logger: logger)
 
 		// Remote via simple HTTP
 		//return DockerClient(daemonURL: .init(string: "http://127.0.0.1:2375")!, logger: logger)

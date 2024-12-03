@@ -1,7 +1,7 @@
 import Foundation
 import NIO
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// Get system information
 	/// - Throws: Errors that can occur when executing the request.

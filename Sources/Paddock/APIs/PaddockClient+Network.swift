@@ -1,6 +1,6 @@
 import Foundation
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// APIs related to Docker networks.
 	public var networks: NetworksAPI {
@@ -8,7 +8,7 @@ extension DockerClient {
 	}
 	
 	public struct NetworksAPI {
-		fileprivate var client: DockerClient
+		fileprivate var client: PaddockClient
 		
 		/// Lists the networks.
 		/// - Throws: Errors that can occur when executing the request.

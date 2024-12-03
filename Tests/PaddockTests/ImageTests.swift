@@ -4,10 +4,10 @@ import Logging
 import NIO
 
 final class ImageTests: XCTestCase {
-	var client: DockerClient!
+	var client: PaddockClient!
 
 	override func setUp() async throws {
-		client = DockerClient.forTesting()
+		client = PaddockClient.forTesting()
 		if (try? await client.images.get("nginx:latest")) == nil {
 			_ = try await client.images.pull(byName: "nginx", tag: "latest")
 		}

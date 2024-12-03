@@ -166,7 +166,7 @@ extension ContainerAttachEndpoint {
 
 		let mocker: any BidirectionalMockEndpoint
 
-		init(mocker: any BidirectionalMockEndpoint, client: DockerClient) async throws {
+		init(mocker: any BidirectionalMockEndpoint, client: PaddockClient) async throws {
 			var mocker = mocker
 
 			let req = try mocker.request(
@@ -209,7 +209,7 @@ extension ContainerAttachEndpoint._HandleImplementation: ContainerAttachEndpoint
 
 extension ChannelHandlerContext: @retroactive @unchecked Sendable {}
 
-public extension DockerClient.ContainersAPI {
+public extension PaddockClient.ContainersAPI {
 	@MainActor
 	func attach(_ endpoint: ContainerAttachEndpoint) async throws -> ContainerAttachEndpoint.AttachHandle {
 		var endpoint = endpoint

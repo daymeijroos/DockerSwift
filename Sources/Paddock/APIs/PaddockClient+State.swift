@@ -1,6 +1,6 @@
 import NIOHTTP1
 
-public extension DockerClient {
+public extension PaddockClient {
 	enum State {
 		case uninitialized
 		case initialized(HostInfo)

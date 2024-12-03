@@ -1,6 +1,6 @@
 import Foundation
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// APIs related to Docker plugins.
 	public var plugins: PluginsAPI {
@@ -8,7 +8,7 @@ extension DockerClient {
 	}
 	
 	public struct PluginsAPI {
-		fileprivate var client: DockerClient
+		fileprivate var client: PaddockClient
 		
 		/// Lists the plugins.
 		/// - Throws: Errors that can occur when executing the request.

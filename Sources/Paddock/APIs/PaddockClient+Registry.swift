@@ -1,7 +1,7 @@
 import Foundation
 import Logging
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// APIs related to Docker registries.
 	public var registries: RegistriesAPI {
@@ -9,7 +9,7 @@ extension DockerClient {
 	}
 	
 	public struct RegistriesAPI {
-		fileprivate var client: DockerClient
+		fileprivate var client: PaddockClient
 		
 		/// Log into a docker registry (gets a token)
 		/// - Parameters:

@@ -8,5 +8,4 @@ public enum DockerError: Error {
 	case unknownResponse(String)
 	case corruptedData(String)
 	case errorCode(Int, String?)
-	case unsupportedScheme(String)
 }

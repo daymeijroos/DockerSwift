@@ -5,8 +5,8 @@ import NIOSSL
 import AsyncHTTPClient
 import Logging
 
-/// The entry point for Docker client commands.
-public class DockerClient: @unchecked Sendable {
+/// The entry point for Docker/Podman client commands.
+public class PaddockClient: @unchecked Sendable {
 	internal let apiVersion = "v1.41"
 	let headers = HTTPHeaders([
 		("Host", "localhost"), // Required by Docker
@@ -58,11 +58,11 @@ public class DockerClient: @unchecked Sendable {
 		timeout: HTTPClient.Configuration.Timeout = .init(),
 		proxy: HTTPClient.Configuration.Proxy? = nil,
 		useLiveSocket: Bool = false
-	) -> DockerClient {
+	) -> PaddockClient {
 		var logger = Logger(label: "🪵docker-client-tests")
 		logger.logLevel = .debug
 
-		return DockerClient(
+		return PaddockClient(
 			daemonURL: daemonURL,
 			tlsConfig: tlsConfig,
 			logger: logger,
@@ -277,7 +277,7 @@ public class DockerClient: @unchecked Sendable {
 }
 
 // MARK: - Curl Command
-extension DockerClient {
+extension PaddockClient {
 	func genCurlCommand<E: SimpleEndpoint>(_ endpoint: E) throws -> String {
 		try genCurlCommand(
 			method: endpoint.method,

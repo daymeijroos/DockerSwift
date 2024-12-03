@@ -1,6 +1,6 @@
 import Foundation
 
-extension DockerClient {
+extension PaddockClient {
 	
 	/// APIs related to Docker volumes.
 	public var volumes: VolumesAPI {
@@ -8,7 +8,7 @@ extension DockerClient {
 	}
 	
 	public struct VolumesAPI {
-		fileprivate var client: DockerClient
+		fileprivate var client: PaddockClient
 		
 		
 		/// Lists the volumes.
