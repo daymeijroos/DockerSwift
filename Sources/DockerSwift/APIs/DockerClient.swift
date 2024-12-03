@@ -161,7 +161,7 @@ public class DockerClient: @unchecked Sendable {
 					let buffer = try await mockEndpoint.mockedResponse(request)
 					return try decodeOut(buffer)
 				}
-			} catch is NoMock {}
+			} catch is NoMockAvailableError {}
 		}
 
 		let response = try await client.execute(request, timeout: endpoint.timeout ?? .minutes(2))
@@ -260,7 +260,7 @@ public class DockerClient: @unchecked Sendable {
 					let mockStream = try await mockEndpoint.mockedStreamingResponse(request)
 					return consumeStream(mockStream)
 				}
-			} catch is NoMock {}
+			} catch is NoMockAvailableError {}
 		}
 
 		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout ?? endpoint.timeout ?? .hours(1), logger: logger)
@@ -269,7 +269,7 @@ public class DockerClient: @unchecked Sendable {
 		return consumeStream(stream)
 	}
 
-	private struct NoMock: Error {}
+	private struct NoMockAvailableError: Error {}
 	private func performTest<EP: Endpoint, T>(useMocks: Bool, endpoint: EP, mockBlock: (any MockedResponseEndpoint) async throws -> T) async throws -> T {
 		if useMocks {
 			if let mockEndpoint = endpoint as? (any MockedResponseEndpoint) {
@@ -283,7 +283,7 @@ public class DockerClient: @unchecked Sendable {
 			let isMockStr = (endpoint is any MockedResponseEndpoint) ? "(🍀 mock available)" : "(🥵 no mock available)"
 			logger.debug("(\(EP.self) / \(EP.Response.self)) ⚡️🔌 Live Socket Testing \(isMockStr) \(endpoint.method.rawValue) \(endpoint.path)")
 		}
-		throw NoMock()
+		throw NoMockAvailableError()
 	}
 
 	package enum TestMode {
