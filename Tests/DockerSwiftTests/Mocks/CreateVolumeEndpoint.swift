@@ -13,7 +13,7 @@ extension CreateVolumeEndpoint: MockedResponseEndpoint {
 				.string(#"{"CreatedAt":"2024-12-03T13:33:50-06:00","Driver":"local","Labels":{"myLabel":"value"},"Mountpoint":"/var/home/core/.local/share/containers/storage/volumes/6E6ECDC1-A20B-46B5-8079-E8CB754DEAE7/_data","Name":"TestVolumeStorage","Options":null,"Scope":"local"}"#)
 			]
 		default:
-			logger.error("Requested mock volume creation not found: \(body.name as Any).")
+			logger.error("⚠️ Requested mock volume creation not found: \(body.name as Any).")
 			return []
 		}
 	}

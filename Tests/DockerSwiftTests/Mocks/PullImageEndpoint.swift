@@ -31,7 +31,7 @@ extension PullImageEndpoint: MockedResponseEndpoint {
 				.string(#"{"status":"Download complete","progressDetail":{},"id":"7a3f95c07812"}"#),
 			]
 		default:
-			logger.error("Requested image not found: \(imageName).")
+			logger.error("⚠️ Requested image not found: \(imageName).")
 			return []
 		}
 	}

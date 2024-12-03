@@ -48,7 +48,7 @@ extension GetLogsEndpoint: MockedResponseEndpoint {
 				.base64EncodedString("AQAAAAAAAD4yMDI0LTExLTI2VDAzOjQwOjM3LTA2OjAwIE1hc3RvZG9uOiAgQFBvZG1hbl9pb0Bmb3NzdG9kb24ub3JnCg=="),
 			]
 		default:
-			logger.error("Requested logs for container not found: \(id).")
+			logger.error("⚠️ Requested logs for container not found: \(id).")
 			return []
 		}
 	}

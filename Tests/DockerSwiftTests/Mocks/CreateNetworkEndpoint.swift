@@ -12,7 +12,7 @@ extension CreateNetworkEndpoint: MockedResponseEndpoint {
 				.string(#"{"Id":"7e77192f93582449e5806dc32639808ae078e0d5f38cc4636f1d7b9057e8c6e1", "Warning":""}"#)
 			]
 		default:
-			logger.error("Requested mock network creation not found: \(body.name).")
+			logger.error("⚠️ Requested mock network creation not found: \(body.name).")
 			return []
 		}
 	}
