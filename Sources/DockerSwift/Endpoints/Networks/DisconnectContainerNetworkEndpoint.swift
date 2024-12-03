@@ -1,7 +1,7 @@
 import NIOHTTP1
 import Foundation
 
-struct DisconnectContainerEndpoint: SimpleEndpoint {
+struct DisconnectContainerNetworkEndpoint: SimpleEndpoint {
 	typealias Body = DisconnectContainerRequest
 	
 	typealias Response = NoBody?

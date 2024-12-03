@@ -74,7 +74,7 @@ extension DockerClient {
 		/// - Throws: Errors that can occur when executing the request.
 		public func disconnect(container: String, from networkNameOrId: String, force: Bool = false) async throws {
 			try await client.run(
-				DisconnectContainerEndpoint(nameOrId: networkNameOrId, containerNameOrId: container, force: force)
+				DisconnectContainerNetworkEndpoint(nameOrId: networkNameOrId, containerNameOrId: container, force: force)
 			)
 		}
 	}
