@@ -164,7 +164,7 @@ public class DockerClient: @unchecked Sendable {
 			} catch is NoMock {}
 		}
 
-		let response = try await client.execute(request, timeout: .minutes(2))
+		let response = try await client.execute(request, timeout: endpoint.timeout ?? .minutes(2))
 		let responseBody = response.body
 		try await _initialize(with: response.headers)
 		try response.checkStatusCode()
@@ -184,7 +184,7 @@ public class DockerClient: @unchecked Sendable {
 	/// stream is completed.
 	@discardableResult
 	internal func run<T: PipelineEndpoint>(_ endpoint: T, progressUpdater: @escaping (T.Response) -> Void) async throws -> T.FinalResponse {
-		let responseStream = try await run(endpoint, timeout: .hours(1), separators: [])
+		let responseStream = try await run(endpoint)
 
 		var accumulator: [T.Response] = []
 		for try await response in responseStream {
@@ -197,7 +197,7 @@ public class DockerClient: @unchecked Sendable {
 
 	/// Run an endpoint that streams data. Log updates might be a good example.
 	@discardableResult
-	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount, hasLengthHeader: Bool = false, separators: [UInt8]) async throws -> AsyncThrowingStream<T.Response, Error> {
+	internal func run<T: StreamingEndpoint>(_ endpoint: T, timeout: TimeAmount? = nil) async throws -> AsyncThrowingStream<T.Response, Error> {
 		defer {
 			if logger.logLevel <= .debug {
 				// printing to avoid the logging prefix, making for an easier copy/pasta
@@ -263,7 +263,7 @@ public class DockerClient: @unchecked Sendable {
 			} catch is NoMock {}
 		}
 
-		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout, logger: logger)
+		let (headers, stream) = try await client.executeStream(request: request, timeout: timeout ?? endpoint.timeout ?? .hours(1), logger: logger)
 		try await _initialize(with: headers)
 
 		return consumeStream(stream)

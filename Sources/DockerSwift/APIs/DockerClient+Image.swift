@@ -18,7 +18,7 @@ extension DockerClient {
 		///   - tag: Optional tag name. Default is `nil`.
 		///   - digest: Optional digest value. Default is `nil`.
 		/// - Throws: Errors that can occur when executing the request.
-		public func pull(byName name: String, tag: String? = nil, digest: Digest? = nil, token: RegistryAuth.Token? = nil, progressUpdater: @escaping (PullImageEndpoint.Response) -> Void = { _ in }) async throws -> PullImageEndpoint.FinalResponse {
+		public func pull(byName name: String, tag: String? = nil, digest: Digest? = nil, token: RegistryAuth.Token? = nil, timeout: TimeAmount? = nil, progressUpdater: @escaping (PullImageEndpoint.Response) -> Void = { _ in }) async throws -> PullImageEndpoint.FinalResponse {
 			var identifier = name
 			if let tag = tag {
 				identifier += ":\(tag)"
@@ -26,15 +26,15 @@ extension DockerClient {
 			if let digest = digest {
 				identifier += "@\(digest.rawValue)"
 			}
-			return try await pull(byIdentifier: identifier, token: token, progressUpdater: progressUpdater)
+			return try await pull(byIdentifier: identifier, token: token, timeout: timeout, progressUpdater: progressUpdater)
 		}
 
 		/// Pulls an image by a given identifier. The identifier can be build manually.
 		/// - Parameters:
 		///   - identifier: Identifier of an image that is pulled.
 		/// - Throws: Errors that can occur when executing the request.
-		public func pull(byIdentifier identifier: String, token: RegistryAuth.Token? = nil, progressUpdater: @escaping (PullImageEndpoint.Response) -> Void = { _ in }) async throws -> PullImageEndpoint.FinalResponse {
-			try await client.run(PullImageEndpoint(imageName: identifier, token: token, logger: client.logger), progressUpdater: progressUpdater)
+		public func pull(byIdentifier identifier: String, token: RegistryAuth.Token? = nil, timeout: TimeAmount? = nil, progressUpdater: @escaping (PullImageEndpoint.Response) -> Void = { _ in }) async throws -> PullImageEndpoint.FinalResponse {
+			try await client.run(PullImageEndpoint(imageName: identifier, token: token, timeout: timeout, logger: client.logger), progressUpdater: progressUpdater)
 		}
 
 		/// Push an image to a registry.
@@ -88,9 +88,9 @@ extension DockerClient {
 		///   - timeout: How long to wait for the build to finish before cancelling it (by cancelling the request).
 		/// - Throws: Errors that can occur when executing the request.
 		/// - Returns: Returns an `EventLoopFuture` when the image has been removed or an error is thrown.
-		public func build(config: BuildEndpoint.Configuration, context: ByteBuffer, timeout: TimeAmount = .minutes(10)) async throws -> AsyncThrowingStream<BuildEndpoint.StreamOutput, Error> {
+		public func build(config: BuildEndpoint.Configuration, context: ByteBuffer, timeout: TimeAmount? = nil) async throws -> AsyncThrowingStream<BuildEndpoint.StreamOutput, Error> {
 			let endpoint = BuildEndpoint(buildConfig: config, context: context)
-			return try await client.run(endpoint, timeout: timeout, separators: [])
+			return try await client.run(endpoint, timeout: timeout ?? endpoint.timeout ?? .minutes(10))
 		}
 
 		/// Creates an image from an existing Container (`docker commit`).

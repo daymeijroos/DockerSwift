@@ -1,3 +1,4 @@
+import NIO
 import NIOHTTP1
 import Foundation
 
@@ -8,17 +9,19 @@ struct StopContainerEndpoint: SimpleEndpoint {
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] {
 		[
-			timeout.map { URLQueryItem(name: "t", value: $0.description) }
+			stopTimeout.map { URLQueryItem(name: "t", value: $0.description) }
 		]
 			.compactMap(\.self)
 	}
 
-	private let containerId: String
-	private let timeout: UInt?
-	
-	init(containerId: String, timeout: UInt?) {
+	var timeout: TimeAmount? { .seconds(stopTimeout.map { Int64($0) + 10 } ?? 20) }
+
+	let containerId: String
+	let stopTimeout: Int?
+
+	init(containerId: String, stopTimeout: Int?) {
 		self.containerId = containerId
-		self.timeout = timeout
+		self.stopTimeout = stopTimeout
 	}
 	
 	var path: String {

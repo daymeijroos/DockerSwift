@@ -11,6 +11,8 @@ protocol Endpoint {
 	var queryArugments: [URLQueryItem] { get }
 	var headers: HTTPHeaders? {get}
 	var body: Body? { get }
+
+	var timeout: TimeAmount? { get }
 }
 
 protocol SimpleEndpoint: Endpoint where Response: Codable {
@@ -20,7 +22,8 @@ protocol SimpleEndpoint: Endpoint where Response: Codable {
 extension SimpleEndpoint {
 	public var headers: HTTPHeaders? { nil }
 	public var body: Body? { nil }
-	
+	var timeout: TimeAmount? { .seconds(10) }
+
 	func responseValidation(_ response: Response) throws(DockerError) {}
 }
 
@@ -36,6 +39,8 @@ protocol StreamingEndpoint: Endpoint {
 extension StreamingEndpoint {
 	var headers: HTTPHeaders? { nil }
 	var body: Body? { nil }
+
+	var timeout: TimeAmount? { .hours(365 * 24 * 10) }
 
 	func mapDecodableStreamChunk(_ buffer: ByteBuffer, decoder: JSONDecoder, remainingBytes: inout ByteBuffer) async throws(StreamChunkError) -> [Response] where Response: Decodable {
 		var buffer = buffer

@@ -1,7 +1,7 @@
+import NIO
 import NIOHTTP1
 import Foundation
 import Logging
-import NIO
 
 public struct PullImageEndpoint: PipelineEndpoint {
 	typealias Body = NoBody
@@ -14,6 +14,7 @@ public struct PullImageEndpoint: PipelineEndpoint {
 	var queryArugments: [URLQueryItem] {
 		[URLQueryItem(name: "fromImage", value: imageName)]
 	}
+	var timeout: TimeAmount?
 
 	let logger: Logger
 
@@ -25,12 +26,13 @@ public struct PullImageEndpoint: PipelineEndpoint {
 
 	var headers: HTTPHeaders? = nil
 
-	init(imageName: String, token: RegistryAuth.Token?, logger: Logger) {
+	init(imageName: String, token: RegistryAuth.Token?, timeout: TimeAmount? = nil, logger: Logger) {
 		self.imageName = imageName
 		self.token = token
 		if let token {
 			self.headers = .init([("X-Registry-Auth", token.rawValue)])
 		}
+		self.timeout = timeout ?? .minutes(2)
 		self.logger = logger
 	}
 

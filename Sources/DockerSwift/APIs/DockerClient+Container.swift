@@ -67,8 +67,8 @@ extension DockerClient {
 		///   - nameOrId: Name or Id of the`Container`.
 		///   - timeout: Number of seconds to wait for the containert to stop, before killing it.
 		/// - Throws: Errors that can occur when executing the request.
-		public func stop(_ nameOrId: String, timeout: UInt? = nil) async throws {
-			try await client.run(StopContainerEndpoint(containerId: nameOrId, timeout: timeout))
+		public func stop(_ nameOrId: String, stopTimeout: Int? = nil) async throws {
+			try await client.run(StopContainerEndpoint(containerId: nameOrId, stopTimeout: stopTimeout))
 		}
 		
 		/// Kills a running container by sending it a Unix signal.
@@ -180,12 +180,7 @@ extension DockerClient {
 				since: since,
 				until: until,
 				logger: client.logger)
-			return try await client.run(
-				endpoint,
-				// Arbitrary timeouts.
-				// TODO: should probably make these configurable
-				timeout: follow ? .hours(12) : .seconds(60),
-				separators: [UInt8(13)])
+			return try await client.run(endpoint)
 		}
 		
 		/// Attaches to a container. Allows to retrieve a stream of the container output, and sending commands if it listens on the standard input.

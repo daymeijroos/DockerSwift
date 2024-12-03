@@ -38,6 +38,6 @@ extension DockerClient {
 	///   - until: Show events created until this timestamp then stop streaming.
 	public func events(since: Date? = nil, until: Date? = nil) async throws -> AsyncThrowingStream<GetEventsEndpoint.Response, Error> {
 		let endpoint = GetEventsEndpoint(since: since, until: until)
-		return try await run(endpoint, timeout: .hours(12), hasLengthHeader: false, separators: [UInt8(ascii: "\n")])
+		return try await run(endpoint, timeout: .hours(12))
 	}
 }
