@@ -7,9 +7,7 @@ public struct PruneVolumesEndpoint: SimpleEndpoint {
 
 	typealias Body = NoBody
 	let method: HTTPMethod = .POST
-		
-	init() {}
-	
+
 	var path: String {
 		"volumes/prune"
 	}
