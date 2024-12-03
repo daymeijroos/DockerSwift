@@ -92,62 +92,6 @@ public extension ContainerAttachEndpoint.AttachHandle {
 	}
 }
 
-public extension DockerClient.ContainersAPI {
-	@MainActor
-	func attach(_ endpoint: consuming ContainerAttachEndpoint) async throws -> ContainerAttachEndpoint.AttachHandle {
-		guard endpoint.isStarting == false else { throw AttachError.alreadyStarting }
-		endpoint.isStarting = true
-
-		let handle = ContainerAttachEndpoint._HandleImplementation()
-
-		let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-		let bootstrap = ClientBootstrap(group: group)
-			.channelInitializer { channel in
-				channel.pipeline.addHandler(handle)
-			}
-			.channelOption(.socketOption(.so_reuseaddr), value: 1)
-
-		guard
-			let socketPath = client.daemonURL.host(percentEncoded: false)
-		else { throw DockerError.message("Invalid unix domain socket path: \(client.daemonURL)") }
-		let channel = try await bootstrap.connect(unixDomainSocketPath: socketPath).get()
-
-		defer { endpoint.isStarting = false }
-		let runTask = Task {
-			do {
-				try await channel.closeFuture.get()
-			} catch {
-				fatalError("Error connecting to server: \(error)")
-			}
-		}
-		handle.runTask = runTask
-
-		let pathGen = {
-			let url = client
-				.daemonURL
-				.appending(path: endpoint.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
-			guard endpoint.queryArugments.isEmpty == false else { return url.path() }
-			let withQuery = url.appending(queryItems: endpoint.queryArugments)
-			return "\(withQuery.path())?\(withQuery.query() ?? "")"
-		}()
-		let headerLines = [
-			"\(endpoint.method.rawValue) \(pathGen) HTTP/1.1",
-			"Host: localhost",
-		]
-
-		let header = headerLines
-			.joined(by: "\r\n") + "\r\n\r\n"
-
-		try await handle.send(header)
-
-		return handle
-	}
-
-	enum AttachError: Swift.Error {
-		case alreadyStarting
-	}
-}
-
 extension ContainerAttachEndpoint {
 	@MainActor
 	fileprivate class _HandleImplementation: Sendable, ContainerAttachEndpoint.AttachHandle, ChannelInboundHandler {
@@ -236,3 +180,59 @@ extension ContainerAttachEndpoint._HandleImplementation: ContainerAttachEndpoint
 }
 
 extension ChannelHandlerContext: @retroactive @unchecked Sendable {}
+
+public extension DockerClient.ContainersAPI {
+	@MainActor
+	func attach(_ endpoint: consuming ContainerAttachEndpoint) async throws -> ContainerAttachEndpoint.AttachHandle {
+		guard endpoint.isStarting == false else { throw AttachError.alreadyStarting }
+		endpoint.isStarting = true
+
+		let handle = ContainerAttachEndpoint._HandleImplementation()
+
+		let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+		let bootstrap = ClientBootstrap(group: group)
+			.channelInitializer { channel in
+				channel.pipeline.addHandler(handle)
+			}
+			.channelOption(.socketOption(.so_reuseaddr), value: 1)
+
+		guard
+			let socketPath = client.daemonURL.host(percentEncoded: false)
+		else { throw DockerError.message("Invalid unix domain socket path: \(client.daemonURL)") }
+		let channel = try await bootstrap.connect(unixDomainSocketPath: socketPath).get()
+
+		defer { endpoint.isStarting = false }
+		let runTask = Task {
+			do {
+				try await channel.closeFuture.get()
+			} catch {
+				fatalError("Error connecting to server: \(error)")
+			}
+		}
+		handle.runTask = runTask
+
+		let pathGen = {
+			let url = client
+				.daemonURL
+				.appending(path: endpoint.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
+			guard endpoint.queryArugments.isEmpty == false else { return url.path() }
+			let withQuery = url.appending(queryItems: endpoint.queryArugments)
+			return "\(withQuery.path())?\(withQuery.query() ?? "")"
+		}()
+		let headerLines = [
+			"\(endpoint.method.rawValue) \(pathGen) HTTP/1.1",
+			"Host: localhost",
+		]
+
+		let header = headerLines
+			.joined(by: "\r\n") + "\r\n\r\n"
+
+		try await handle.send(header)
+
+		return handle
+	}
+
+	enum AttachError: Swift.Error {
+		case alreadyStarting
+	}
+}
