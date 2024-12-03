@@ -46,7 +46,7 @@ final class ContainerTests: XCTestCase {
 			try await self.client.containers.stop(containerInfo.id, stopTimeout: 1)
 		}
 
-		let attachEndpoint = ContainerAttach2(
+		let attachEndpoint = ContainerAttachEndpoint(
 			containerID: containerInfo.id,
 			containerWithTTY: config.tty,
 			logs: true,

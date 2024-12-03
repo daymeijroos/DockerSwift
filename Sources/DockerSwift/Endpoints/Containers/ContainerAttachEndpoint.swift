@@ -66,11 +66,35 @@ public struct ContainerAttachEndpoint: LogStreamCommon {
 
 	@MainActor
 	fileprivate var isStarting = false
+
+	@MainActor
+	public protocol AttachHandle: Sendable, AnyObject {
+		var delegate: AttachHandleDelegate? { get set }
+
+		var stream: AsyncThrowingStream<ByteBuffer, Error> { get }
+
+		func send(_ buffer: ByteBuffer) async throws
+	}
+
+	@MainActor
+	public protocol AttachHandleDelegate: AnyObject {
+		func attachHandleDidConnect(_ attachHandle: AttachHandle)
+		func attachHandle(_ attachHandle: AttachHandle, didRecieveData byteBuffer: ByteBuffer)
+		func attachHandle(_ attachHandle: AttachHandle, didRecieveError error: Error)
+		func attachHandleDidDisconnect(_ attachHandle: AttachHandle)
+	}
+}
+
+public extension ContainerAttachEndpoint.AttachHandle {
+	func send(_ string: String) async throws {
+		let buffer = ByteBuffer(string: string)
+		return try await send(buffer)
+	}
 }
 
 public extension DockerClient.ContainersAPI {
 	@MainActor
-	func attach(_ endpoint: consuming ContainerAttachEndpoint) async throws -> ContainerAttachHandle {
+	func attach(_ endpoint: consuming ContainerAttachEndpoint) async throws -> ContainerAttachEndpoint.AttachHandle {
 		guard endpoint.isStarting == false else { throw AttachError.alreadyStarting }
 		endpoint.isStarting = true
 
@@ -126,19 +150,11 @@ public extension DockerClient.ContainersAPI {
 }
 
 @MainActor
-public class ContainerAttachHandle: Sendable {
-	@MainActor
-	public protocol Delegate: AnyObject {
-		func containerAttachHandleDidConnect(_ containerAttachHandle: ContainerAttachHandle)
-		func containerAttachHandle(_ containerAttachHandle: ContainerAttachHandle, didRecieveData byteBuffer: ByteBuffer)
-		func containerAttachHandle(_ containerAttachHandle: ContainerAttachHandle, didRecieveError error: Error)
-		func containerAttachHandleDidDisconnect(_ containerAttachHandle: ContainerAttachHandle)
-	}
-
+public class ContainerAttachHandle: Sendable, ContainerAttachEndpoint.AttachHandle {
 	private let handler: _Handler
 	fileprivate var runTask: Task<Void, Never>?
 
-	public weak var delegate: Delegate?
+	public weak var delegate: ContainerAttachEndpoint.AttachHandleDelegate?
 
 	public let stream: AsyncThrowingStream<ByteBuffer, Error>
 	private let continuation: AsyncThrowingStream<ByteBuffer, Error>.Continuation
@@ -149,11 +165,6 @@ public class ContainerAttachHandle: Sendable {
 		self.continuation = continuation
 		self.handler = handler
 		handler.parent = self
-	}
-
-	public func send(_ string: String) async throws {
-		let buffer = ByteBuffer(string: string)
-		return try await send(buffer)
 	}
 
 	public func send(_ buffer: ByteBuffer) async throws {
@@ -180,7 +191,7 @@ public class ContainerAttachHandle: Sendable {
 			Task {
 				await MainActor.run {
 					self.context = context
-					parent?.containerAttachHandleDidConnect(parent)
+					parent?.attachHandleDidConnect(parent)
 				}
 			}
 		}
@@ -188,42 +199,42 @@ public class ContainerAttachHandle: Sendable {
 		func channelRead(context: ChannelHandlerContext, data: NIOAny) {
 			Task {
 				let byteBuffer = unwrapInboundIn(data)
-				await parent?.containerAttachHandle(parent, didRecieveData: byteBuffer)
+				await parent?.attachHandle(parent, didRecieveData: byteBuffer)
 			}
 		}
 
 		func errorCaught(context: ChannelHandlerContext, error: any Error) {
 			Task {
-				await parent?.containerAttachHandle(parent, didRecieveError: error)
+				await parent?.attachHandle(parent, didRecieveError: error)
 			}
 		}
 
 		func channelInactive(context: ChannelHandlerContext) {
 			context.close(promise: nil)
 			Task {
-				await parent?.containerAttachHandleDidDisconnect(parent)
+				await parent?.attachHandleDidDisconnect(parent)
 			}
 		}
 	}
 }
 
-extension ContainerAttachHandle: ContainerAttachHandle.Delegate {
-	public func containerAttachHandleDidConnect(_ containerAttachHandle: ContainerAttachHandle) {
-		delegate?.containerAttachHandleDidConnect(self)
+extension ContainerAttachHandle: ContainerAttachEndpoint.AttachHandleDelegate {
+	public func attachHandleDidConnect(_ containerAttachHandle: ContainerAttachEndpoint.AttachHandle) {
+		delegate?.attachHandleDidConnect(self)
 	}
 	
-	public func containerAttachHandle(_ containerAttachHandle: ContainerAttachHandle, didRecieveData byteBuffer: ByteBuffer) {
-		delegate?.containerAttachHandle(self, didRecieveData: byteBuffer)
+	public func attachHandle(_ containerAttachHandle: ContainerAttachEndpoint.AttachHandle, didRecieveData byteBuffer: ByteBuffer) {
+		delegate?.attachHandle(self, didRecieveData: byteBuffer)
 		continuation.yield(byteBuffer)
 	}
 	
-	public func containerAttachHandle(_ containerAttachHandle: ContainerAttachHandle, didRecieveError error: any Error) {
-		delegate?.containerAttachHandle(self, didRecieveError: error)
+	public func attachHandle(_ containerAttachHandle: ContainerAttachEndpoint.AttachHandle, didRecieveError error: any Error) {
+		delegate?.attachHandle(self, didRecieveError: error)
 		continuation.finish(throwing: error)
 	}
 	
-	public func containerAttachHandleDidDisconnect(_ containerAttachHandle: ContainerAttachHandle) {
-		delegate?.containerAttachHandleDidDisconnect(self)
+	public func attachHandleDidDisconnect(_ containerAttachHandle: ContainerAttachEndpoint.AttachHandle) {
+		delegate?.attachHandleDidDisconnect(self)
 		continuation.finish()
 	}
 }

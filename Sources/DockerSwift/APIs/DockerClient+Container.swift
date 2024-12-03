@@ -183,18 +183,6 @@ extension DockerClient {
 			return try await client.run(endpoint)
 		}
 		
-		/// Attaches to a container. Allows to retrieve a stream of the container output, and sending commands if it listens on the standard input.
-		/// - Parameters:
-		///   - container: Instance of an `Container`.
-		///   - stream: Whether to return stream
-		///   - logs: Whether to return log lines from the standard output.
-		///   - detachKeys: Override the key sequence for detaching a container. Format is a single character `[a-Z]`, or` ctrl-<value>` where `<value>` is one of: a-z, @, ^, [, ,, or _.
-		/// - Throws: Errors that can occur when executing the request.
-		/// - Returns: Returns  a `ContainerAttach` allowing to fetch the container output as well as sending input/commands to it.
-		public func attach(container: Container, stream: Bool, logs: Bool, detachKeys: String? = nil) async throws -> ContainerAttachEndpoint.AttachControl {
-			let ep = ContainerAttachEndpoint(client: client, nameOrId: container.id, stream: true, logs: false)
-			return try await ep.connect()
-		}
 		
 		/// Deletes all stopped containers.
 		/// - Throws: Errors that can occur when executing the request.
