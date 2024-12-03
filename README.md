@@ -15,121 +15,91 @@ This means that it will work with Docker >= 20.10.
 
 ## Current implementation status
 
-| Section                     | Operation               | Support  | Notes       |
-|-----------------------------|-------------------------|----------|-------------|
-| Client connection           | Local Unix socket       | ✅       |             |
-|                             | HTTP                    | ✅       |             |
-|                             | HTTPS                   | ✅       |             |
-|                             |                         |          |             |
-| Docker daemon & System info | Ping                    | ✅       |             |
-|                             | Info                    | ✅       |             |
-|                             | Version                 | ✅       |             |
-|                             | Events                  | ✅       |             |
-|                             | Get data usage info     | ✅       |             |
-|                             |                         |          |             |
-| Containers                  | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Create                  | ✅       |             |
-|                             | Update                  | ✅       |             |
-|                             | Rename                  | ✅       |             |
-|                             | Start/Stop/Kill         | ✅       |             |
-|                             | Pause/Unpause           | ✅       |             |
-|                             | Get logs                | ✅       |             |
-|                             | Get stats               | ✅       |             |
-|                             | Get processes (top)     | ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             | Prune                   | ✅       |             |
-|                             | Wait                    | ✅       |             |
-|                             | Filesystem changes      | ✅       | untested    |
-|                             | Attach                  | ✅       | basic support <sup>1</sup>|
-|                             | Exec                    | ❌       | unlikely <sup>2</sup>|
-|                             | Resize TTY              | ❌       |             |
-|                             |                         |          |             |
-| Images                      | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | History                 | ✅       |             |
-|                             | Pull                    | ✅       | basic support |
-|                             | Build                   | ✅       | basic support |
-|                             | Tag                     | ✅       |             |
-|                             | Push                    | ✅       |             |
-|                             | Create (container commit)| ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             | Prune                   | ✅       |             |
-|                             |                         |          |             |
-| Swarm                       | Init                    | ✅       |             |
-|                             | Join                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Leave                   | ✅       |             |
-|                             | Update                  | ✅       |             |
-|                             |                         |          |             |
-| Nodes                       | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Update                  | ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             |                         |          |             |
-| Services                    | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Create                  | ✅       |             |
-|                             | Get logs                | ✅       |             |
-|                             | Update                  | ✅       |             |
-|                             | Rollback                | ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             |                         |          |             |
-| Networks                    | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Create                  | ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             | Prune                   | ✅       |             |
-|                             | (Dis)connect container  | ✅       |             |
-|                             |                         |          |             |
-| Volumes                     | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Create                  | ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             | Prune                   | ✅       |             |
-|                             |                         |          |             |
-| Secrets                     | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Create                  | ✅       |             |
-|                             | Update                  | ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             |                         |          |             |
-| Configs                     | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Create                  | ✅       |             |
-|                             | Update                  | ✅       |             |
-|                             | Delete                  | ✅       |             |
-|                             |                         |          |             |
-| Tasks                       | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Get logs                | ✅       |             |
-|                             |                         |          |             |
-| Plugins                     | List                    | ✅       |             |
-|                             | Inspect                 | ✅       |             |
-|                             | Get Privileges          | ✅       |             |
-|                             | Install                 | ✅       |             |
-|                             | Remove                  | ✅       |             |
-|                             | Enable/disable          | ✅       |             |
-|                             | Upgrade                 | ✅       | untested    |
-|                             | Configure               | ✅       | untested    |
-|                             | Create                  | ❌       | TBD         |
-|                             | Push                    | ❌       | TBD         |
-|                             |                         |          |             |
-| Registries                  | Login                   | ✅       | basic support |
-|                             |                         |          |             |
-| Docker error responses mgmt |                         | 🚧       |             |
+| Section                     | Operation                 | Support | Tests | Notes                                                         |
+| --------------------------- | ------------------------- | ------- | ----- | ------------------------------------------------------------- |
+| Client connection           | Local Unix socket         | ✅       | ❌     |                                                               |
+|                             | HTTP                      | ✅       | ❌     |                                                               |
+|                             | HTTPS                     | ✅       | ❌     |                                                               |
+|                             | Mocks                     |         | ✅     |                                                               |
+|                             |                           |         |       |                                                               |
+| Docker daemon & System info | Ping                      | ✅       | ✅     |                                                               |
+|                             | Info                      | ✅       | ✅     |                                                               |
+|                             | Version                   | ✅       | ✅     |                                                               |
+|                             | Events                    | ✅       | ✅     |                                                               |
+|                             | Get data usage info       | ✅       | ✅     |                                                               |
+|                             |                           |         |       |                                                               |
+| Containers                  | List                      | ✅       | ✅     |                                                               |
+|                             | Inspect                   | ✅       | ✅     |                                                               |
+|                             | Create                    | ✅       | ✅     |                                                               |
+|                             | Update                    | ✅       | ✅     |                                                               |
+|                             | Rename                    | ✅       | ✅     |                                                               |
+|                             | Start/Stop/Kill           | ✅       | ✅❌    | no kill test                                                  |
+|                             | Pause/Unpause             | ✅       | ✅     |                                                               |
+|                             | Get logs                  | ✅       | ✅     |                                                               |
+|                             | Get stats                 | 🟡       | ❌     | implementation deprecated, but code exists. needs overhauling |
+|                             | Get processes (top)       | ✅       | ✅     |                                                               |
+|                             | Delete                    | ✅       | ✅     |                                                               |
+|                             | Prune                     | ✅       | ✅     |                                                               |
+|                             | Wait                      | ✅       | ✅     |                                                               |
+|                             | Filesystem changes        | ✅       | ❌     |                                                               |
+|                             | Attach                    | ✅       | ✅     |                                                               |
+|                             | Exec                      | ❌       | ❌     | unlikely <sup>2</sup>                                         |
+|                             | Resize TTY                | ❌       | ❌     |                                                               |
+|                             |                           |         |       |                                                               |
+| Images                      | List                      | ✅       | ✅     |                                                               |
+|                             | Inspect                   | ✅       | ✅     |                                                               |
+|                             | History                   | ✅       | ✅     |                                                               |
+|                             | Pull                      | ✅       | ✅     | basic support                                                 |
+|                             | Build                     | ✅       | ✅     | basic support                                                 |
+|                             | Tag                       | ✅       | ✅     |                                                               |
+|                             | Push                      | ✅       | ✅     |                                                               |
+|                             | Create (container commit) | ✅       | ✅     |                                                               |
+|                             | Delete                    | ✅       | ✅     |                                                               |
+|                             | Prune                     | ✅       | ✅     |                                                               |
+|                             |                           |         |       |                                                               |
+| Networks                    | List                      | ✅       | ✅     |                                                               |
+|                             | Inspect                   | ✅       | ✅     |                                                               |
+|                             | Create                    | ✅       | ✅     |                                                               |
+|                             | Delete                    | ✅       | ✅     |                                                               |
+|                             | Prune                     | ✅       | ✅     |                                                               |
+|                             | (Dis)connect container    | ✅       | ✅     |                                                               |
+|                             |                           |         |       |                                                               |
+| Volumes                     | List                      | ✅       | ✅     |                                                               |
+|                             | Inspect                   | ✅       | ❌     |                                                               |
+|                             | Create                    | ✅       | ✅     |                                                               |
+|                             | Delete                    | ✅       | ✅     |                                                               |
+|                             | Prune                     | ✅       | ✅     |                                                               |
+|                             |                           |         |       |                                                               |
+| Secrets                     | List                      | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Inspect                   | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Create                    | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Update                    | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Delete                    | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             |                           |         |       |                                                               |
+| Plugins                     | List                      | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Inspect                   | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Get Privileges            | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Install                   | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Remove                    | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Enable/disable            | ✅       | 🟡     | Legacy tests exist, but have not been updated or mocked       |
+|                             | Upgrade                   | ✅       | 🟡     | untested                                                      |
+|                             | Configure                 | ✅       | 🟡     | untested                                                      |
+|                             | Create                    | ❌       |       | TBD                                                           |
+|                             | Push                      | ❌       |       | TBD                                                           |
+|                             |                           |         |       |                                                               |
+| Registries                  | Login                     | ✅       |       | basic support                                                 |
+|                             |                           |         |       |                                                               |
+| Docker error responses mgmt |                           | 🟡       |       |                                                               |
 
 
 
 ✅ : done or _mostly_ done
 
-🚧 : work in progress, partially implemented, might not work
+🟡 : work in progress, partially implemented, might not work
 
 ❌ : not implemented/supported at the moment.
 
 Note: various Docker endpoints such as list or prune support *filters*. These are currently not implemented.
-
-<sup>1</sup> Attach is currently **not** supported when connecting to Docker via local Unix socket, or when using a proxy. It uses the Websocket protocol.
 
 <sup>2</sup> Docker exec is using an unconventional protocol that requires raw access to the TCP socket. Significant work needed in order to support it (https://github.com/swift-server/async-http-client/issues/353).
 
