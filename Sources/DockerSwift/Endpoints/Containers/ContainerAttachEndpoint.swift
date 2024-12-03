@@ -3,7 +3,7 @@ import AsyncHTTPClient
 @preconcurrency import NIO
 import NIOHTTP1
 
-public struct ContainerAttach2: LogStreamCommon {
+public struct ContainerAttachEndpoint: LogStreamCommon {
 	typealias Response = DockerLogEntry
 
 	typealias Body = NoBody
@@ -70,7 +70,7 @@ public struct ContainerAttach2: LogStreamCommon {
 
 public extension DockerClient.ContainersAPI {
 	@MainActor
-	func attach(_ endpoint: consuming ContainerAttach2) async throws -> ContainerAttachHandle {
+	func attach(_ endpoint: consuming ContainerAttachEndpoint) async throws -> ContainerAttachHandle {
 		guard endpoint.isStarting == false else { throw AttachError.alreadyStarting }
 		endpoint.isStarting = true
 
