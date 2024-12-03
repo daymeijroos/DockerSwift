@@ -1,16 +1,19 @@
 import NIOHTTP1
 import Foundation
+import Logging
 
 public struct CreateVolumeEndpoint: SimpleEndpoint {
 	var body: Body?
 	
 	typealias Response = Volume
-	typealias Body = VolumeSpec
 	let method: HTTPMethod = .POST
 	var queryArugments: [URLQueryItem] { [] }
 
-	init(spec: VolumeSpec) {
+	let logger: Logger
+
+	init(spec: Body, logger: Logger) {
 		self.body = spec
+		self.logger = logger
 	}
 	
 	var path: String {
@@ -20,7 +23,7 @@ public struct CreateVolumeEndpoint: SimpleEndpoint {
 
 public extension CreateVolumeEndpoint {
 	/// Structure to specify the configuration for creating a Volume.
-	struct VolumeSpec: Codable {
+	struct Body: Codable {
 		public init(name: String? = nil, driver: String = "local", driverOptions: [String : String] = [:], labels: [String : String] = [:]) {
 			self.name = name
 			self.driver = driver

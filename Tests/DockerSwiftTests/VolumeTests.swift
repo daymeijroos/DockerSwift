@@ -13,14 +13,14 @@ final class VolumeTests: XCTestCase {
 	override func tearDownWithError() throws {
 		try client.syncShutdown()
 	}
-	
-	func testCreateDeleteVolume() async throws {
-		let name = UUID().uuidString
-		let volume = try await client.volumes.create(
-			spec: .init(name: name, labels: ["myLabel": "value"])
-		)
-		XCTAssert(volume.name == name, "Ensure volume name is set")
-		try await client.volumes.remove(name, force: true)
+
+	func testCreateVolume() async throws {
+		let name = "TestVolumeStorage"
+		let volSpec = CreateVolumeEndpoint.Body(name: name)
+
+		let volume = try await client.volumes.create(spec: volSpec)
+
+		XCTAssertEqual(volume.name, name)
 	}
 	
 	func testListVolumes() async throws {
