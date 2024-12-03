@@ -7,13 +7,7 @@ final class ContainerTests: XCTestCase {
 	var client: DockerClient!
 
 	override func setUp() async throws {
-		client = DockerClient.testable()
-		if (try? await client.images.get("nginx:latest")) == nil {
-			_ = try await client.images.pull(byName: "nginx", tag: "latest")
-		}
-		if (try? await client.images.get("hello-world:latest")) == nil {
-			_ = try await client.images.pull(byName: "hello-world", tag: "latest")
-		}
+		client = DockerClient.forTesting()
 	}
 
 	override func tearDownWithError() throws {
