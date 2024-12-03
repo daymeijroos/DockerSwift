@@ -43,6 +43,12 @@ final class NetworkTests: XCTestCase {
 		XCTAssertGreaterThan(pruned.networksDeleted.count, 0)
 	}
 
+	func testRemoveNetwork() async throws {
+		let name = "11E46E6F-BF6B-474B-A6E5-E08E1E48D454"
+		let network = try await client.networks.get(name)
+		try await client.networks.remove(network.id)
+	}
+
 	func testConnectContainer() async throws {
 		let name = UUID().uuidString
 		let imageInfo = try await client.images.pull(byIdentifier: "nginx:latest")
