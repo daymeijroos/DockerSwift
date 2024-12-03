@@ -7,7 +7,5 @@ struct ListNetworksEndpoint: SimpleEndpoint {
 	let method: HTTPMethod = .GET
 	var queryArugments: [URLQueryItem] { [] }
 	
-	var path: String {
-		"networks"
-	}
+	var path: String { "networks" }
 }

@@ -21,8 +21,9 @@ final class NetworkTests: XCTestCase {
 	}
 
 	func testListNetworks() async throws {
-		// TODO: improve and check the actual content
-		let _ = try await client.networks.list()
+		let networkList = try await client.networks.list()
+
+		XCTAssertGreaterThan(networkList.count, 0)
 	}
 
 	func testCreateNetwork() async throws {
