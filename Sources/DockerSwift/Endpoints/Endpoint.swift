@@ -2,6 +2,7 @@ import NIOHTTP1
 import NIO
 import NIOFoundationCompat
 import Foundation
+import AsyncHTTPClient
 
 protocol Endpoint {
 	associatedtype Response
@@ -13,6 +14,35 @@ protocol Endpoint {
 	var body: Body? { get }
 
 	var timeout: TimeAmount? { get }
+}
+
+extension Endpoint {
+	func request(socketURL url: URL, apiVersion: String, additionalHeaders: HTTPHeaders, encoder: JSONEncoder) throws -> HTTPClientRequest {
+
+		let body = try {
+			if let endpointBody = self.body as? ByteBuffer {
+				HTTPClientRequest.Body.bytes(endpointBody)
+			} else {
+				try self.body.map { try HTTPClientRequest.Body.bytes(encoder.encode($0)) }
+			}
+		}()
+
+		let urlPath = "/\(apiVersion)/\(path)"
+
+		let allHeaders = {
+			var start = headers ?? HTTPHeaders()
+			start.add(contentsOf: additionalHeaders)
+			return start
+		}()
+
+		return HTTPClientRequest(
+			daemonURL: url,
+			urlPath: urlPath,
+			queryItems: queryArugments,
+			method: method,
+			body: body,
+			headers: allHeaders)
+	}
 }
 
 protocol SimpleEndpoint: Endpoint where Response: Codable {

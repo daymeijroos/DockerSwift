@@ -123,10 +123,6 @@ public class DockerClient: @unchecked Sendable {
 	/// Executes a request to a specific endpoint that is a single, simple operation. Call and response. No streaming.
 	@discardableResult
 	internal func run<T: SimpleEndpoint>(_ endpoint: T) async throws -> T.Response {
-		var finalHeaders: HTTPHeaders = self.headers
-		if let additionalHeaders = endpoint.headers {
-			finalHeaders.add(contentsOf: additionalHeaders)
-		}
 		defer {
 			if logger.logLevel <= .debug {
 				// printing to avoid the logging prefix, making for an easier copy/pasta
@@ -134,13 +130,11 @@ public class DockerClient: @unchecked Sendable {
 			}
 		}
 
-		let request = try HTTPClientRequest(
-			daemonURL: daemonURL,
-			urlPath: "/\(apiVersion)/\(endpoint.path)",
-			queryItems: endpoint.queryArugments,
-			method: endpoint.method,
-			body: endpoint.body.map { try HTTPClientRequest.Body.bytes(encoder.encode($0)) },
-			headers: finalHeaders)
+		let request = try endpoint.request(
+			socketURL: daemonURL,
+			apiVersion: apiVersion,
+			additionalHeaders: headers,
+			encoder: encoder)
 
 		func decodeOut(_ buffer: ByteBuffer) throws -> T.Response {
 			if T.Response.self == NoBody.self || T.Response.self == NoBody?.self {
@@ -205,21 +199,11 @@ public class DockerClient: @unchecked Sendable {
 			}
 		}
 
-		let body = try {
-			if let endpointBody = endpoint.body as? ByteBuffer {
-				HTTPClientRequest.Body.bytes(endpointBody)
-			} else {
-				try endpoint.body.map { try HTTPClientRequest.Body.bytes(encoder.encode($0)) }
-			}
-		}()
-
-		let request = HTTPClientRequest(
-			daemonURL: daemonURL,
-			urlPath: "/\(apiVersion)/\(endpoint.path)",
-			queryItems: endpoint.queryArugments,
-			method: endpoint.method,
-			body: body,
-			headers: headers)
+		let request = try endpoint.request(
+			socketURL: daemonURL,
+			apiVersion: apiVersion,
+			additionalHeaders: headers,
+			encoder: encoder)
 
 		func consumeStream(_ stream: AsyncThrowingStream<ByteBuffer, Error>) -> AsyncThrowingStream<T.Response, Error> {
 			let (responseStream, responseContinuation) = AsyncThrowingStream<T.Response, Error>.makeStream()
