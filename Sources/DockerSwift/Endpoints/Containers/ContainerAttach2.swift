@@ -84,24 +84,10 @@ public extension DockerClient.ContainersAPI {
 			}
 			.channelOption(.socketOption(.so_reuseaddr), value: 1)
 
-		let request = HTTPClientRequest(
-			daemonURL: client.daemonURL,
-			urlPath: endpoint.path,
-			queryItems: endpoint.queryArugments,
-			method: endpoint.method,
-			headers: HTTPHeaders())
-
 		guard
-//			let socketPathURL = URL(string: request.url),
 			let socketPath = client.daemonURL.host(percentEncoded: false)
-		else { throw DockerError.message("Invalid unix domain socket path: \(request.url)") }
+		else { throw DockerError.message("Invalid unix domain socket path: \(client.daemonURL)") }
 		let channel = try await bootstrap.connect(unixDomainSocketPath: socketPath).get()
-//		let channel = try await {
-//			if let scheme = client.daemonURL.scheme, scheme.contains("unix") {
-//			} else {
-//				try await bootstrap.connect(host: <#T##String#>, port: <#T##Int#>, channelInitializer: <#T##(any Channel) -> EventLoopFuture<Sendable>#>)
-//			}
-//		}
 
 		defer { endpoint.isStarting = false }
 		let runTask = Task {
@@ -122,9 +108,9 @@ public extension DockerClient.ContainersAPI {
 			return "\(withQuery.path())?\(withQuery.query() ?? "")"
 		}()
 		let headerLines = [
-			"\(request.method.rawValue) \(pathGen) HTTP/1.1",
+			"\(endpoint.method.rawValue) \(pathGen) HTTP/1.1",
 			"Host: localhost",
-		] + request.headers.map { "\($0.name): \($0.value)" }
+		]
 
 		let header = headerLines
 			.joined(by: "\r\n") + "\r\n\r\n"
