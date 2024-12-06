@@ -147,8 +147,8 @@ public struct Container: Codable {
 		public let type: ContainerMountType
 		
 		/// Volume name.
-		public let name: String
-		
+		public let name: String?
+
 		/// Source location of the mount.
 		/// For volumes, this contains the storage location of the volume (within /var/lib/docker/volumes/).
 		/// For bind-mounts, and npipe, this contains the source (host) part of the bind-mount.
@@ -159,8 +159,8 @@ public struct Container: Codable {
 		public let destination: String
 		
 		/// Volume driver used to create the volume (if it is a volume).
-		public let driver: String
-		
+		public let driver: String?
+
 		/// Comma separated list of options supplied by the user when creating the bind/volume mount.
 		/// The default is platform-specific ("z" on Linux, empty on Windows).
 		public let mode: String
@@ -257,31 +257,31 @@ public struct Container: Codable {
 	public struct NetworkSettings: Codable {
 		/// Name of the network'a bridge (for example, `docker0`).
 		public let bridge: String
-		
+
 		/// Uniquely represents a container's network stack.
 		public let sandboxId: String
-		
+
 		/// Indicates if hairpin NAT should be enabled on the virtual interface.
 		public let hairpinMode: Bool
-		
+
 		/// IPv6 unicast address using the link-local prefix.
 		public let linkLocalIPv6Address: String
-		
+
 		/// Prefix length of the IPv6 unicast address.
 		public let linkLocalIPv6PrefixLen: UInt16
-		
+
 		// TODO: implement
 		// public let ports:
 		
 		/// ID of the network sandbox
-		public let sandboxKey: String
-		
-		public let secondaryIPAddresses: [Address]?
+		public let sandboxKey: String?
 
-		public let secondaryIPv6Addresses: [Address]?
-		
-		public let networks: [String:IPAM.IPAMConfig]?
-		
+		public let secondaryIPAddresses: [Address]
+
+		public let secondaryIPv6Addresses: [Address]
+
+		public let networks: [String: IPAM.IPAMConfig]?
+
 		enum CodingKeys: String, CodingKey {
 			case bridge = "Bridge"
 			case sandboxId = "SandboxID"

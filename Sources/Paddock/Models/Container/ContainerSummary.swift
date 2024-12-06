@@ -55,8 +55,8 @@ public struct ContainerSummary: Codable {
 	}
 	
 	public struct NetworkSettings: Codable {
-		public let networks: [String:IPAM.IPAMConfig]
-		
+		public let networks: [String: IPAM.IPAMConfig]?
+
 		enum CodingKeys: String, CodingKey {
 			case networks = "Networks"
 		}
