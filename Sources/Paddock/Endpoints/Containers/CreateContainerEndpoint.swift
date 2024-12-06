@@ -26,8 +26,8 @@ public struct CreateContainerEndpoint: SimpleEndpoint {
 	}
 
 	public struct Response: Codable {
-		let id: String
-		let warnings: [String]
+		public let id: String
+		public let warnings: [String]
 
 		enum CodingKeys: String, CodingKey {
 			case id = "Id"
