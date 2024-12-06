@@ -93,7 +93,7 @@ final class ContainerTests: XCTestCase {
 			// Override the default command of the Image
 			command: cmd,
 			// Add new environment variables
-			environmentVars: ["HELLO=hi"],
+			environmentVars: [.add(key: "HELLO", value: "hi"), .add(key: "F=oo", value: "bar")], // "HELLO=hi"
 			// Expose port 80
 			exposedPorts: [.tcp(80)],
 			// Set custon container labels

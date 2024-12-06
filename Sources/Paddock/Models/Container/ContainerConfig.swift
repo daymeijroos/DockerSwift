@@ -14,11 +14,82 @@ public struct ContainerConfig: Codable {
 	
 	/// Custom entrypoint to run, overrides the value of the Image if any
 	public var entrypoint: [String]? = nil
-	
+
+	public enum EnvironmentVariable: Codable {
+		public struct EnvKey: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
+			public let rawValue: String
+
+			public init<S: StringProtocol>(_ rawValue: S) {
+				guard rawValue.isEmpty == false else {
+					self.rawValue = "__EMPTY__"
+					return
+				}
+				let firstCharacterValid = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_")
+				let remainingValid = CharacterSet(charactersIn: "0123456789").union(firstCharacterValid)
+
+				let firstCharacter: Character = {
+					guard
+						let first = rawValue.first,
+						first.unicodeScalars.allSatisfy({ scalar in
+							firstCharacterValid.contains(scalar)
+						})
+					else { return "_" }
+					return first
+				}()
+				let remaining: [Character] = rawValue.dropFirst().map { character in
+					guard
+						character.unicodeScalars.allSatisfy({ scalar in
+							remainingValid.contains(scalar)
+						})
+					else { return "_" }
+					return character
+				}
+
+
+				self.rawValue = String(firstCharacter) + String(remaining)
+			}
+
+			public init(rawValue: String) {
+				self.init(rawValue)
+			}
+
+			public init(stringLiteral value: String) {
+				self.init(rawValue: value)
+			}
+		}
+
+		case add(key: EnvKey, value: String)
+		case remove(key: String)
+
+		public var rawValue: String {
+			switch self {
+			case .add(let key, let value):
+				"\(key.rawValue)=\(value)"
+			case .remove(let key):
+				key
+			}
+		}
+
+		public init(rawValue: String) {
+			let parts = rawValue.split(separator: "=", maxSplits: 1)
+			if parts.count == 2 {
+				let key = EnvKey(parts[0])
+				let value = String(parts[1])
+				self = .add(key: key, value: value)
+			} else {
+				self = .remove(key: rawValue)
+			}
+		}
+	}
+
 	/// A list of environment variables to set inside the container in the form `["VAR=value", ...].`
 	/// A variable without `=` is removed from the environment, rather than to have an empty value.
-	public var environmentVars: [String]? = nil
-	
+	public var environmentVars: [EnvironmentVariable]? {
+		get { _environmentVars?.map(EnvironmentVariable.init(rawValue:)) }
+		set { _environmentVars = newValue?.map(\.rawValue) }
+	}
+	private var _environmentVars: [String]?
+
 	/// An object mapping ports to an empty object in the form:
 	/// `{"<port>/<tcp|udp|sctp>": {}}`
 	//public var exposedPorts: [String:EmptyObject]? = [:]
@@ -90,7 +161,7 @@ public struct ContainerConfig: Codable {
 		command: [String]? = nil,
 		domainname: String? = nil,
 		entrypoint: [String]? = nil,
-		environmentVars: [String]? = nil,
+		environmentVars: [EnvironmentVariable]? = nil,
 		exposedPorts: [ExposedPortSpec]? = nil,
 		healthcheck: HealthCheckConfig? = nil,
 		hostname: String? = nil,
@@ -117,7 +188,7 @@ public struct ContainerConfig: Codable {
 		self.command = command
 		self.domainname = domainname
 		self.entrypoint = entrypoint
-		self.environmentVars = environmentVars
+		self._environmentVars = environmentVars?.map(\.rawValue)
 		self.exposedPorts = exposedPorts
 		self.healthcheck = healthcheck
 		self.hostname = hostname
@@ -146,7 +217,7 @@ public struct ContainerConfig: Codable {
 		case command = "Cmd"
 		case domainname = "Domainname"
 		case entrypoint = "Entrypoint"
-		case environmentVars = "Env"
+		case _environmentVars = "Env"
 		case exposedPorts = "ExposedPorts"
 		case healthcheck = "Healthcheck"
 		case hostname = "Hostname"
