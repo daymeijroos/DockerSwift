@@ -112,8 +112,6 @@ public struct ContainerConfig: Codable {
 	/// Whether networking is disabled for the container.
 	public var networkDisabled: Bool?
 
-	public var name: String?
-
 	/// `ONBUILD` metadata that were defined in the image's `Dockerfile`
 	public var onBuild: [String]? = nil
 	
@@ -150,8 +148,8 @@ public struct ContainerConfig: Codable {
 
 	public var hostConfig: ContainerHostConfig?
 
-	public init(image: String, command: [String]? = nil, name: String? = nil) {
-		self.init(command: command, image: image, name: name)
+	public init(image: String, command: [String]? = nil) {
+		self.init(command: command, image: image)
 	}
 
 	public init(
@@ -169,7 +167,6 @@ public struct ContainerConfig: Codable {
 		labels: [String : String]? = nil,
 		macAddress: String? = nil,
 		networkDisabled: Bool? = nil,
-		name: String? = nil,
 		onBuild: [String]? = nil,
 		openStdin: Bool = false,
 		shell: [String]? = nil,
@@ -196,7 +193,6 @@ public struct ContainerConfig: Codable {
 		self.labels = labels
 		self.macAddress = macAddress
 		self.networkDisabled = networkDisabled
-		self.name = name
 		self.onBuild = onBuild
 		self.openStdin = openStdin
 		self.shell = shell
@@ -225,7 +221,6 @@ public struct ContainerConfig: Codable {
 		case image = "Image"
 		case labels = "Labels"
 		case macAddress = "MacAddress"
-		case name = "Name"
 		case networkDisabled = "NetworkDisabled"
 		case onBuild = "OnBuild"
 		case openStdin = "OpenStdin"

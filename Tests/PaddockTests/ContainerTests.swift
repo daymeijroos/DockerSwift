@@ -30,10 +30,9 @@ final class ContainerTests: XCTestCase {
 			command: nil,
 			entrypoint: ["sh"],
 			image: image.id,
-			name: "testttt",
 			openStdin: true,
 			tty: true)
-		let containerInfo = try await client.containers.create(config: config)
+		let containerInfo = try await client.containers.create(name: "testtt", config: config)
 		try await client.containers.start(containerInfo.id)
 
 		addTeardownBlock {
@@ -183,9 +182,14 @@ final class ContainerTests: XCTestCase {
 	}
 
 	func testPruneContainers() async throws {
+		// easy cleanup when debugging
+//		let list = try await client.containers.list()
+//		for container in list {
+//			try await client.containers.stop(container.id)
+//		}
 
 		let pruned = try await client.containers.prune()
-		XCTAssert(pruned.reclaimedSpace > 0)
+		XCTAssertGreaterThan(pruned.containersIds.count, 0)
 	}
 
 	func testPauseUnpauseContainers() async throws {
