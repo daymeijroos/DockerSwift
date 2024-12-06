@@ -276,9 +276,9 @@ public struct Container: Codable {
 		/// ID of the network sandbox
 		public let sandboxKey: String?
 
-		public let secondaryIPAddresses: [Address]
+		public let secondaryIPAddresses: [Address]?
 
-		public let secondaryIPv6Addresses: [Address]
+		public let secondaryIPv6Addresses: [Address]?
 
 		public let networks: [String: IPAM.IPAMConfig]?
 
