@@ -148,9 +148,12 @@ public class PaddockClient: @unchecked Sendable {
 				let decodedResponse = try decoder.decode(T.Response.self, from: buffer)
 				try endpoint.responseValidation(decodedResponse)
 				return decodedResponse
+			} catch let error as DecodingError {
+				let contingency = DockerError.ActualResponse(contingencyBuffer)
+				throw DockerError.unexpectedResponse(contingency, "Could not decode response. \(error)")
 			} catch {
 				let contingency = DockerError.ActualResponse(contingencyBuffer)
-				throw DockerError.unexpectedResponse(contingency, "Could not decode or validate response.")
+				throw DockerError.unexpectedResponse(contingency, "Could not validate response.")
 			}
 		}
 

@@ -159,6 +159,13 @@ final class ContainerTests: XCTestCase {
 		XCTAssertEqual(inspectedContainer.config.command, ["/hello"])
 	}
 
+	func testInspectContainerWithHealthVariance() async throws {
+		let id = "f70b3c8bd94bfa0846c10d241d5f511452c0f7a0dcf243c156ea0106d14b5b69"
+		let inspectedContainer = try await client.containers.get(id)
+
+		XCTAssertEqual(inspectedContainer.id, id)
+	}
+
 	func testRetrievingLogsNoTty() async throws {
 		var hasContent = false
 		for try await line in try await client.containers.logs(containerID: "hello-podman-notty", containerIsTTY: false, timestamps: true) {

@@ -92,8 +92,30 @@ public struct Container: Codable {
 	}
 	
 	// MARK: - HealthStatus
-	public enum HealthStatus: String, Codable {
-		case none, starting, healthy, unhealthy
+	public struct HealthStatus: RawRepresentable, Codable, ExpressibleByStringLiteral {
+		public let rawValue: String
+
+		public init<S: StringProtocol>(_ rawValue: S) {
+			let rawValue = String(rawValue)
+			guard rawValue.isEmpty == false else {
+				self = .none
+				return
+			}
+			self.rawValue = rawValue
+		}
+
+		public init(rawValue: String) {
+			self.init(rawValue)
+		}
+
+		public init(stringLiteral value: StringLiteralType) {
+			self.init(value)
+		}
+
+		static let none: HealthStatus = "none"
+		static let starting: HealthStatus = "starting"
+		static let healthy: HealthStatus = "healthy"
+		static let unhealthy: HealthStatus = "unhealthy"
 	}
 	
 	// MARK: - HealthcheckResult
@@ -117,9 +139,10 @@ public struct Container: Codable {
 		
 		/// Number of consecutive failures
 		public let failingStreak: UInt64
-		
-		public let log: [HealthcheckResult]
-		
+
+		@DefaultEmptyArray
+		public var log: [HealthcheckResult]
+
 		enum CodingKeys: String, CodingKey {
 			case status = "Status"
 			case failingStreak = "FailingStreak"
