@@ -1,4 +1,5 @@
 import Foundation
+import NIO
 
 public enum DockerError: Error {
 	/// Not connected to an Attach/Exec endpoint, or disconnected
@@ -8,4 +9,5 @@ public enum DockerError: Error {
 	case unknownResponse(String)
 	case corruptedData(String)
 	case errorCode(Int, String?)
+	case unexpectedResponse(ByteBuffer, String)
 }

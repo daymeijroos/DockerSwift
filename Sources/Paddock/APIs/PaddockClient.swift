@@ -143,9 +143,14 @@ public class PaddockClient: @unchecked Sendable {
 			guard T.Response.self != String.self else {
 				return String(buffer: buffer) as! T.Response
 			}
-			let decodedResponse = try decoder.decode(T.Response.self, from: buffer)
-			try endpoint.responseValidation(decodedResponse)
-			return decodedResponse
+			let contingencyBuffer = buffer
+			do {
+				let decodedResponse = try decoder.decode(T.Response.self, from: buffer)
+				try endpoint.responseValidation(decodedResponse)
+				return decodedResponse
+			} catch {
+				throw DockerError.unexpectedResponse(contingencyBuffer, "Could not decode or validate response.")
+			}
 		}
 
 		if case .testing(useMocks: let useMocks) = testMode {
