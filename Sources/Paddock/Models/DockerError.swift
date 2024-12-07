@@ -8,6 +8,18 @@ public enum DockerError: Error {
 	case message(String)
 	case unknownResponse(String)
 	case corruptedData(String)
-	case errorCode(Int, String?)
-	case unexpectedResponse(ByteBuffer, String)
+	case unexpectedResponse(ActualResponse, String)
+
+	public enum ActualResponse {
+		case buffer(ByteBuffer)
+		case string(String)
+
+		init (_ buffer: ByteBuffer) {
+			if let str = buffer.getString(at: 0, length: buffer.readableBytes) {
+				self = .string(str)
+			} else {
+				self = .buffer(buffer)
+			}
+		}
+	}
 }

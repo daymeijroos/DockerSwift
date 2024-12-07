@@ -15,7 +15,9 @@ extension HTTPClient {
 		guard
 			(200...299).contains(response.status.code)
 		else {
-			throw DockerError.errorCode(Int(response.status.code), response.status.reasonPhrase)
+			let actualResponse = try await DockerError.ActualResponse(response.body.collect(upTo: 10240))
+
+			throw DockerError.unexpectedResponse(actualResponse, "Invalid response code: \(response.status)")
 		}
 		let body = response.body
 

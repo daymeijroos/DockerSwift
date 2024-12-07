@@ -149,7 +149,8 @@ public class PaddockClient: @unchecked Sendable {
 				try endpoint.responseValidation(decodedResponse)
 				return decodedResponse
 			} catch {
-				throw DockerError.unexpectedResponse(contingencyBuffer, "Could not decode or validate response.")
+				let contingency = DockerError.ActualResponse(contingencyBuffer)
+				throw DockerError.unexpectedResponse(contingency, "Could not decode or validate response.")
 			}
 		}
 
@@ -166,7 +167,11 @@ public class PaddockClient: @unchecked Sendable {
 		let response = try await client.execute(request, timeout: endpoint.timeout ?? .minutes(2))
 		let responseBody = response.body
 		try await _initialize(with: response.headers)
-		try response.checkStatusCode()
+		guard 200...299 ~= response.status.code else {
+			let buffer = try await response.body.collect(upTo: .max)
+			let actual = DockerError.ActualResponse(buffer)
+			throw DockerError.unexpectedResponse(actual, "Invalid response code: \(response.status)")
+		}
 
 		let buffer = try await responseBody.collect(upTo: .max)
 
