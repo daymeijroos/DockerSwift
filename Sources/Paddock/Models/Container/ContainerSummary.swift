@@ -24,7 +24,7 @@ public struct ContainerSummary: Codable {
 	/// The ports exposed by this container
 	public let ports: [ExposedPort]
 	
-	public let labels: [String:String]
+	public let labels: [String: String]
 	
 	/// The state of this container (e.g. `exited`)
 	public let state: Container.State.State
