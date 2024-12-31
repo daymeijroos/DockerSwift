@@ -159,6 +159,18 @@ final class ContainerTests: XCTestCase {
 		XCTAssertEqual(inspectedContainer.config.command, ["/hello"])
 	}
 
+	func testContainerSummaryFromContainer() async throws {
+		let id = "ce25040926ba103e72dd4070db9a07c4510291a3a3475b0cb175dd06dddfbc93"
+		let inspectedContainer = try await client.containers.get(id)
+
+		let summary = try ContainerSummary(from: inspectedContainer)
+
+		XCTAssertEqual(summary.id, id)
+		XCTAssertEqual(summary.command, "/custom/command --option")
+
+		XCTAssertEqual(summary.ports, [.init(ip: "0.0.0.0", privatePort: 80, publicPort: 8008, type: .tcp)])
+	}
+
 	func testInspectContainerWithHealthVariance() async throws {
 		let id = "f70b3c8bd94bfa0846c10d241d5f511452c0f7a0dcf243c156ea0106d14b5b69"
 		let inspectedContainer = try await client.containers.get(id)

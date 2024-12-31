@@ -40,7 +40,7 @@ public struct ContainerSummary: Codable {
 	/// A summary of the container's network settings
 	public let networkSettings: NetworkSettings
 	
-	public struct ExposedPort: Codable {
+	public struct ExposedPort: Codable, Hashable {
 		public let ip: String?
 		public let privatePort: UInt16
 		public let publicPort: UInt16?
@@ -75,5 +75,41 @@ public struct ContainerSummary: Codable {
 		case state = "State"
 		case networkSettings = "NetworkSettings"
 		case status = "Status"
+	}
+}
+
+extension ContainerSummary {
+	public init(from container: Container) throws {
+		let ports = container
+			.hostConfig
+			.portBindings?
+			.map { binding in
+				let internalPort = binding.key.port
+				let prot = binding.key.protocol
+				let array = binding.value ?? []
+				return array.map { info in
+					ExposedPort(
+						ip: info.hostIp,
+						privatePort: internalPort,
+						publicPort: info.hostPort,
+						type: prot)
+				}
+			}
+			.flatMap { $0 }
+
+
+		self.init(
+			id: container.id,
+			names: [container.name],
+			image: container.config.image,
+			imageId: container.image,
+			command: container.config.command?.joined(separator: " ") ?? "",
+			createdAt: container.createdAt,
+			ports: ports ?? [],
+			labels: container.config.labels ?? [:],
+			state: container.state.status,
+			status: container.state.status.rawValue,
+			mounts: container.mounts,
+			networkSettings: .init(networks: container.networkSettings.networks))
 	}
 }

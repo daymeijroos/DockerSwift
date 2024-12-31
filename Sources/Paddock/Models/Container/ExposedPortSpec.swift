@@ -17,7 +17,7 @@ public struct ExposedPortSpec: Codable, Hashable {
 		return ExposedPortSpec(port: port, protocol: .sctp)
 	}
 	
-	public enum PortProtocol: String, Codable {
+	public enum PortProtocol: String, Codable, Hashable {
 		case tcp, udp, sctp
 	}
 	
