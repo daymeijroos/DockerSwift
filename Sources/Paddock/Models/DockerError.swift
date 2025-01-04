@@ -23,3 +23,11 @@ public enum DockerGeneralError: Error {
 		}
 	}
 }
+
+public struct DockerError: Codable, Sendable, Error, Hashable {
+	public let message: String
+	public let cause: String?
+	public let response: Int?
+
+	public internal(set) var responseCode: Int?
+}
