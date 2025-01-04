@@ -79,7 +79,7 @@ public struct ContainerSummary: Codable {
 }
 
 extension ContainerSummary {
-	public init(from container: Container) throws {
+	public init(from container: Container) {
 		let ports = container
 			.hostConfig
 			.portBindings?
