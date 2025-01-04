@@ -173,7 +173,9 @@ public class PaddockClient: @unchecked Sendable {
 		guard 200...299 ~= response.status.code else {
 			let buffer = try await response.body.collect(upTo: .max)
 
-			if let err = try? decoder.decode(DockerError.self, from: buffer) {
+			if var err = try? decoder.decode(DockerError.self, from: buffer) {
+				err.responseCode = response.status.code
+				err.responseReasonPhrase = response.status.reasonPhrase
 				throw err
 			}
 

@@ -25,9 +25,16 @@ public enum DockerGeneralError: Error {
 }
 
 public struct DockerError: Codable, Sendable, Error, Hashable {
+	/// Forwarded from error json object
 	public let message: String
+	/// Forwarded from error json object
 	public let cause: String?
+	/// Forwarded from error json object
 	public let response: Int?
 
-	public internal(set) var responseCode: Int?
+
+	/// Forwarded from response header
+	public internal(set) var responseCode: UInt?
+	/// Forwarded from response header
+	public internal(set) var responseReasonPhrase: String?
 }
