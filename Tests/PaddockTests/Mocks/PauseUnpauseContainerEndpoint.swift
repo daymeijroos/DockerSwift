@@ -20,6 +20,6 @@ extension PauseUnpauseContainerEndpoint: MockedResponseEndpoint {
 			(components.startIndex..<components.endIndex).contains(containerIndex + 2),
 			case let command = components[containerIndex + 2],
 			["pause", "unpause"].contains(command)
-		else { throw DockerError.message("invalid path for pause/unpause: \(url)") }
+		else { throw DockerGeneralError.message("invalid path for pause/unpause: \(url)") }
 	}
 }

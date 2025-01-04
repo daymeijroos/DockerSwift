@@ -50,10 +50,10 @@ extension ExposedPortCoding: Decodable {
 			let splat = spec.split(separator: "/")
 			if splat.count == 2 {
 				guard let port = UInt16(String(splat[0])) else {
-					throw DockerError.corruptedData("expected port number, got '\(splat[0])'")
+					throw DockerGeneralError.corruptedData("expected port number, got '\(splat[0])'")
 				}
 				guard let proto = ExposedPortSpec.PortProtocol.init(rawValue: String(splat[1])) else {
-					throw DockerError.corruptedData("expected protocol (tcp, udp, sctp), got '\(splat[1])'")
+					throw DockerGeneralError.corruptedData("expected protocol (tcp, udp, sctp), got '\(splat[1])'")
 				}
 				self.wrappedValue!.append(
 					.init(
@@ -98,10 +98,10 @@ extension PublishedPortCoding: Decodable {
 			let splat = spec.split(separator: "/")
 			if splat.count == 2 {
 				guard let port = UInt16(String(splat[0])) else {
-					throw DockerError.corruptedData("expected port number, got '\(splat[0])'")
+					throw DockerGeneralError.corruptedData("expected port number, got '\(splat[0])'")
 				}
 				guard let proto = ExposedPortSpec.PortProtocol.init(rawValue: String(splat[1])) else {
-					throw DockerError.corruptedData("expected protocol (tcp, udp, sctp), got '\(splat[1])'")
+					throw DockerGeneralError.corruptedData("expected protocol (tcp, udp, sctp), got '\(splat[1])'")
 				}
 				
 				let exposedSpec = ExposedPortSpec(port: port, protocol: proto)

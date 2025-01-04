@@ -14,6 +14,6 @@ extension ContainerProcessListEndpoint: MockedResponseEndpoint {
 
 		guard
 			url.pathComponents.last == "top"
-		else { throw DockerError.message("Invalid path") }
+		else { throw DockerGeneralError.message("Invalid path") }
 	}
 }

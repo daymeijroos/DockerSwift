@@ -11,6 +11,6 @@ extension ConnectContainerNetworkEndpoint: MockedResponseEndpoint {
 			let connectIndex = url.pathComponents.lastIndex(of: "connect"),
 			connectIndex >= 2,
 			url.pathComponents[connectIndex - 2] == "networks"
-		else { throw DockerError.message("Invalid path") }
+		else { throw DockerGeneralError.message("Invalid path") }
 	}
 }

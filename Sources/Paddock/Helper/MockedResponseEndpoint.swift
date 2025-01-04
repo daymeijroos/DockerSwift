@@ -42,7 +42,7 @@ extension MockedResponseEndpoint {
 	func superMockedResponse(_ request: HTTPClientRequest, sleepDelay: Duration) async throws -> ByteBuffer {
 		guard
 			let first = responseData.first
-		else { throw DockerError.message("Error retrieving mock data") }
+		else { throw DockerGeneralError.message("Error retrieving mock data") }
 
 		try await Task.sleep(for: sleepDelay)
 		return first.data
@@ -53,7 +53,7 @@ extension MockedResponseEndpoint {
 	}
 
 	func superMockedStreamingResponse(_ request: HTTPClientRequest, intermittentSleepDuration: Duration) async throws -> AsyncThrowingStream<ByteBuffer, Error> {
-		guard responseData.isEmpty == false else { throw DockerError.message("No mocked data available") }
+		guard responseData.isEmpty == false else { throw DockerGeneralError.message("No mocked data available") }
 
 		let (stream, continuation) = AsyncThrowingStream<ByteBuffer, Error>.makeStream()
 
@@ -75,10 +75,10 @@ extension MockedResponseEndpoint {
 
 	@discardableResult
 	func validate(method: HTTPMethod, andGetURLFromRequest request: HTTPClientRequest) throws -> URL {
-		guard request.method == method else { throw DockerError.message("require post method") }
+		guard request.method == method else { throw DockerGeneralError.message("require post method") }
 		guard
 			let url = URL(string: request.url)
-		else { throw DockerError.message("invalid url") }
+		else { throw DockerGeneralError.message("invalid url") }
 		return url
 	}
 	func validate(request: HTTPClientRequest) throws {}

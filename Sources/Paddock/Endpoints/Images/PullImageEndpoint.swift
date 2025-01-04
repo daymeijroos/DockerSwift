@@ -55,7 +55,7 @@ public struct PullImageEndpoint: PipelineEndpoint {
 			// podman flavor
 			return .init(digest: id)
 		} else {
-			throw DockerError.unknownResponse("\(parts)")
+			throw DockerGeneralError.unknownResponse("\(parts)")
 		}
 	}
 }

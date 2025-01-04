@@ -41,23 +41,23 @@ Content-Length: 822
  Ostype: linux
 */
 
-		init(from header: HTTPHeaders) throws(DockerError) {
+		init(from header: HTTPHeaders) throws(DockerGeneralError) {
 			guard
 				let serverString = header.first(name: "Server")
-			else { throw DockerError.unknownResponse("Header missing crucial information") }
+			else { throw DockerGeneralError.unknownResponse("Header missing crucial information") }
 
 			let serverRegex = /^(?<engine>.*)\/(?<version>\S+) \((?<osHost>.*)\)$/
 
 			guard
 				let matches = serverString.firstMatch(of: serverRegex)?.output
-			else { throw DockerError.unknownResponse("Header data malformatted") }
+			else { throw DockerGeneralError.unknownResponse("Header data malformatted") }
 
 			let engine = HostEngine(rawValue: String(matches.engine))
 			let version = String(matches.version)
 			guard
 				let osHost = (OsType(rawValue: String(matches.osHost)) ?? header.first(name: "Ostype").flatMap(OsType.init(rawValue:))),
 				let apiVersion = header.first(name: "Api-Version")
-			else { throw DockerError.unknownResponse("Header missing information") }
+			else { throw DockerGeneralError.unknownResponse("Header missing information") }
 
 			let isExperimental = header.first(name: "Docker-Experimental") == "true"
 			self.init(

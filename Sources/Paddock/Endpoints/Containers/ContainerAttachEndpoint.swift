@@ -117,7 +117,7 @@ extension ContainerAttachEndpoint {
 		}
 
 		public func send(_ buffer: ByteBuffer) async throws {
-			guard let context = context else { throw DockerError.notconnected }
+			guard let context = context else { throw DockerGeneralError.notconnected }
 			let prom = context.eventLoop.makePromise(of: Void.self)
 			context.eventLoop.execute { [self] in
 				context.writeAndFlush(wrapOutboundOut(buffer), promise: prom)
@@ -233,7 +233,7 @@ public extension PaddockClient.ContainersAPI {
 
 		guard
 			let socketPath = client.socketURL.host(percentEncoded: false)
-		else { throw DockerError.message("Invalid unix domain socket path: \(client.socketURL)") }
+		else { throw DockerGeneralError.message("Invalid unix domain socket path: \(client.socketURL)") }
 		let channel = try await bootstrap.connect(unixDomainSocketPath: socketPath).get()
 
 		defer { endpoint.isStarting = false }

@@ -15,6 +15,6 @@ extension RemoveVolumeEndpoint: MockedResponseEndpoint {
 		guard
 			let volIndex = url.pathComponents.firstIndex(of: "volumes"),
 			volIndex < url.pathComponents.count - 1
-		else { throw DockerError.message("Invalid path") }
+		else { throw DockerGeneralError.message("Invalid path") }
 	}
 }

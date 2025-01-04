@@ -14,7 +14,7 @@ extension PaddockClient {
 	public func ping(timeout: TimeAmount? = nil) async throws {
 		let ping = try await run(PingEndpoint(responseTimeout: timeout))
 		guard ping == "OK" else {
-			throw DockerError.unknownResponse(ping)
+			throw DockerGeneralError.unknownResponse(ping)
 		}
 	}
 	

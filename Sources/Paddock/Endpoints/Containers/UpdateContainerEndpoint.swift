@@ -18,11 +18,11 @@ public struct UpdateContainerEndpoint: SimpleEndpoint {
 		"containers/\(nameOrId)/update"
 	}
 
-	func responseValidation(_ response: Response) throws(DockerError) {
+	func responseValidation(_ response: Response) throws(DockerGeneralError) {
 		// I'm not really sure if this should throw here, but it's what I have for now.
 		if let warnings = response.warnings, warnings.isEmpty == false {
 			let message = warnings.joined(separator: "\n-----\n")
-			throw DockerError.corruptedData("Warnings on update: \(message)")
+			throw DockerGeneralError.corruptedData("Warnings on update: \(message)")
 		}
 	}
 

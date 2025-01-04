@@ -1,7 +1,7 @@
 import Foundation
 import NIO
 
-public enum DockerError: Error {
+public enum DockerGeneralError: Error {
 	/// Not connected to an Attach/Exec endpoint, or disconnected
 	case notconnected
 	/// Custom error from the Docker daemon

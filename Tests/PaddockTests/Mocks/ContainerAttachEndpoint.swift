@@ -32,7 +32,7 @@ extension ContainerAttachEndpoint: BidirectionalMockEndpoint {
 		guard
 			let responses = reactiveData[buffer]
 		else {
-			let error = DockerError.message("Unknown command")
+			let error = DockerGeneralError.message("Unknown command")
 			streamContinuation?.finish(throwing: error)
 			throw error
 		}

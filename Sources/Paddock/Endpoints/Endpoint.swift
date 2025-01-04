@@ -46,7 +46,7 @@ extension Endpoint {
 }
 
 protocol SimpleEndpoint: Endpoint where Response: Codable {
-	func responseValidation(_ response: Response) throws(DockerError)
+	func responseValidation(_ response: Response) throws(DockerGeneralError)
 }
 
 extension SimpleEndpoint {
@@ -54,7 +54,7 @@ extension SimpleEndpoint {
 	public var body: Body? { nil }
 	var timeout: TimeAmount? { .seconds(10) }
 
-	func responseValidation(_ response: Response) throws(DockerError) {}
+	func responseValidation(_ response: Response) throws(DockerGeneralError) {}
 }
 
 enum StreamChunkError: Error {
@@ -207,7 +207,7 @@ public class JSONStreamingEndpoint<T>: StreamingEndpoint where T: Codable {
 						}
 						let splat = data.split(separator: 10 /* ascii code for \n */)
 						guard splat.count >= 1 else {
-							continuation.finish(throwing: DockerError.unknownResponse("Expected json terminated by line return"))
+							continuation.finish(throwing: DockerGeneralError.unknownResponse("Expected json terminated by line return"))
 							return
 						}
 						do {

@@ -11,6 +11,6 @@ extension RemoveNetworkEndpoint: MockedResponseEndpoint {
 		guard
 			let index = url.pathComponents.lastIndex(of: "networks"),
 			index < url.pathComponents.endIndex - 1
-		else { throw DockerError.message("Invalid path") }
+		else { throw DockerGeneralError.message("Invalid path") }
 	}
 }

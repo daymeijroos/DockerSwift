@@ -19,6 +19,6 @@ extension StopContainerEndpoint: MockedResponseEndpoint {
 			let containerIndex = components.firstIndex(of: "containers"),
 			(components.startIndex..<components.endIndex).contains(containerIndex + 2),
 			components[containerIndex + 2] == "stop"
-		else { throw DockerError.message("invalid path for stop: \(url)") }
+		else { throw DockerGeneralError.message("invalid path for stop: \(url)") }
 	}
 }

@@ -11,6 +11,6 @@ extension DisconnectContainerNetworkEndpoint: MockedResponseEndpoint {
 			let disconnectIndex = url.pathComponents.lastIndex(of: "disconnect"),
 			disconnectIndex >= 2,
 			url.pathComponents[disconnectIndex - 2] == "networks"
-		else { throw DockerError.message("Invalid path") }
+		else { throw DockerGeneralError.message("Invalid path") }
 	}
 }
