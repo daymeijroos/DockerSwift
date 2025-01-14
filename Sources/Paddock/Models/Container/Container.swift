@@ -264,15 +264,15 @@ public struct Container: Codable {
 			public init(rawValue: String) {
 				self.rawValue = rawValue
 			}
-			static let created = State(rawValue: "created")
-			static let restarting = State(rawValue: "restarting")
-			static let running = State(rawValue: "running")
-			static let removing = State(rawValue: "removing")
-			static let paused = State(rawValue: "paused")
-			static let stopping = State(rawValue: "stopping")
-			static let stopped = State(rawValue: "stopped")
-			static let exited = State(rawValue: "exited")
-			static let dead = State(rawValue: "dead")
+			public static let created = State(rawValue: "created")
+			public static let restarting = State(rawValue: "restarting")
+			public static let running = State(rawValue: "running")
+			public static let removing = State(rawValue: "removing")
+			public static let paused = State(rawValue: "paused")
+			public static let stopping = State(rawValue: "stopping")
+			public static let stopped = State(rawValue: "stopped")
+			public static let exited = State(rawValue: "exited")
+			public static let dead = State(rawValue: "dead")
 		}
 	}
 	
