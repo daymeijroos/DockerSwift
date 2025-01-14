@@ -258,8 +258,21 @@ public struct Container: Codable {
 			case status = "Status"
 		}
 		
-		public enum State: String, Codable {
-			case created, restarting, running, removing, paused, stopping, exited, dead
+		public struct State: RawRepresentable, Codable {
+			public let rawValue: String
+
+			public init(rawValue: String) {
+				self.rawValue = rawValue
+			}
+			static let created = State(rawValue: "created")
+			static let restarting = State(rawValue: "restarting")
+			static let running = State(rawValue: "running")
+			static let removing = State(rawValue: "removing")
+			static let paused = State(rawValue: "paused")
+			static let stopping = State(rawValue: "stopping")
+			static let stopped = State(rawValue: "stopped")
+			static let exited = State(rawValue: "exited")
+			static let dead = State(rawValue: "dead")
 		}
 	}
 	
