@@ -259,7 +259,7 @@ public struct Container: Codable {
 		}
 		
 		public enum State: String, Codable {
-			case created, restarting, running, removing, paused, exited, dead
+			case created, restarting, running, removing, paused, stopping, exited, dead
 		}
 	}
 	
