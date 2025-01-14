@@ -258,7 +258,7 @@ public struct Container: Codable {
 			case status = "Status"
 		}
 		
-		public struct State: RawRepresentable, Codable {
+		public struct State: RawRepresentable, Codable, Hashable, Sendable {
 			public let rawValue: String
 
 			public init(rawValue: String) {
