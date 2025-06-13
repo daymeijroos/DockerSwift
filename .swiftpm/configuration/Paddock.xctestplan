@@ -1,0 +1,46 @@
+{
+  "configurations" : [
+    {
+      "id" : "0CA31F77-F3BF-4B91-BB40-0BACA67A06F9",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "Paddock",
+          "name" : "Paddock"
+        }
+      ]
+    },
+    "environmentVariableEntries" : [
+      {
+        "key" : "DOCKER_HOST",
+        "value" : "\/var\/run\/docker.sock"
+      }
+    ]
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "ConfigAndSecretTests",
+        "PluginTests",
+        "ServiceTests",
+        "SwarmTests",
+        "SystemTests\/testSystemInfoWithSwarm()",
+        "TaskTests"
+      ],
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "PaddockTests",
+        "name" : "PaddockTests"
+      }
+    }
+  ],
+  "version" : 1
+}
